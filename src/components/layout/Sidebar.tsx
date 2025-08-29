@@ -117,7 +117,7 @@ const Sidebar = ({ activeModule, onModuleChange }: SidebarProps) => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-foreground/60 mt-1">
                       {module.description}
                     </p>
                   </div>

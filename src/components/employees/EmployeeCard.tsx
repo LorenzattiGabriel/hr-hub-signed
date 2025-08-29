@@ -1,101 +1,107 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileText, Edit, MoreHorizontal, Download } from "lucide-react";
-
-interface Employee {
-  id: string;
-  name: string;
-  position: string;
-  department: string;
-  email: string;
-  phone: string;
-  status: "active" | "inactive";
-  avatar?: string;
-  startDate: string;
-}
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Mail, Phone, Calendar, Eye, Edit, FileText } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface EmployeeCardProps {
-  employee: Employee;
-  onEdit: (employee: Employee) => void;
-  onViewDetails: (employee: Employee) => void;
-  onDownloadPDF: (employee: Employee) => void;
+  employee: {
+    id: number;
+    nombres: string;
+    apellidos: string;
+    dni: string;
+    cargo: string;
+    sector: string;
+    email: string;
+    telefono: string;
+    fechaIngreso: string;
+    estado: string;
+  };
+  onView: () => void;
+  onEdit: () => void;
 }
 
-const EmployeeCard = ({ employee, onEdit, onViewDetails, onDownloadPDF }: EmployeeCardProps) => {
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map(n => n[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2);
+const EmployeeCard = ({ employee, onView, onEdit }: EmployeeCardProps) => {
+  const { toast } = useToast();
+
+  const getInitials = (nombres: string, apellidos: string) => {
+    return `${nombres.charAt(0)}${apellidos.charAt(0)}`.toUpperCase();
+  };
+
+  const generatePDF = () => {
+    toast({
+      title: "PDF Generado",
+      description: `Legajo de ${employee.nombres} ${employee.apellidos} generado exitosamente`,
+    });
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-AR');
+  };
+
+  const calculateYearsOfService = (startDate: string) => {
+    const start = new Date(startDate);
+    const now = new Date();
+    const years = now.getFullYear() - start.getFullYear();
+    return years;
   };
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 border border-border hover:border-primary/20">
-      <CardHeader className="pb-3">
+    <Card className="hover:shadow-lg transition-all duration-300 group">
+      <CardContent className="p-6">
         <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-start space-x-4">
             <Avatar className="h-12 w-12">
-              <AvatarImage src={employee.avatar} alt={employee.name} />
               <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                {getInitials(employee.name)}
+                {getInitials(employee.nombres, employee.apellidos)}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <h3 className="font-semibold text-card-foreground group-hover:text-primary transition-colors">
-                {employee.name}
+            
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                {employee.nombres} {employee.apellidos}
               </h3>
-              <p className="text-sm text-muted-foreground">{employee.position}</p>
-              <p className="text-xs text-muted-foreground">{employee.department}</p>
+              <p className="text-foreground/70 font-medium">{employee.cargo}</p>
+              <p className="text-sm text-foreground/60">{employee.sector}</p>
+              
+              <div className="flex items-center space-x-4 mt-3 text-sm text-foreground/70">
+                <div className="flex items-center space-x-1">
+                  <Mail className="h-4 w-4" />
+                  <span className="truncate max-w-[200px]">{employee.email}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <Phone className="h-4 w-4" />
+                  <span>{employee.telefono}</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-1 mt-2 text-sm text-foreground/70">
+                <Calendar className="h-4 w-4" />
+                <span>Ingreso: {formatDate(employee.fechaIngreso)}</span>
+                <span className="mx-2">•</span>
+                <span>{calculateYearsOfService(employee.fechaIngreso)} años de antigüedad</span>
+              </div>
             </div>
           </div>
-          <Badge variant={employee.status === "active" ? "active" : "inactive"}>
-            {employee.status === "active" ? "Activo" : "Inactivo"}
-          </Badge>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="pt-0">
-        <div className="space-y-2 mb-4">
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium">Email:</span> {employee.email}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium">Teléfono:</span> {employee.phone}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium">Ingreso:</span> {employee.startDate}
-          </p>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onViewDetails(employee)}
-            className="flex-1"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Ver Detalle
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => onDownloadPDF(employee)}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            PDF
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onEdit(employee)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
+          
+          <div className="flex flex-col items-end space-y-3">
+            <Badge variant={employee.estado === "activo" ? "success" : "destructive"}>
+              {employee.estado === "activo" ? "Activo" : "Inactivo"}
+            </Badge>
+            
+            <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Button variant="ghost" size="sm" onClick={onView}>
+                <Eye className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onEdit}>
+                <Edit className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" onClick={generatePDF}>
+                <FileText className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -50,6 +50,46 @@ const downloadPDF = async () => {
     return new Date(dateString).toLocaleDateString();
   };
 
+  const calculateAntiquity = (fechaIngreso: string) => {
+    if (!fechaIngreso) return { years: 0, months: 0, days: 0 };
+    
+    const ingresoDate = new Date(fechaIngreso);
+    const today = new Date();
+    
+    let years = today.getFullYear() - ingresoDate.getFullYear();
+    let months = today.getMonth() - ingresoDate.getMonth();
+    let days = today.getDate() - ingresoDate.getDate();
+    
+    if (days < 0) {
+      months--;
+      const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+      days += lastMonth.getDate();
+    }
+    
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    
+    return { years, months, days };
+  };
+
+  const calculateVacationDays = (fechaIngreso: string) => {
+    if (!fechaIngreso) return 0;
+    
+    const antiquity = calculateAntiquity(fechaIngreso);
+    const totalYears = antiquity.years;
+    
+    // Según la ley laboral argentina
+    if (totalYears < 1) return 0;
+    if (totalYears >= 1 && totalYears < 5) return 14;
+    if (totalYears >= 5 && totalYears < 10) return 21;
+    if (totalYears >= 10 && totalYears < 20) return 28;
+    if (totalYears >= 20) return 35;
+    
+    return 14; // Por defecto
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -196,12 +236,27 @@ const downloadPDF = async () => {
                   {formatDate(employeeData.fechaIngreso)}
                 </p>
               </div>
-              <div>
-                <strong>Estado:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
-                  {employeeData.estado || "Activo"}
-                </p>
-              </div>
+                <div>
+                  <strong>Estado:</strong>
+                  <p className="border-b border-dotted border-gray-400 pb-1">
+                    {employeeData.estado || "Activo"}
+                  </p>
+                </div>
+                <div>
+                  <strong>Antigüedad:</strong>
+                  <p className="border-b border-dotted border-gray-400 pb-1">
+                    {(() => {
+                      const antiquity = calculateAntiquity(employeeData.fechaIngreso);
+                      return `${antiquity.years} años, ${antiquity.months} meses, ${antiquity.days} días`;
+                    })()}
+                  </p>
+                </div>
+                <div>
+                  <strong>Días de Vacaciones Anuales:</strong>
+                  <p className="border-b border-dotted border-gray-400 pb-1">
+                    {calculateVacationDays(employeeData.fechaIngreso)} días
+                  </p>
+                </div>
             </CardContent>
           </Card>
 

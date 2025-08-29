@@ -27,6 +27,10 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
     fechaNacimiento: employee?.fechaNacimiento || "",
     direccion: employee?.direccion || "",
     
+    // Documentos
+    fotoDni: employee?.fotoDni || null,
+    fotoCarnet: employee?.fotoCarnet || null,
+    
     // Datos de Contacto
     telefono: employee?.telefono || "",
     email: employee?.email || "",
@@ -57,8 +61,52 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
     observaciones: employee?.observaciones || ""
   });
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileChange = (field: string, file: File | null) => {
+    setFormData(prev => ({ ...prev, [field]: file }));
+  };
+
+  const calculateAntiquity = (fechaIngreso: string) => {
+    if (!fechaIngreso) return { years: 0, months: 0, days: 0 };
+    
+    const ingresoDate = new Date(fechaIngreso);
+    const today = new Date();
+    
+    let years = today.getFullYear() - ingresoDate.getFullYear();
+    let months = today.getMonth() - ingresoDate.getMonth();
+    let days = today.getDate() - ingresoDate.getDate();
+    
+    if (days < 0) {
+      months--;
+      const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+      days += lastMonth.getDate();
+    }
+    
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    
+    return { years, months, days };
+  };
+
+  const calculateVacationDays = (fechaIngreso: string) => {
+    if (!fechaIngreso) return 0;
+    
+    const antiquity = calculateAntiquity(fechaIngreso);
+    const totalYears = antiquity.years;
+    
+    // Según la ley laboral argentina
+    if (totalYears < 1) return 0;
+    if (totalYears >= 1 && totalYears < 5) return 14;
+    if (totalYears >= 5 && totalYears < 10) return 21;
+    if (totalYears >= 10 && totalYears < 20) return 28;
+    if (totalYears >= 20) return 35;
+    
+    return 14; // Por defecto
   };
 
   const handleSave = () => {
@@ -223,6 +271,46 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
           </CardContent>
         </Card>
 
+        {/* Documentos */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-foreground">Documentos</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="fotoDni" className="text-foreground">Foto del DNI (Opcional)</Label>
+              <Input
+                id="fotoDni"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileChange("fotoDni", e.target.files?.[0] || null)}
+                className="mt-1"
+              />
+              {formData.fotoDni && (
+                <p className="text-sm text-foreground/60 mt-1">
+                  Archivo seleccionado: {formData.fotoDni.name}
+                </p>
+              )}
+            </div>
+            
+            <div>
+              <Label htmlFor="fotoCarnet" className="text-foreground">Foto Carnet (Opcional)</Label>
+              <Input
+                id="fotoCarnet"
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileChange("fotoCarnet", e.target.files?.[0] || null)}
+                className="mt-1"
+              />
+              {formData.fotoCarnet && (
+                <p className="text-sm text-foreground/60 mt-1">
+                  Archivo seleccionado: {formData.fotoCarnet.name}
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Datos de Contacto */}
         <Card>
           <CardHeader>
@@ -367,6 +455,30 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Información calculada automáticamente */}
+            {formData.fechaIngreso && (
+              <div className="space-y-2 p-4 bg-secondary/10 rounded-lg border border-secondary/20">
+                <h4 className="font-semibold text-foreground">Información Calculada</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <Label className="text-foreground">Antigüedad:</Label>
+                    <p className="text-foreground/80">
+                      {(() => {
+                        const antiquity = calculateAntiquity(formData.fechaIngreso);
+                        return `${antiquity.years} años, ${antiquity.months} meses, ${antiquity.days} días`;
+                      })()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-foreground">Días de Vacaciones Anuales:</Label>
+                    <p className="text-foreground/80">
+                      {calculateVacationDays(formData.fechaIngreso)} días
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 

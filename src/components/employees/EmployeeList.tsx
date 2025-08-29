@@ -292,13 +292,9 @@ const EmployeeList = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los sectores</SelectItem>
-                <SelectItem value="Granja">Granja</SelectItem>
-                <SelectItem value="Incubación">Incubación</SelectItem>
-                <SelectItem value="Procesamiento">Procesamiento</SelectItem>
-                <SelectItem value="Administración">Administración</SelectItem>
-                <SelectItem value="Control de Calidad">Control de Calidad</SelectItem>
-                <SelectItem value="Mantenimiento">Mantenimiento</SelectItem>
-                <SelectItem value="Transporte">Transporte</SelectItem>
+                <SelectItem value="administracion">Administración</SelectItem>
+                <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                <SelectItem value="produccion">Producción</SelectItem>
               </SelectContent>
             </Select>
             
@@ -317,16 +313,67 @@ const EmployeeList = () => {
       </Card>
 
       {/* Employee List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredEmployees.map((employee) => (
-          <EmployeeCard 
-            key={employee.id} 
-            employee={employee}
-            onView={() => handleViewEmployee(employee)}
-            onEdit={() => handleEditEmployee(employee)}
-          />
-        ))}
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-foreground">Lista de Empleados ({filteredEmployees.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b border-border">
+                <tr className="text-left">
+                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Empleado</th>
+                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">DNI</th>
+                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Cargo</th>
+                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Sector</th>
+                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Estado</th>
+                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filteredEmployees.map((employee) => (
+                  <tr key={employee.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-foreground">
+                          {employee.nombres} {employee.apellidos}
+                        </span>
+                        <span className="text-sm text-foreground/60">{employee.email}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-foreground">{employee.dni}</td>
+                    <td className="px-6 py-4 text-foreground">{employee.cargo}</td>
+                    <td className="px-6 py-4 text-foreground">{employee.sector}</td>
+                    <td className="px-6 py-4">
+                      <Badge variant={employee.estado === "activo" ? "default" : "secondary"}>
+                        {employee.estado === "activo" ? "Activo" : "Inactivo"}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewEmployee(employee)}
+                        >
+                          Ver
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditEmployee(employee)}
+                        >
+                          Editar
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
       {filteredEmployees.length === 0 && (
         <Card>

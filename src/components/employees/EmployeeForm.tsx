@@ -309,14 +309,11 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
                   <SelectValue placeholder="Seleccionar puesto" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="operario">Operario</SelectItem>
-                  <SelectItem value="supervisor">Supervisor</SelectItem>
-                  <SelectItem value="encargado">Encargado</SelectItem>
-                  <SelectItem value="gerente">Gerente</SelectItem>
-                  <SelectItem value="administrativo">Administrativo</SelectItem>
-                  <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
-                  <SelectItem value="veterinario">Veterinario</SelectItem>
-                  <SelectItem value="conductor">Conductor</SelectItem>
+                  <SelectItem value="operario-mantenimiento">Operario Mantenimiento</SelectItem>
+                  <SelectItem value="operario-administracion">Operario Administración</SelectItem>
+                  <SelectItem value="recursos-humanos">Recursos Humanos</SelectItem>
+                  <SelectItem value="administracion">Administración</SelectItem>
+                  <SelectItem value="chofer">Chofer</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -328,14 +325,9 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
                   <SelectValue placeholder="Seleccionar sector" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="granja">Granja</SelectItem>
-                  <SelectItem value="incubacion">Incubación</SelectItem>
-                  <SelectItem value="procesamiento">Procesamiento</SelectItem>
                   <SelectItem value="administracion">Administración</SelectItem>
                   <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
-                  <SelectItem value="transporte">Transporte</SelectItem>
-                  <SelectItem value="ventas">Ventas</SelectItem>
-                  <SelectItem value="calidad">Control de Calidad</SelectItem>
+                  <SelectItem value="produccion">Producción</SelectItem>
                 </SelectContent>
               </Select>
             </div>

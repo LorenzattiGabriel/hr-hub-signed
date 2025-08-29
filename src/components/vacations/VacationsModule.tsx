@@ -8,69 +8,12 @@ import { Calendar, Download, Plus, Search, Clock, User, FileText } from "lucide-
 import VacationForm from "./VacationForm";
 import VacationDetail from "./VacationDetail";
 import { useToast } from "@/hooks/use-toast";
-
-// Import employee data from EmployeeList
-const mockEmployees = [
-  {
-    id: 1,
-    nombres: "Noelia Belén",
-    apellidos: "Ludueña",
-    dni: "35.832.688",
-    fechaIngreso: "2024-05-25",
-    estado: "activo"
-  },
-  {
-    id: 2,
-    nombres: "Mariela Desiree",
-    apellidos: "Díaz",
-    dni: "41.279.664",
-    fechaIngreso: "2020-01-07",
-    estado: "activo"
-  },
-  {
-    id: 5,
-    nombres: "Gerardo Damián",
-    apellidos: "Mateo",
-    dni: "34.671.654",
-    fechaIngreso: "2023-08-04",
-    estado: "activo"
-  },
-  {
-    id: 8,
-    nombres: "Marcelo Edgar",
-    apellidos: "Mangold",
-    dni: "40.026.130",
-    fechaIngreso: "2019-05-02",
-    estado: "activo"
-  },
-  {
-    id: 9,
-    nombres: "Edgar Alberto",
-    apellidos: "Maidana",
-    dni: "27.079.378",
-    fechaIngreso: "2025-02-08",
-    estado: "activo"
-  },
-  {
-    id: 10,
-    nombres: "Laura Roxana",
-    apellidos: "Criado",
-    dni: "25.089.374",
-    fechaIngreso: "2016-02-02",
-    estado: "activo"
-  },
-  {
-    id: 11,
-    nombres: "Lucas Milton",
-    apellidos: "Bonetto",
-    dni: "38.020.563",
-    fechaIngreso: "2025-07-14",
-    estado: "activo"
-  }
-];
+import { useEmployees } from "@/contexts/EmployeeContext";
 
 const VacationsModule = () => {
   const { toast } = useToast();
+  const { getActiveEmployees } = useEmployees();
+  const activeEmployees = getActiveEmployees();
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedVacation, setSelectedVacation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -117,7 +60,7 @@ const VacationsModule = () => {
   };
 
   // Create employee vacation status
-  const employeesWithVacations = mockEmployees.map(emp => {
+  const employeesWithVacations = activeEmployees.map(emp => {
     const totalDays = calculateVacationDays(emp.fechaIngreso);
     const usedDays = getUsedVacationDays(emp.id);
     const remainingDays = totalDays - usedDays;
@@ -187,7 +130,7 @@ const VacationsModule = () => {
   };
 
   if (view === "form") {
-    return <VacationForm onBack={handleBackToList} vacation={selectedVacation} employees={mockEmployees} />;
+    return <VacationForm onBack={handleBackToList} vacation={selectedVacation} employees={activeEmployees} />;
   }
 
   if (view === "detail" && selectedVacation) {

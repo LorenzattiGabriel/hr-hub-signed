@@ -8,62 +8,12 @@ import { Calendar, Download, Plus, Search, Clock, User, FileText, AlertCircle } 
 import AbsenceForm from "./AbsenceForm";
 import AbsenceDetail from "./AbsenceDetail";
 import { useToast } from "@/hooks/use-toast";
-
-// Import employee data
-const mockEmployees = [
-  {
-    id: 1,
-    nombres: "Noelia Belén",
-    apellidos: "Ludueña",
-    dni: "35.832.688",
-    estado: "activo"
-  },
-  {
-    id: 2,
-    nombres: "Mariela Desiree",
-    apellidos: "Díaz",
-    dni: "41.279.664",
-    estado: "activo"
-  },
-  {
-    id: 5,
-    nombres: "Gerardo Damián",
-    apellidos: "Mateo",
-    dni: "34.671.654",
-    estado: "activo"
-  },
-  {
-    id: 8,
-    nombres: "Marcelo Edgar",
-    apellidos: "Mangold",
-    dni: "40.026.130",
-    estado: "activo"
-  },
-  {
-    id: 9,
-    nombres: "Edgar Alberto",
-    apellidos: "Maidana",
-    dni: "27.079.378",
-    estado: "activo"
-  },
-  {
-    id: 10,
-    nombres: "Laura Roxana",
-    apellidos: "Criado",
-    dni: "25.089.374",
-    estado: "activo"
-  },
-  {
-    id: 11,
-    nombres: "Lucas Milton",
-    apellidos: "Bonetto",
-    dni: "38.020.563",
-    estado: "activo"
-  }
-];
+import { useEmployees } from "@/contexts/EmployeeContext";
 
 const AbsencesModule = () => {
   const { toast } = useToast();
+  const { getActiveEmployees } = useEmployees();
+  const activeEmployees = getActiveEmployees();
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedAbsence, setSelectedAbsence] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -146,7 +96,7 @@ const AbsencesModule = () => {
   };
 
   if (view === "form") {
-    return <AbsenceForm onBack={handleBackToList} absence={selectedAbsence} employees={mockEmployees} />;
+    return <AbsenceForm onBack={handleBackToList} absence={selectedAbsence} employees={activeEmployees} />;
   }
 
   if (view === "detail" && selectedAbsence) {

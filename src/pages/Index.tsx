@@ -36,8 +36,10 @@ const Index = () => {
       <Header />
       <div className="flex">
         <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} />
-        <main className="flex-1 p-6 overflow-auto">
-          {renderContent()}
+        <main className="flex-1 container-padding section-spacing overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            {renderContent()}
+          </div>
         </main>
       </div>
     </div>

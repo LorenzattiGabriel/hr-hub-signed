@@ -20,6 +20,13 @@ interface SidebarProps {
 
 const modules = [
   {
+    id: "dashboard",
+    name: "Panel General",
+    icon: BarChart3,
+    description: "Resumen y estadísticas",
+    badge: ""
+  },
+  {
     id: "employees",
     name: "Gestión de Empleados",
     icon: Users,
@@ -28,10 +35,17 @@ const modules = [
   },
   {
     id: "vacations",
-    name: "Vacaciones y Ausencias",
+    name: "Vacaciones",
     icon: CalendarDays,
-    description: "Permisos y Certificados",
+    description: "Gestión de vacaciones",
     badge: "3"
+  },
+  {
+    id: "absences",
+    name: "Ausencias y Permisos",
+    icon: ClipboardList,
+    description: "Permisos y Certificados",
+    badge: "2"
   },
   {
     id: "training",

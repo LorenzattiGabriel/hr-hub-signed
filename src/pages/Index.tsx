@@ -3,7 +3,8 @@ import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import EmployeeList from "@/components/employees/EmployeeList";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
-import VacationList from "@/components/vacations/VacationList";
+import VacationsModule from "@/components/vacations/VacationsModule";
+import AbsencesModule from "@/components/absences/AbsencesModule";
 import TrainingList from "@/components/training/TrainingList";
 import AttendanceList from "@/components/attendance/AttendanceList";
 import PerformanceList from "@/components/performance/PerformanceList";
@@ -17,7 +18,9 @@ const Index = () => {
       case "employees":
         return <EmployeeList />;
       case "vacations":
-        return <VacationList />;
+        return <VacationsModule />;
+      case "absences":
+        return <AbsencesModule />;
       case "training":
         return <TrainingList />;
       case "attendance":

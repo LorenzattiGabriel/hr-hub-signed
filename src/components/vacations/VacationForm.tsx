@@ -11,9 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 interface VacationFormProps {
   onBack: () => void;
   vacation?: any;
+  employees: any[];
 }
 
-const VacationForm = ({ onBack, vacation }: VacationFormProps) => {
+const VacationForm = ({ onBack, vacation, employees }: VacationFormProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     empleadoId: vacation?.empleadoId || "",
@@ -23,14 +24,6 @@ const VacationForm = ({ onBack, vacation }: VacationFormProps) => {
     observaciones: vacation?.observaciones || ""
   });
 
-  // Mock employees data
-  const employees = [
-    { id: 1, nombre: "María José González Pérez" },
-    { id: 2, nombre: "Juan Carlos Rodríguez Silva" },
-    { id: 3, nombre: "Ana Sofía Martínez López" },
-    { id: 4, nombre: "Roberto Fernández Castro" },
-    { id: 5, nombre: "Laura García Moreno" }
-  ];
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -124,9 +117,9 @@ const VacationForm = ({ onBack, vacation }: VacationFormProps) => {
                   <SelectValue placeholder="Seleccionar empleado" />
                 </SelectTrigger>
                 <SelectContent>
-                  {employees.map((emp) => (
-                    <SelectItem key={emp.id} value={emp.id.toString()}>
-                      {emp.nombre}
+                  {employees.map((employee) => (
+                    <SelectItem key={employee.id} value={employee.id.toString()}>
+                      {employee.nombres} {employee.apellidos} - DNI: {employee.dni}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -201,7 +194,10 @@ const VacationForm = ({ onBack, vacation }: VacationFormProps) => {
               <>
                 <div className="p-4 bg-muted/50 rounded-lg">
                   <h3 className="font-semibold text-foreground mb-2">
-                    {employees.find(e => e.id.toString() === formData.empleadoId)?.nombre}
+                    {(() => {
+                      const emp = employees.find(e => e.id.toString() === formData.empleadoId);
+                      return emp ? `${emp.nombres} ${emp.apellidos}` : '';
+                    })()}
                   </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>

@@ -8,56 +8,43 @@ import { GraduationCap, Plus, Search, Download, BookOpen, Award, Users } from "l
 import TrainingForm from "./TrainingForm";
 import TrainingDetail from "./TrainingDetail";
 import { useToast } from "@/hooks/use-toast";
+import { useEmployees } from "@/contexts/EmployeeContext";
 
 const TrainingList = () => {
   const { toast } = useToast();
+  const { getActiveEmployees } = useEmployees();
+  const activeEmployees = getActiveEmployees();
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedTraining, setSelectedTraining] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
 
-  // Mock data
-  const mockTrainings = [
-    {
-      id: 1,
-      titulo: "Bioseguridad en Granjas Avícolas",
-      empleadoId: 1,
-      empleadoNombre: "María José González",
-      fecha: "2024-11-15",
-      duracion: 8,
-      tipo: "seguridad",
-      instructor: "Dr. Carlos Pérez",
-      estado: "completado",
-      certificacion: true,
-      observaciones: "Excelente participación"
-    },
-    {
-      id: 2,
-      titulo: "Manejo de Equipos de Incubación",
-      empleadoId: 4,
-      empleadoNombre: "Roberto Fernández",
-      fecha: "2024-11-20",
-      duracion: 6,
-      tipo: "tecnico",
-      instructor: "Ing. Ana Martínez",
-      estado: "en-progreso",
-      certificacion: false,
-      observaciones: ""
-    },
-    {
-      id: 3,
-      titulo: "Primeros Auxilios en el Trabajo",
-      empleadoId: 2,
-      empleadoNombre: "Juan Carlos Rodríguez",
-      fecha: "2024-10-05",
-      duracion: 4,
-      tipo: "seguridad",
-      instructor: "Cruz Roja Argentina",
-      estado: "completado",
-      certificacion: true,
-      observaciones: "Certificación vigente por 2 años"
-    }
-  ];
+  // Training data based on real employees
+  const getTrainingsForEmployees = () => {
+    const trainingTitles = [
+      "Bioseguridad en Granjas Avícolas",
+      "Manejo de Equipos de Incubación", 
+      "Primeros Auxilios en el Trabajo",
+      "Seguridad Industrial",
+      "Calidad en Procesos"
+    ];
+    
+    return activeEmployees.slice(0, 3).map((emp, index) => ({
+      id: emp.id,
+      titulo: trainingTitles[index] || "Capacitación General",
+      empleadoId: emp.id,
+      empleadoNombre: `${emp.nombres} ${emp.apellidos}`,
+      fecha: new Date(Date.now() - (index * 10) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      duracion: 4 + (index * 2),
+      tipo: ["seguridad", "tecnico", "administrativo"][index % 3],
+      instructor: ["Dr. Carlos Pérez", "Ing. Ana Martínez", "Cruz Roja Argentina"][index % 3],
+      estado: index === 0 ? "completado" : "en-progreso",
+      certificacion: index % 2 === 0,
+      observaciones: index === 0 ? "Excelente participación" : ""
+    }));
+  };
+
+  const mockTrainings = getTrainingsForEmployees();
 
   const filteredTrainings = mockTrainings.filter(training => {
     const matchesSearch = (

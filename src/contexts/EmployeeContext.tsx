@@ -35,6 +35,7 @@ interface EmployeeContextType {
   employees: Employee[];
   addEmployee: (employee: Omit<Employee, 'id'>) => void;
   updateEmployee: (id: number, employee: Partial<Employee>) => void;
+  deleteEmployee: (id: number) => void;
   getActiveEmployees: () => Employee[];
 }
 
@@ -393,6 +394,10 @@ export const EmployeeProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const deleteEmployee = (id: number) => {
+    setEmployees(prev => prev.filter(emp => emp.id !== id));
+  };
+
   const getActiveEmployees = () => {
     return employees.filter(emp => emp.estado === "activo");
   };
@@ -402,6 +407,7 @@ export const EmployeeProvider = ({ children }: { children: ReactNode }) => {
       employees, 
       addEmployee, 
       updateEmployee, 
+      deleteEmployee,
       getActiveEmployees 
     }}>
       {children}

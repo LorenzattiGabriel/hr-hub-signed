@@ -11,12 +11,16 @@ import {
   CheckCircle,
   Calendar
 } from "lucide-react";
+import { useEmployees } from "@/contexts/EmployeeContext";
 
 const DashboardOverview = () => {
+  const { employees, getActiveEmployees } = useEmployees();
+  const activeEmployees = getActiveEmployees();
+  
   const quickStats = [
     {
       title: "Empleados Activos",
-      value: "127",
+      value: activeEmployees.length.toString(),
       change: "+3 este mes",
       icon: Users,
       color: "text-primary",
@@ -52,7 +56,7 @@ const DashboardOverview = () => {
     {
       id: 1,
       type: "employee",
-      message: "Nuevo empleado agregado: María González",
+      message: `Nuevo empleado agregado: ${employees.length > 0 ? `${employees[0].nombres} ${employees[0].apellidos}` : 'Sin empleados'}`,
       time: "Hace 2 horas",
       status: "success"
     },

@@ -8,92 +8,47 @@ import { Star, Plus, Search, Download, TrendingUp, Award, Users } from "lucide-r
 import PerformanceForm from "./PerformanceForm";
 import PerformanceDetail from "./PerformanceDetail";
 import { useToast } from "@/hooks/use-toast";
+import { useEmployees } from "@/contexts/EmployeeContext";
 
 const PerformanceList = () => {
   const { toast } = useToast();
+  const { getActiveEmployees } = useEmployees();
+  const activeEmployees = getActiveEmployees();
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedPerformance, setSelectedPerformance] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPeriod, setFilterPeriod] = useState("");
 
-  // Mock performance evaluations data
-  const mockEvaluations = [
-    {
-      id: 1,
-      empleadoId: 1,
-      empleadoNombre: "María José González",
+  // Performance evaluations based on real employees
+  const getEvaluationsForEmployees = () => {
+    return activeEmployees.slice(0, 3).map((emp, index) => ({
+      id: emp.id,
+      empleadoId: emp.id,
+      empleadoNombre: `${emp.nombres} ${emp.apellidos}`,
       periodo: "2024-Q4",
-      fechaEvaluacion: "2024-11-15",
-      evaluador: "Gerente de Área",
-      puntuacionGeneral: 92,
+      fechaEvaluacion: new Date(Date.now() - (index * 5) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      evaluador: "Supervisor de Área",
+      puntuacionGeneral: 75 + Math.floor(Math.random() * 25),
       competencias: {
-        tecnicas: 90,
-        liderazgo: 95,
-        comunicacion: 88,
-        puntualidad: 98,
-        trabajoEquipo: 92
+        tecnicas: 70 + Math.floor(Math.random() * 30),
+        liderazgo: 70 + Math.floor(Math.random() * 30),
+        comunicacion: 70 + Math.floor(Math.random() * 30),
+        puntualidad: 70 + Math.floor(Math.random() * 30),
+        trabajoEquipo: 70 + Math.floor(Math.random() * 30)
       },
       objetivos: {
-        cumplimiento: 95,
-        calidad: 90,
-        eficiencia: 88
+        cumplimiento: 70 + Math.floor(Math.random() * 30),
+        calidad: 70 + Math.floor(Math.random() * 30),
+        eficiencia: 70 + Math.floor(Math.random() * 30)
       },
-      estado: "completado",
-      observaciones: "Excelente desempeño, candidata a promoción",
-      fortalezas: ["Liderazgo natural", "Excelente comunicación", "Proactiva"],
-      areasDesarrollo: ["Gestión del tiempo", "Conocimientos técnicos avanzados"]
-    },
-    {
-      id: 2,
-      empleadoId: 4,
-      empleadoNombre: "Roberto Fernández",
-      periodo: "2024-Q4",
-      fechaEvaluacion: "2024-11-10",
-      evaluador: "Supervisor Técnico",
-      puntuacionGeneral: 85,
-      competencias: {
-        tecnicas: 95,
-        liderazgo: 80,
-        comunicacion: 82,
-        puntualidad: 92,
-        trabajoEquipo: 88
-      },
-      objetivos: {
-        cumplimiento: 90,
-        calidad: 95,
-        eficiencia: 85
-      },
-      estado: "completado",
-      observaciones: "Sólido desempeño técnico, mejorar habilidades de comunicación",
-      fortalezas: ["Experto técnico", "Confiable", "Orientado a resultados"],
-      areasDesarrollo: ["Comunicación interpersonal", "Flexibilidad"]
-    },
-    {
-      id: 3,
-      empleadoId: 2,
-      empleadoNombre: "Juan Carlos Rodríguez",
-      periodo: "2024-Q4",
-      fechaEvaluacion: "2024-11-20",
-      evaluador: "Jefe de Operaciones",
-      puntuacionGeneral: 78,
-      competencias: {
-        tecnicas: 85,
-        liderazgo: 70,
-        comunicacion: 75,
-        puntualidad: 65,
-        trabajoEquipo: 80
-      },
-      objetivos: {
-        cumplimiento: 75,
-        calidad: 80,
-        eficiencia: 78
-      },
-      estado: "en-progreso",
-      observaciones: "Necesita mejorar puntualidad y cumplimiento de objetivos",
-      fortalezas: ["Conocimiento del proceso", "Buena actitud"],
-      areasDesarrollo: ["Puntualidad", "Organización", "Proactividad"]
-    }
-  ];
+      estado: index === 0 ? "completado" : "en-progreso",
+      observaciones: index === 0 ? "Excelente desempeño general" : "Evaluación en curso",
+      fortalezas: ["Responsabilidad", "Puntualidad", "Trabajo en equipo"],
+      areasDesarrollo: ["Comunicación", "Liderazgo", "Iniciativa"]
+    }));
+  };
+
+  const mockEvaluations = getEvaluationsForEmployees();
 
   const filteredEvaluations = mockEvaluations.filter(evaluation => {
     const matchesSearch = evaluation.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());

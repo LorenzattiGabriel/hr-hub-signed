@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Filter, Download, FileText, Users } from "lucide-react";
+import { Search, Plus, Filter, Download, FileText, Users, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import EmployeeForm from "./EmployeeForm";
 import EmployeeDetail from "./EmployeeDetail";
 import { useToast } from "@/hooks/use-toast";
@@ -12,7 +13,7 @@ import { useEmployees } from "@/contexts/EmployeeContext";
 
 const EmployeeList = () => {
   const { toast } = useToast();
-  const { employees, addEmployee, updateEmployee } = useEmployees();
+  const { employees, addEmployee, updateEmployee, deleteEmployee } = useEmployees();
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -67,12 +68,28 @@ const EmployeeList = () => {
   const handleSaveEmployee = (data: any) => {
     if (data.id) {
       updateEmployee(data.id, data);
+      toast({
+        title: "Empleado actualizado",
+        description: "Los datos del empleado se han actualizado exitosamente",
+      });
     } else {
       addEmployee(data);
+      toast({
+        title: "Empleado agregado",
+        description: "El nuevo empleado se ha agregado exitosamente",
+      });
     }
     setView("list");
     setSelectedEmployee(null);
     setIsEditing(false);
+  };
+
+  const handleDeleteEmployee = (id: number, name: string) => {
+    deleteEmployee(id);
+    toast({
+      title: "Empleado eliminado",
+      description: `${name} ha sido eliminado del sistema`,
+    });
   };
 
   if (view === "form") {
@@ -274,6 +291,34 @@ const EmployeeList = () => {
                         >
                           Editar
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Eliminar empleado?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción no se puede deshacer. Se eliminará permanentemente el registro de {employee.nombres} {employee.apellidos} del sistema.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={() => handleDeleteEmployee(employee.id, `${employee.nombres} ${employee.apellidos}`)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Eliminar
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </td>
                   </tr>

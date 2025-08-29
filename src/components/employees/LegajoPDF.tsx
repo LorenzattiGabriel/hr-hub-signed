@@ -109,58 +109,58 @@ const downloadPDF = async () => {
           </DialogTitle>
         </DialogHeader>
 
-        <div ref={printRef} className="bg-white p-8 space-y-6" style={{ fontFamily: 'serif' }}>
+        <div ref={printRef} className="bg-white p-8 space-y-6 text-black" style={{ fontFamily: 'serif', backgroundColor: '#ffffff', color: '#000000' }}>
           {/* Header del Legajo */}
-          <div className="text-center border-b-2 border-gray-300 pb-4">
-            <h1 className="text-2xl font-bold text-gray-800 mb-2">LEGAJO DIGITAL DE EMPLEADO</h1>
-            <h2 className="text-lg font-semibold text-gray-600">AVÍCOLA LA PALOMA</h2>
-            <p className="text-sm text-gray-500 mt-2">
+          <div className="text-center border-b-2 pb-4" style={{ borderColor: '#e5e7eb' }}>
+            <h1 className="text-2xl font-bold mb-2" style={{ color: '#1f2937' }}>LEGAJO DIGITAL DE EMPLEADO</h1>
+            <h2 className="text-lg font-semibold" style={{ color: '#4b5563' }}>AVÍCOLA LA PALOMA</h2>
+            <p className="text-sm mt-2" style={{ color: '#6b7280' }}>
               Fecha de Generación: {new Date().toLocaleDateString()}
             </p>
           </div>
 
           {/* Datos Personales */}
-          <Card>
+          <Card style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-lg text-gray-800">
+              <CardTitle className="flex items-center text-lg" style={{ color: '#1f2937' }}>
                 <User className="h-5 w-5 mr-2" />
                 DATOS PERSONALES
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <strong>Nombre y Apellido:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Nombre y Apellido:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.nombres} {employeeData.apellidos}
                 </p>
               </div>
               <div>
-                <strong>DNI:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>DNI:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.dni || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>CUIL:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>CUIL:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.cuil || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>Fecha de Nacimiento:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Fecha de Nacimiento:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {formatDate(employeeData.fechaNacimiento)}
                 </p>
               </div>
               <div>
-                <strong>Estado Civil:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Estado Civil:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.estadoCivil || "_______________"}
                 </p>
               </div>
               <div className="col-span-2">
-                <strong>Domicilio:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Domicilio:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.direccion || "_______________"}
                 </p>
               </div>
@@ -168,41 +168,41 @@ const downloadPDF = async () => {
           </Card>
 
           {/* Datos de Contacto */}
-          <Card>
+          <Card style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-lg text-gray-800">
+              <CardTitle className="flex items-center text-lg" style={{ color: '#1f2937' }}>
                 <Phone className="h-5 w-5 mr-2" />
                 INFORMACIÓN DE CONTACTO
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <strong>Teléfono:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Teléfono:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.telefono || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>Email:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Email:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.email || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>Contacto de Emergencia:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Contacto de Emergencia:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.contactoEmergencia || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>Parentesco:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Parentesco:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.parentescoEmergencia || "_______________"}
                 </p>
               </div>
               <div className="col-span-2">
-                <strong>Teléfono de Emergencia:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Teléfono de Emergencia:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.telefonoEmergencia || "_______________"}
                 </p>
               </div>
@@ -210,41 +210,41 @@ const downloadPDF = async () => {
           </Card>
 
           {/* Datos Laborales */}
-          <Card>
+          <Card style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-lg text-gray-800">
+              <CardTitle className="flex items-center text-lg" style={{ color: '#1f2937' }}>
                 <Briefcase className="h-5 w-5 mr-2" />
                 INFORMACIÓN LABORAL
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <strong>Puesto/Cargo:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Puesto/Cargo:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.cargo || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>Sector:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Sector:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.sector || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>Fecha de Ingreso:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Fecha de Ingreso:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {formatDate(employeeData.fechaIngreso)}
                 </p>
               </div>
+              <div>
+                <strong style={{ color: '#1f2937' }}>Estado:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
+                  {employeeData.estado || "Activo"}
+                </p>
+              </div>
                 <div>
-                  <strong>Estado:</strong>
-                  <p className="border-b border-dotted border-gray-400 pb-1">
-                    {employeeData.estado || "Activo"}
-                  </p>
-                </div>
-                <div>
-                  <strong>Antigüedad:</strong>
-                  <p className="border-b border-dotted border-gray-400 pb-1">
+                  <strong style={{ color: '#1f2937' }}>Antigüedad:</strong>
+                  <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                     {(() => {
                       const antiquity = calculateAntiquity(employeeData.fechaIngreso);
                       return `${antiquity.years} años, ${antiquity.months} meses, ${antiquity.days} días`;
@@ -252,8 +252,8 @@ const downloadPDF = async () => {
                   </p>
                 </div>
                 <div>
-                  <strong>Días de Vacaciones Anuales:</strong>
-                  <p className="border-b border-dotted border-gray-400 pb-1">
+                  <strong style={{ color: '#1f2937' }}>Días de Vacaciones Anuales:</strong>
+                  <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                     {calculateVacationDays(employeeData.fechaIngreso)} días
                   </p>
                 </div>
@@ -261,29 +261,29 @@ const downloadPDF = async () => {
           </Card>
 
           {/* Información Académica */}
-          <Card>
+          <Card style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-lg text-gray-800">
+              <CardTitle className="flex items-center text-lg" style={{ color: '#1f2937' }}>
                 <GraduationCap className="h-5 w-5 mr-2" />
                 INFORMACIÓN ACADÉMICA
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div>
-                <strong>Nivel Educativo:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Nivel Educativo:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.nivelEducativo || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>Título:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Título:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.titulo || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>Otros Conocimientos:</strong>
-                <div className="border border-gray-300 min-h-[60px] p-2 bg-gray-50">
+                <strong style={{ color: '#1f2937' }}>Otros Conocimientos:</strong>
+                <div className="border p-2 min-h-[60px]" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#1f2937' }}>
                   {employeeData.otrosConocimientos || ""}
                 </div>
               </div>
@@ -291,35 +291,35 @@ const downloadPDF = async () => {
           </Card>
 
           {/* Información Médica */}
-          <Card>
+          <Card style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center text-lg text-gray-800">
+              <CardTitle className="flex items-center text-lg" style={{ color: '#1f2937' }}>
                 <Heart className="h-5 w-5 mr-2" />
                 INFORMACIÓN MÉDICA
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <strong>Grupo Sanguíneo:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Grupo Sanguíneo:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.grupoSanguineo || "_______________"}
                 </p>
               </div>
               <div>
-                <strong>Obra Social:</strong>
-                <p className="border-b border-dotted border-gray-400 pb-1">
+                <strong style={{ color: '#1f2937' }}>Obra Social:</strong>
+                <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                   {employeeData.obraSocial || "_______________"}
                 </p>
               </div>
               <div className="col-span-2">
-                <strong>Alergias:</strong>
-                <div className="border border-gray-300 min-h-[40px] p-2 bg-gray-50">
+                <strong style={{ color: '#1f2937' }}>Alergias:</strong>
+                <div className="border p-2 min-h-[40px]" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#1f2937' }}>
                   {employeeData.alergias || ""}
                 </div>
               </div>
               <div className="col-span-2">
-                <strong>Medicación Habitual:</strong>
-                <div className="border border-gray-300 min-h-[40px] p-2 bg-gray-50">
+                <strong style={{ color: '#1f2937' }}>Medicación Habitual:</strong>
+                <div className="border p-2 min-h-[40px]" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#1f2937' }}>
                   {employeeData.medicacionHabitual || ""}
                 </div>
               </div>
@@ -327,33 +327,33 @@ const downloadPDF = async () => {
           </Card>
 
           {/* Observaciones */}
-          <Card>
+          <Card style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb' }}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg text-gray-800">OBSERVACIONES ADICIONALES</CardTitle>
+              <CardTitle className="text-lg" style={{ color: '#1f2937' }}>OBSERVACIONES ADICIONALES</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border border-gray-300 min-h-[60px] p-2 bg-gray-50 text-sm">
+              <div className="border p-2 min-h-[60px] text-sm" style={{ borderColor: '#d1d5db', backgroundColor: '#f9fafb', color: '#1f2937' }}>
                 {employeeData.observaciones || ""}
               </div>
             </CardContent>
           </Card>
 
           {/* Firmas */}
-          <div className="grid grid-cols-2 gap-8 mt-8 pt-6 border-t-2 border-gray-300">
+          <div className="grid grid-cols-2 gap-8 mt-8 pt-6" style={{ borderTop: '2px solid #d1d5db' }}>
             <div className="text-center">
-              <div className="border-t border-gray-600 mt-16 pt-2">
-                <p className="text-sm font-semibold">FIRMA DEL EMPLEADO</p>
+              <div className="mt-16 pt-2" style={{ borderTop: '1px solid #4b5563' }}>
+                <p className="text-sm font-semibold" style={{ color: '#1f2937' }}>FIRMA DEL EMPLEADO</p>
               </div>
             </div>
             <div className="text-center">
-              <div className="border-t border-gray-600 mt-16 pt-2">
-                <p className="text-sm font-semibold">ACLARACIÓN</p>
+              <div className="mt-16 pt-2" style={{ borderTop: '1px solid #4b5563' }}>
+                <p className="text-sm font-semibold" style={{ color: '#1f2937' }}>ACLARACIÓN</p>
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="text-center text-xs text-gray-500 mt-8 pt-4 border-t border-gray-200">
+          <div className="text-center text-xs mt-8 pt-4" style={{ borderTop: '1px solid #e5e7eb', color: '#6b7280' }}>
             <p>
               Este documento constituye el legajo digital del empleado según normativas laborales vigentes.
             </p>

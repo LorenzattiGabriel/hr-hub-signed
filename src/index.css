@@ -9,23 +9,23 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Base colors - Clean and professional */
-    --background: 255 255 255;
+    --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
 
-    --card: 255 255 255;
+    --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
 
-    --popover: 255 255 255;
+    --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
 
     /* Primary brand colors - Professional blue */
     --primary: 213 94% 68%;
-    --primary-foreground: 255 255 255;
+    --primary-foreground: 0 0% 100%;
     --primary-hover: 213 94% 63%;
 
     /* Secondary colors - Professional green */
     --secondary: 142 69% 58%;
-    --secondary-foreground: 255 255 255;
+    --secondary-foreground: 0 0% 100%;
     --secondary-hover: 142 69% 53%;
 
     /* Muted colors for subtle elements */
@@ -38,13 +38,13 @@ All colors MUST be HSL.
 
     /* Status colors */
     --success: 142 76% 36%;
-    --success-foreground: 255 255 255;
+    --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
-    --warning-foreground: 255 255 255;
+    --warning-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 255 255 255;
+    --destructive-foreground: 0 0% 100%;
 
     /* Border and input colors */
     --border: 214.3 31.8% 91.4%;
@@ -54,7 +54,7 @@ All colors MUST be HSL.
     /* Professional gradients */
     --gradient-primary: linear-gradient(135deg, hsl(213 94% 68%), hsl(213 94% 58%));
     --gradient-secondary: linear-gradient(135deg, hsl(142 69% 58%), hsl(142 69% 48%));
-    --gradient-card: linear-gradient(135deg, hsl(255 255 255), hsl(210 40% 98%));
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 40% 98%));
     --gradient-dashboard: linear-gradient(135deg, hsl(213 94% 68% / 0.03), hsl(142 69% 58% / 0.03));
 
     /* Professional shadows */
@@ -72,7 +72,7 @@ All colors MUST be HSL.
     --sidebar-background: 248 250 252;
     --sidebar-foreground: 0 0% 3.9%;
     --sidebar-primary: 213 94% 68%;
-    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 40% 96%;
     --sidebar-accent-foreground: 0 0% 3.9%;
     --sidebar-border: 214.3 31.8% 91.4%;

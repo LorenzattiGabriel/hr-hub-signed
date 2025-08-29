@@ -15,8 +15,9 @@ import {
   User,
   AlertTriangle,
   Clock
-} from "lucide-react";
+ } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import LegajoPDF from "./LegajoPDF";
 
 interface EmployeeDetailProps {
   employee: any;
@@ -63,10 +64,15 @@ const EmployeeDetail = ({ employee, onBack, onEdit }: EmployeeDetailProps) => {
         </div>
         
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => generatePDF("Legajo Digital")}>
-            <FileText className="h-4 w-4 mr-2" />
-            Descargar Legajo
-          </Button>
+          <LegajoPDF 
+            employeeData={employee}
+            trigger={
+              <Button variant="outline">
+                <FileText className="h-4 w-4 mr-2" />
+                Ver Legajo Completo
+              </Button>
+            }
+          />
           <Button onClick={onEdit}>
             <Edit className="h-4 w-4 mr-2" />
             Editar

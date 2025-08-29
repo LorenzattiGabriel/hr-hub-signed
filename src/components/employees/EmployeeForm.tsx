@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, Save, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import LegajoPDF from "./LegajoPDF";
 
 interface EmployeeFormProps {
   onBack: () => void;
@@ -18,21 +19,41 @@ interface EmployeeFormProps {
 const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
+    // Datos Personales
     nombres: employee?.nombres || "",
     apellidos: employee?.apellidos || "",
     dni: employee?.dni || "",
     cuil: employee?.cuil || "",
     fechaNacimiento: employee?.fechaNacimiento || "",
+    direccion: employee?.direccion || "",
+    
+    // Datos de Contacto
     telefono: employee?.telefono || "",
     email: employee?.email || "",
-    direccion: employee?.direccion || "",
+    contactoEmergencia: employee?.contactoEmergencia || "",
+    telefonoEmergencia: employee?.telefonoEmergencia || "",
+    parentescoEmergencia: employee?.parentescoEmergencia || "",
+    
+    // Datos Laborales
     cargo: employee?.cargo || "",
     sector: employee?.sector || "",
     fechaIngreso: employee?.fechaIngreso || "",
     salario: employee?.salario || "",
     estadoCivil: employee?.estadoCivil || "",
-    contactoEmergencia: employee?.contactoEmergencia || "",
-    telefonoEmergencia: employee?.telefonoEmergencia || "",
+    estado: employee?.estado || "activo",
+    
+    // Información Académica
+    nivelEducativo: employee?.nivelEducativo || "",
+    titulo: employee?.titulo || "",
+    otrosConocimientos: employee?.otrosConocimientos || "",
+    
+    // Información Médica
+    grupoSanguineo: employee?.grupoSanguineo || "",
+    alergias: employee?.alergias || "",
+    obraSocial: employee?.obraSocial || "",
+    medicacionHabitual: employee?.medicacionHabitual || "",
+    
+    // Observaciones
     observaciones: employee?.observaciones || ""
   });
 
@@ -70,8 +91,8 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
     }
 
     toast({
-      title: "Legajo generado",
-      description: "El legajo digital se ha generado exitosamente y está listo para descargar",
+      title: "Legajo digital generado",
+      description: "El legajo completo con todos los datos se ha generado exitosamente y está listo para descarga y firma",
     });
   };
 
@@ -93,9 +114,18 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
           </div>
         </div>
         <div className="flex space-x-2">
+          <LegajoPDF 
+            employeeData={formData}
+            trigger={
+              <Button variant="outline">
+                <FileText className="h-4 w-4 mr-2" />
+                Previsualizar Legajo
+              </Button>
+            }
+          />
           <Button variant="outline" onClick={generateLegajo}>
-            <FileText className="h-4 w-4 mr-2" />
-            Generar Legajo PDF
+            <Download className="h-4 w-4 mr-2" />
+            Generar PDF
           </Button>
           <Button onClick={handleSave}>
             <Save className="h-4 w-4 mr-2" />
@@ -104,7 +134,7 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Datos Personales */}
         <Card>
           <CardHeader>
@@ -181,26 +211,26 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
             </div>
 
             <div>
-              <Label htmlFor="direccion" className="text-foreground">Dirección</Label>
+              <Label htmlFor="direccion" className="text-foreground">Domicilio Completo</Label>
               <Textarea
                 id="direccion"
                 value={formData.direccion}
                 onChange={(e) => handleInputChange("direccion", e.target.value)}
-                placeholder="Dirección completa"
+                placeholder="Dirección completa con ciudad y código postal"
                 rows={2}
               />
             </div>
           </CardContent>
         </Card>
 
-        {/* Contacto */}
+        {/* Datos de Contacto */}
         <Card>
           <CardHeader>
             <CardTitle className="text-foreground">Información de Contacto</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="telefono" className="text-foreground">Teléfono</Label>
+              <Label htmlFor="telefono" className="text-foreground">Teléfono del Empleado</Label>
               <Input
                 id="telefono"
                 value={formData.telefono}
@@ -210,7 +240,7 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
             </div>
             
             <div>
-              <Label htmlFor="email" className="text-foreground">Email</Label>
+              <Label htmlFor="email" className="text-foreground">Correo Electrónico</Label>
               <Input
                 id="email"
                 type="email"
@@ -220,35 +250,48 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
               />
             </div>
 
-            <div>
-              <Label htmlFor="contactoEmergencia" className="text-foreground">Contacto de Emergencia</Label>
-              <Input
-                id="contactoEmergencia"
-                value={formData.contactoEmergencia}
-                onChange={(e) => handleInputChange("contactoEmergencia", e.target.value)}
-                placeholder="Nombre completo"
-              />
-            </div>
+            <div className="space-y-2">
+              <h4 className="font-semibold text-foreground">Contacto de Emergencia</h4>
+              
+              <div>
+                <Label htmlFor="contactoEmergencia" className="text-foreground">Nombre Completo</Label>
+                <Input
+                  id="contactoEmergencia"
+                  value={formData.contactoEmergencia}
+                  onChange={(e) => handleInputChange("contactoEmergencia", e.target.value)}
+                  placeholder="Nombre y apellido del contacto"
+                />
+              </div>
 
-            <div>
-              <Label htmlFor="telefonoEmergencia" className="text-foreground">Teléfono de Emergencia</Label>
-              <Input
-                id="telefonoEmergencia"
-                value={formData.telefonoEmergencia}
-                onChange={(e) => handleInputChange("telefonoEmergencia", e.target.value)}
-                placeholder="+54 9 11 1234-5678"
-              />
-            </div>
+              <div>
+                <Label htmlFor="parentescoEmergencia" className="text-foreground">Parentesco</Label>
+                <Select onValueChange={(value) => handleInputChange("parentescoEmergencia", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar parentesco" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="padre">Padre</SelectItem>
+                    <SelectItem value="madre">Madre</SelectItem>
+                    <SelectItem value="conyuge">Cónyuge</SelectItem>
+                    <SelectItem value="hijo">Hijo/a</SelectItem>
+                    <SelectItem value="hermano">Hermano/a</SelectItem>
+                    <SelectItem value="abuelo">Abuelo/a</SelectItem>
+                    <SelectItem value="tio">Tío/a</SelectItem>
+                    <SelectItem value="amigo">Amigo/a</SelectItem>
+                    <SelectItem value="otro">Otro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div>
-              <Label htmlFor="observaciones" className="text-foreground">Observaciones</Label>
-              <Textarea
-                id="observaciones"
-                value={formData.observaciones}
-                onChange={(e) => handleInputChange("observaciones", e.target.value)}
-                placeholder="Notas adicionales..."
-                rows={3}
-              />
+              <div>
+                <Label htmlFor="telefonoEmergencia" className="text-foreground">Teléfono de Emergencia</Label>
+                <Input
+                  id="telefonoEmergencia"
+                  value={formData.telefonoEmergencia}
+                  onChange={(e) => handleInputChange("telefonoEmergencia", e.target.value)}
+                  placeholder="+54 9 11 1234-5678"
+                />
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -260,10 +303,10 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="cargo" className="text-foreground">Cargo</Label>
+              <Label htmlFor="cargo" className="text-foreground">Puesto/Cargo</Label>
               <Select onValueChange={(value) => handleInputChange("cargo", value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar cargo" />
+                  <SelectValue placeholder="Seleccionar puesto" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="operario">Operario</SelectItem>
@@ -318,14 +361,156 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
               />
             </div>
 
-            <div className="pt-4">
-              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div>
-                  <p className="font-medium text-foreground">Estado del Empleado</p>
-                  <p className="text-sm text-foreground/70">Empleado activo</p>
-                </div>
-                <Badge variant="success">Activo</Badge>
-              </div>
+            <div>
+              <Label htmlFor="estado" className="text-foreground">Estado del Empleado</Label>
+              <Select onValueChange={(value) => handleInputChange("estado", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="activo">Activo</SelectItem>
+                  <SelectItem value="inactivo">Inactivo</SelectItem>
+                  <SelectItem value="licencia">En Licencia</SelectItem>
+                  <SelectItem value="suspension">Suspendido</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Información Académica */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-foreground">Información Académica</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="nivelEducativo" className="text-foreground">Nivel Educativo Alcanzado</Label>
+              <Select onValueChange={(value) => handleInputChange("nivelEducativo", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar nivel educativo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="primario-incompleto">Primario Incompleto</SelectItem>
+                  <SelectItem value="primario-completo">Primario Completo</SelectItem>
+                  <SelectItem value="secundario-incompleto">Secundario Incompleto</SelectItem>
+                  <SelectItem value="secundario-completo">Secundario Completo</SelectItem>
+                  <SelectItem value="terciario-incompleto">Terciario Incompleto</SelectItem>
+                  <SelectItem value="terciario-completo">Terciario Completo</SelectItem>
+                  <SelectItem value="universitario-incompleto">Universitario Incompleto</SelectItem>
+                  <SelectItem value="universitario-completo">Universitario Completo</SelectItem>
+                  <SelectItem value="posgrado">Posgrado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="titulo" className="text-foreground">Título Obtenido</Label>
+              <Input
+                id="titulo"
+                value={formData.titulo}
+                onChange={(e) => handleInputChange("titulo", e.target.value)}
+                placeholder="Ej: Bachiller en Ciencias Naturales, Técnico en..."
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="otrosConocimientos" className="text-foreground">Otros Conocimientos</Label>
+              <Textarea
+                id="otrosConocimientos"
+                value={formData.otrosConocimientos}
+                onChange={(e) => handleInputChange("otrosConocimientos", e.target.value)}
+                placeholder="Cursos, capacitaciones, idiomas, habilidades técnicas, etc."
+                rows={3}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Información Médica */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-foreground">Información Médica</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="grupoSanguineo" className="text-foreground">Grupo Sanguíneo</Label>
+              <Select onValueChange={(value) => handleInputChange("grupoSanguineo", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar grupo sanguíneo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="A+">A+</SelectItem>
+                  <SelectItem value="A-">A-</SelectItem>
+                  <SelectItem value="B+">B+</SelectItem>
+                  <SelectItem value="B-">B-</SelectItem>
+                  <SelectItem value="AB+">AB+</SelectItem>
+                  <SelectItem value="AB-">AB-</SelectItem>
+                  <SelectItem value="O+">O+</SelectItem>
+                  <SelectItem value="O-">O-</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="obraSocial" className="text-foreground">Obra Social</Label>
+              <Input
+                id="obraSocial"
+                value={formData.obraSocial}
+                onChange={(e) => handleInputChange("obraSocial", e.target.value)}
+                placeholder="Nombre de la obra social y número de afiliado"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="alergias" className="text-foreground">Alergias</Label>
+              <Textarea
+                id="alergias"
+                value={formData.alergias}
+                onChange={(e) => handleInputChange("alergias", e.target.value)}
+                placeholder="Detallar alergias conocidas (medicamentos, alimentos, sustancias, etc.)"
+                rows={2}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="medicacionHabitual" className="text-foreground">Medicación Habitual</Label>
+              <Textarea
+                id="medicacionHabitual"
+                value={formData.medicacionHabitual}
+                onChange={(e) => handleInputChange("medicacionHabitual", e.target.value)}
+                placeholder="Medicamentos que toma regularmente, dosis y frecuencia"
+                rows={2}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Observaciones */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-foreground">Observaciones Adicionales</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="observaciones" className="text-foreground">Otras Observaciones</Label>
+              <Textarea
+                id="observaciones"
+                value={formData.observaciones}
+                onChange={(e) => handleInputChange("observaciones", e.target.value)}
+                placeholder="Cualquier información adicional relevante sobre el empleado..."
+                rows={4}
+              />
+            </div>
+
+            <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+              <h4 className="font-semibold text-foreground mb-2">Información sobre el Legajo Digital</h4>
+              <ul className="text-sm text-foreground/70 space-y-1">
+                <li>• El legajo PDF incluirá todos los datos ingresados</li>
+                <li>• Se generará con espacios para firma y aclaración</li>
+                <li>• Documento listo para imprimir y firmar</li>
+                <li>• Cumple con requisitos legales de documentación laboral</li>
+              </ul>
             </div>
           </CardContent>
         </Card>

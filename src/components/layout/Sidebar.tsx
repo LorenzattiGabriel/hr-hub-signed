@@ -10,7 +10,8 @@ import {
   BarChart3, 
   Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Shirt
 } from "lucide-react";
 
 interface SidebarProps {
@@ -49,10 +50,17 @@ const modules = [
   },
   {
     id: "training",
-    name: "Formación y Registros",
+    name: "Capacitaciones",
     icon: GraduationCap,
-    description: "Capacitaciones y Uniformes",
-    badge: "5"
+    description: "Formación y Desarrollo",
+    badge: "3"
+  },
+  {
+    id: "uniforms",
+    name: "Entrega de Uniformes",
+    icon: Shirt,
+    description: "Control de Uniformes",
+    badge: "2"
   },
   {
     id: "attendance",

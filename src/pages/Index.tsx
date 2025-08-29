@@ -6,6 +6,7 @@ import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import VacationsModule from "@/components/vacations/VacationsModule";
 import AbsencesModule from "@/components/absences/AbsencesModule";
 import TrainingList from "@/components/training/TrainingList";
+import UniformsModule from "@/components/uniforms/UniformsModule";
 import AttendanceList from "@/components/attendance/AttendanceList";
 import PerformanceList from "@/components/performance/PerformanceList";
 import CalendarList from "@/components/calendar/CalendarList";
@@ -24,6 +25,8 @@ const Index = () => {
         return <AbsencesModule />;
       case "training":
         return <TrainingList />;
+      case "uniforms":
+        return <UniformsModule />;
       case "attendance":
         return <AttendanceList />;
       case "performance":

@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -11,13 +12,38 @@ interface LegajoPDFProps {
 
 const LegajoPDF = ({ employeeData, trigger }: LegajoPDFProps) => {
   const { toast } = useToast();
+  const printRef = useRef<HTMLDivElement>(null);
+const downloadPDF = async () => {
+  const element = printRef.current;
+  if (!element) return;
+  try {
+    const module: any = await import('html2pdf.js');
+    const html2pdf = module.default || module;
+    const filename = `Legajo_${(employeeData.apellidos || 'Empleado')}_${employeeData.nombres || ''}.pdf`.replace(/\s+/g, '_');
+    await html2pdf()
+      .set({
+        margin: 10,
+        filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      })
+      .from(element)
+      .save();
 
-  const downloadPDF = () => {
     toast({
-      title: "PDF Descargado",
-      description: "El legajo digital se ha descargado exitosamente. Listo para imprimir y firmar.",
+      title: "PDF descargado",
+      description: "El legajo se descargó correctamente.",
     });
-  };
+  } catch (error) {
+    console.error('Error generando PDF', error);
+    toast({
+      title: "Error al generar PDF",
+      description: "Intenta nuevamente.",
+      variant: "destructive",
+    });
+  }
+};
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "No especificado";
@@ -43,7 +69,7 @@ const LegajoPDF = ({ employeeData, trigger }: LegajoPDFProps) => {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="bg-white p-8 space-y-6" style={{ fontFamily: 'serif' }}>
+        <div ref={printRef} className="bg-white p-8 space-y-6" style={{ fontFamily: 'serif' }}>
           {/* Header del Legajo */}
           <div className="text-center border-b-2 border-gray-300 pb-4">
             <h1 className="text-2xl font-bold text-gray-800 mb-2">LEGAJO DIGITAL DE EMPLEADO</h1>

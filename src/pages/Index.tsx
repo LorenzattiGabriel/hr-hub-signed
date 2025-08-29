@@ -5,6 +5,9 @@ import EmployeeList from "@/components/employees/EmployeeList";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
 import VacationList from "@/components/vacations/VacationList";
 import TrainingList from "@/components/training/TrainingList";
+import AttendanceList from "@/components/attendance/AttendanceList";
+import PerformanceList from "@/components/performance/PerformanceList";
+import CalendarList from "@/components/calendar/CalendarList";
 
 const Index = () => {
   const [activeModule, setActiveModule] = useState("dashboard");
@@ -18,26 +21,11 @@ const Index = () => {
       case "training":
         return <TrainingList />;
       case "attendance":
-        return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Módulo de Control de Asistencia</h2>
-            <p className="text-muted-foreground">Próximamente disponible</p>
-          </div>
-        );
+        return <AttendanceList />;
       case "performance":
-        return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Módulo de Evaluación de Desempeño</h2>
-            <p className="text-muted-foreground">Próximamente disponible</p>
-          </div>
-        );
+        return <PerformanceList />;
       case "calendar":
-        return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Módulo de Calendario y Eventos</h2>
-            <p className="text-muted-foreground">Próximamente disponible</p>
-          </div>
-        );
+        return <CalendarList />;
       default:
         return <DashboardOverview />;
     }

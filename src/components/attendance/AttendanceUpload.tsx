@@ -1,0 +1,228 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Upload, ArrowLeft, FileSpreadsheet, CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+
+interface AttendanceUploadProps {
+  onBack: () => void;
+}
+
+const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
+  const { toast } = useToast();
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [processing, setProcessing] = useState(false);
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.includes("sheet") || file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+        setUploadedFile(file);
+      } else {
+        toast({
+          title: "Formato incorrecto",
+          description: "Por favor selecciona un archivo Excel (.xlsx o .xls)",
+          variant: "destructive"
+        });
+      }
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setUploadedFile(file);
+    }
+  };
+
+  const processFile = () => {
+    if (!uploadedFile) return;
+
+    setProcessing(true);
+    
+    // Simulate file processing
+    setTimeout(() => {
+      setProcessing(false);
+      toast({
+        title: "Archivo procesado",
+        description: "Los datos de asistencia han sido cargados exitosamente",
+      });
+      
+      setTimeout(() => onBack(), 1500);
+    }, 3000);
+  };
+
+  const downloadTemplate = () => {
+    toast({
+      title: "Plantilla descargada",
+      description: "La plantilla Excel ha sido descargada exitosamente",
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" onClick={onBack}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
+          <div>
+            <h2 className="text-2xl font-bold text-foreground">Cargar Archivo de Asistencia</h2>
+            <p className="text-foreground/70">Sube el archivo Excel exportado desde el sistema de huellas dactilares</p>
+          </div>
+        </div>
+        <Button variant="outline" onClick={downloadTemplate}>
+          <FileSpreadsheet className="h-4 w-4 mr-2" />
+          Descargar Plantilla
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Upload Area */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-foreground">Subir Archivo Excel</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                dragActive 
+                  ? "border-primary bg-primary/5" 
+                  : "border-muted-foreground/25 hover:border-muted-foreground/50"
+              }`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                {dragActive ? "Suelta el archivo aquí" : "Arrastra tu archivo Excel aquí"}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                o haz clic para seleccionar un archivo
+              </p>
+              
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileInput}
+                className="hidden"
+                id="file-upload"
+              />
+              <label htmlFor="file-upload">
+                <Button variant="outline" className="cursor-pointer">
+                  Seleccionar Archivo
+                </Button>
+              </label>
+              
+              {uploadedFile && (
+                <div className="mt-4 p-3 bg-success/10 border border-success/20 rounded-lg">
+                  <div className="flex items-center justify-center space-x-2">
+                    <CheckCircle className="h-5 w-5 text-success" />
+                    <span className="text-success font-medium">{uploadedFile.name}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Tamaño: {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {uploadedFile && (
+              <div className="mt-6 space-y-4">
+                <Button 
+                  onClick={processFile} 
+                  className="w-full" 
+                  disabled={processing}
+                >
+                  {processing ? "Procesando..." : "Procesar Archivo"}
+                </Button>
+                
+                {processing && (
+                  <div className="space-y-2">
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full animate-pulse w-3/4"></div>
+                    </div>
+                    <p className="text-sm text-muted-foreground text-center">
+                      Analizando datos de asistencia...
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Instructions */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-foreground">Instrucciones</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Formato del Archivo</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Formato Excel (.xlsx o .xls)</li>
+                <li>• Incluir columnas: Empleado, Fecha, Hora Entrada, Hora Salida</li>
+                <li>• Una fila por día trabajado</li>
+                <li>• Fechas en formato DD/MM/AAAA</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Datos que se Procesarán</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Días trabajados por empleado</li>
+                <li>• Llegadas tarde (después de 8:00 AM)</li>
+                <li>• Horas extras trabajadas</li>
+                <li>• Cálculo automático de puntualidad</li>
+                <li>• Porcentaje de asistencia mensual</li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="font-semibold text-foreground mb-2">Reportes Generados</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• KPIs de asistencia por empleado</li>
+                <li>• Ranking de puntualidad</li>
+                <li>• Alertas de ausentismo</li>
+                <li>• Tendencias mensuales</li>
+              </ul>
+            </div>
+
+            <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg">
+              <p className="text-sm text-warning">
+                <strong>Importante:</strong> El archivo debe contener datos de un mes completo para generar estadísticas precisas.
+              </p>
+            </div>
+
+            <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
+              <p className="text-sm text-primary">
+                <strong>Tip:</strong> Puedes descargar la plantilla Excel para ver el formato exacto requerido.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default AttendanceUpload;

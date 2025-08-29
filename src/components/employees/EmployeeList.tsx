@@ -131,8 +131,8 @@ const EmployeeList = () => {
       employee.cargo.toLowerCase().includes(searchTerm.toLowerCase())
     );
     
-    const matchesSector = !filterSector || employee.sector === filterSector;
-    const matchesStatus = !filterStatus || employee.estado === filterStatus;
+    const matchesSector = !filterSector || filterSector === "all" || employee.sector === filterSector;
+    const matchesStatus = !filterStatus || filterStatus === "all" || employee.estado === filterStatus;
     
     return matchesSearch && matchesSector && matchesStatus;
   });
@@ -291,7 +291,7 @@ const EmployeeList = () => {
                 <SelectValue placeholder="Filtrar por sector" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los sectores</SelectItem>
+                <SelectItem value="all">Todos los sectores</SelectItem>
                 <SelectItem value="Granja">Granja</SelectItem>
                 <SelectItem value="Incubación">Incubación</SelectItem>
                 <SelectItem value="Procesamiento">Procesamiento</SelectItem>
@@ -307,7 +307,7 @@ const EmployeeList = () => {
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los estados</SelectItem>
+                <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="activo">Activo</SelectItem>
                 <SelectItem value="inactivo">Inactivo</SelectItem>
               </SelectContent>

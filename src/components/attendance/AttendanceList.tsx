@@ -182,7 +182,7 @@ const AttendanceList = () => {
                 <SelectValue placeholder="Filtrar por mes" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los meses</SelectItem>
+                <SelectItem value="all">Todos los meses</SelectItem>
                 <SelectItem value="2024-11">Noviembre 2024</SelectItem>
                 <SelectItem value="2024-10">Octubre 2024</SelectItem>
                 <SelectItem value="2024-09">Septiembre 2024</SelectItem>

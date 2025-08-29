@@ -97,7 +97,7 @@ const PerformanceList = () => {
 
   const filteredEvaluations = mockEvaluations.filter(evaluation => {
     const matchesSearch = evaluation.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPeriod = !filterPeriod || evaluation.periodo === filterPeriod;
+    const matchesPeriod = !filterPeriod || filterPeriod === "all" || evaluation.periodo === filterPeriod;
     return matchesSearch && matchesPeriod;
   });
 
@@ -244,7 +244,7 @@ const PerformanceList = () => {
                 <SelectValue placeholder="Filtrar por período" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los períodos</SelectItem>
+                <SelectItem value="all">Todos los períodos</SelectItem>
                 <SelectItem value="2024-Q4">Q4 2024</SelectItem>
                 <SelectItem value="2024-Q3">Q3 2024</SelectItem>
                 <SelectItem value="2024-Q2">Q2 2024</SelectItem>

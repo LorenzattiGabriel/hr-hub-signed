@@ -64,7 +64,7 @@ const TrainingList = () => {
       training.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       training.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const matchesType = !filterType || training.tipo === filterType;
+    const matchesType = !filterType || filterType === "all" || training.tipo === filterType;
     return matchesSearch && matchesType;
   });
 
@@ -206,7 +206,7 @@ const TrainingList = () => {
                 <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los tipos</SelectItem>
+                <SelectItem value="all">Todos los tipos</SelectItem>
                 <SelectItem value="seguridad">Seguridad</SelectItem>
                 <SelectItem value="tecnico">Técnico</SelectItem>
                 <SelectItem value="administrativo">Administrativo</SelectItem>

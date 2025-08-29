@@ -48,7 +48,7 @@ const VacationList = () => {
 
   const filteredVacations = mockVacations.filter(vacation => {
     const matchesSearch = vacation.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !filterStatus || vacation.estado === filterStatus;
+    const matchesStatus = !filterStatus || filterStatus === "all" || vacation.estado === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -191,7 +191,7 @@ const VacationList = () => {
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los estados</SelectItem>
+                <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="pendiente">Pendiente</SelectItem>
                 <SelectItem value="aprobado">Aprobado</SelectItem>
                 <SelectItem value="rechazado">Rechazado</SelectItem>

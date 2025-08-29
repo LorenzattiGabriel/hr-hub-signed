@@ -20,7 +20,7 @@ const EmployeeList = () => {
   const [filterStatus, setFilterStatus] = useState("");
 
   // Datos reales de empleados
-  const mockEmployees = [
+  const [employees, setEmployees] = useState([
     {
       id: 1,
       nombres: "Noelia Belén",
@@ -357,9 +357,9 @@ const EmployeeList = () => {
       obraSocial: "No",
       observaciones: "Sin licencia de conducir. Sin hijos"
     }
-  ];
+  ]);
 
-  const filteredEmployees = mockEmployees.filter(employee => {
+  const filteredEmployees = employees.filter(employee => {
     const matchesSearch = (
       employee.nombres.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.apellidos.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -403,10 +403,24 @@ const EmployeeList = () => {
     });
   };
 
+  const handleSaveEmployee = (data: any) => {
+    setEmployees((prev) => {
+      if (data.id) {
+        return prev.map((e) => (e.id === data.id ? { ...e, ...data } : e));
+      }
+      const newId = Math.max(0, ...prev.map((e) => e.id)) + 1;
+      return [{ ...data, id: newId }, ...prev];
+    });
+    setView("list");
+    setSelectedEmployee(null);
+    setIsEditing(false);
+  };
+
   if (view === "form") {
     return (
       <EmployeeForm 
         onBack={handleBackToList}
+        onSave={handleSaveEmployee}
         employee={selectedEmployee}
         isEditing={isEditing}
       />
@@ -452,7 +466,7 @@ const EmployeeList = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground/70">Total Empleados</p>
-                <p className="text-3xl font-bold text-foreground">{mockEmployees.length}</p>
+                <p className="text-3xl font-bold text-foreground">{employees.length}</p>
               </div>
               <div className="p-3 bg-primary/10 rounded-lg">
                 <Users className="h-6 w-6 text-primary" />
@@ -466,7 +480,7 @@ const EmployeeList = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground/70">Empleados Activos</p>
-                <p className="text-3xl font-bold text-foreground">{mockEmployees.filter(e => e.estado === "activo").length}</p>
+                <p className="text-3xl font-bold text-foreground">{employees.filter(e => e.estado === "activo").length}</p>
               </div>
               <div className="p-3 bg-success/10 rounded-lg">
                 <Users className="h-6 w-6 text-success" />

@@ -12,11 +12,12 @@ import LegajoPDF from "./LegajoPDF";
 
 interface EmployeeFormProps {
   onBack: () => void;
+  onSave?: (employee: any) => void;
   employee?: any;
   isEditing?: boolean;
 }
 
-const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps) => {
+const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeFormProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     // Datos Personales
@@ -120,12 +121,16 @@ const EmployeeForm = ({ onBack, employee, isEditing = false }: EmployeeFormProps
       return;
     }
 
+    // Guardar en lista (padre)
+    const payload = { ...formData, id: employee?.id };
+    onSave?.(payload);
+
     toast({
       title: isEditing ? "Empleado actualizado" : "Empleado creado",
       description: `${formData.nombres} ${formData.apellidos} ha sido ${isEditing ? 'actualizado' : 'registrado'} exitosamente`,
     });
 
-    setTimeout(() => onBack(), 1500);
+    setTimeout(() => onBack(), 800);
   };
 
   const generateLegajo = () => {

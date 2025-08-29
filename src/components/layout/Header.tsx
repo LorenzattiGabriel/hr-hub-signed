@@ -7,7 +7,6 @@ import {
   ClipboardList, 
   BarChart3, 
   Calendar,
-  Building2,
   Bell,
   Settings,
   User
@@ -19,9 +18,9 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between px-6">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <Building2 className="h-8 w-8 text-primary" />
+            <img src="/lovable-uploads/bc1834d3-5cc1-4aa1-9acd-e40b9c20d1bf.png" alt="Avícola La Paloma" className="h-8 w-8" />
             <div>
-              <h1 className="text-xl font-bold text-foreground">RRHH Manager</h1>
+              <h1 className="text-xl font-bold text-foreground">RRHH Avícola</h1>
               <p className="text-xs text-muted-foreground">Sistema de Gestión de Personal</p>
             </div>
           </div>

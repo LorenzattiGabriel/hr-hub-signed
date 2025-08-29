@@ -3,6 +3,8 @@ import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import EmployeeList from "@/components/employees/EmployeeList";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
+import VacationList from "@/components/vacations/VacationList";
+import TrainingList from "@/components/training/TrainingList";
 
 const Index = () => {
   const [activeModule, setActiveModule] = useState("dashboard");
@@ -12,19 +14,9 @@ const Index = () => {
       case "employees":
         return <EmployeeList />;
       case "vacations":
-        return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Módulo de Vacaciones y Ausencias</h2>
-            <p className="text-muted-foreground">Próximamente disponible</p>
-          </div>
-        );
+        return <VacationList />;
       case "training":
-        return (
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Módulo de Formación y Registros</h2>
-            <p className="text-muted-foreground">Próximamente disponible</p>
-          </div>
-        );
+        return <TrainingList />;
       case "attendance":
         return (
           <div className="text-center py-12">

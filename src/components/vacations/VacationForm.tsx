@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, Save, ArrowLeft, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import html2pdf from "html2pdf.js";
 
 interface VacationFormProps {
   onBack: () => void;
@@ -59,20 +60,101 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
     setTimeout(() => onBack(), 1500);
   };
 
-  const generateConstancia = () => {
+  const generateConstancia = async () => {
     if (!formData.empleadoId) {
       toast({
         title: "Error",
         description: "Seleccione un empleado antes de generar la constancia",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
-    toast({
-      title: "Constancia generada",
-      description: "La constancia de vacaciones se ha generado exitosamente",
-    });
+    // Solo permitir descarga si la solicitud está aprobada (cuando aplica)
+    if (vacation && vacation.estado && vacation.estado.toLowerCase() !== "aprobada") {
+      toast({
+        title: "No disponible",
+        description: "Solo puedes descargar la constancia de solicitudes aprobadas.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const emp = employees.find(
+        (e) => e.id?.toString() === (formData.empleadoId as string)?.toString()
+      );
+      const employeeName = emp ? `${emp.nombres} ${emp.apellidos}` : "Empleado";
+      const dni = emp?.dni ?? "";
+      const days = calculateDays();
+      const motivoMap: Record<string, string> = {
+        "vacaciones-anuales": "Vacaciones Anuales",
+        "asuntos-personales": "Asuntos Personales",
+        "motivos-familiares": "Motivos Familiares",
+        "licencia-medica": "Licencia Médica",
+        otros: "Otros",
+      };
+      const motivoLabel = motivoMap[formData.motivo] ?? "Vacaciones";
+      const inicio = formData.fechaInicio
+        ? new Date(formData.fechaInicio).toLocaleDateString("es-AR")
+        : "";
+      const fin = formData.fechaFin
+        ? new Date(formData.fechaFin).toLocaleDateString("es-AR")
+        : "";
+      const emitido = new Date().toLocaleDateString("es-AR");
+
+      const safeName = employeeName.replace(/\s+/g, "_");
+      const fileName = `Constancia_Vacaciones_${safeName}_${formData.periodo}_${formData.fechaInicio}_${formData.fechaFin}.pdf`;
+
+      const container = document.createElement("div");
+      container.style.padding = "24px";
+      container.style.fontFamily = "Inter, Arial, sans-serif";
+      container.style.color = "#0f1115";
+      container.innerHTML = `
+        <div style="text-align:center; margin-bottom:16px;">
+          <h1 style="margin:0; font-size:22px;">Constancia de Vacaciones</h1>
+          <p style="margin:4px 0; font-size:12px;">Período ${formData.periodo || "-"}</p>
+        </div>
+        <p style="line-height:1.6; font-size:14px;">
+          Se deja constancia de que <strong>${employeeName}</strong> ${dni ? "(DNI " + dni + ")" : ""} gozará de su período de vacaciones desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong>, totalizando <strong>${days}</strong> días corridos.
+        </p>
+        ${formData.motivo ? `<p style="font-size:13px;"><strong>Motivo:</strong> ${motivoLabel}</p>` : ""}
+        ${formData.observaciones ? `<p style=\"font-size:13px;\"><strong>Observaciones:</strong> ${formData.observaciones}</p>` : ""}
+        <p style="margin-top:24px; font-size:13px;">Emitido el ${emitido}.</p>
+        <div style="display:flex; justify-content:space-between; margin-top:48px;">
+          <div style="text-align:center;">
+            <div style="border-top:1px solid #777; width:220px; margin:0 auto 6px;"></div>
+            <span style="font-size:12px;">Firma del Empleado</span>
+          </div>
+          <div style="text-align:center;">
+            <div style="border-top:1px solid #777; width:220px; margin:0 auto 6px;"></div>
+            <span style="font-size:12px;">Firma de la Empresa</span>
+          </div>
+        </div>
+      `;
+
+      const opt = {
+        margin: 10,
+        filename: fileName,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      } as const;
+
+      await html2pdf().from(container).set(opt).save();
+
+      toast({
+        title: "Descarga iniciada",
+        description: "La constancia se está descargando.",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error al generar PDF",
+        description: "Intente nuevamente o contacte al soporte.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

@@ -10,6 +10,7 @@ import UniformsModule from "@/components/uniforms/UniformsModule";
 import AttendanceList from "@/components/attendance/AttendanceList";
 import PerformanceList from "@/components/performance/PerformanceList";
 import CalendarList from "@/components/calendar/CalendarList";
+import PayrollModule from "@/components/payroll/PayrollModule";
 import { EmployeeProvider } from "@/contexts/EmployeeContext";
 
 const Index = () => {
@@ -33,6 +34,8 @@ const Index = () => {
         return <PerformanceList />;
       case "calendar":
         return <CalendarList />;
+      case "payroll":
+        return <PayrollModule />;
       default:
         return <DashboardOverview />;
     }

@@ -11,7 +11,8 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Shirt
+  Shirt,
+  DollarSign
 } from "lucide-react";
 
 interface SidebarProps {
@@ -76,11 +77,12 @@ const modules = [
     description: "Seguimiento de Rendimiento"
   },
   {
-    id: "calendar",
-    name: "Calendario y Eventos",
-    icon: Calendar,
-    description: "Planificador Visual"
-  }
+    id: "payroll",
+    name: "Nómina de Sueldos",
+    icon: DollarSign,
+    description: "Sueldos y Pagos",
+    badge: "New"
+  },
 ];
 
 const Sidebar = ({ activeModule, onModuleChange }: SidebarProps) => {

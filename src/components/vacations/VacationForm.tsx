@@ -12,9 +12,10 @@ interface VacationFormProps {
   onBack: () => void;
   vacation?: any;
   employees: any[];
+  onSave?: (requestData: any) => void;
 }
 
-const VacationForm = ({ onBack, vacation, employees }: VacationFormProps) => {
+const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     empleadoId: vacation?.empleadoId || "",
@@ -51,10 +52,9 @@ const VacationForm = ({ onBack, vacation, employees }: VacationFormProps) => {
       return;
     }
 
-    toast({
-      title: "Solicitud guardada",
-      description: "La solicitud de vacaciones ha sido registrada exitosamente",
-    });
+    if (onSave) {
+      onSave(formData);
+    }
 
     setTimeout(() => onBack(), 1500);
   };

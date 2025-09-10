@@ -64,10 +64,138 @@ const VacationsModule = () => {
     };
   });
 
-  // No vacation requests yet
-  const mockVacations: any[] = [];
+  // Vacation requests state
+  const [vacationRequests, setVacationRequests] = useState<any[]>([]);
 
-  const filteredVacations = mockVacations.filter(vacation => {
+  // Add new vacation request
+  const addVacationRequest = (requestData: any) => {
+    const selectedEmployee = activeEmployees.find(emp => emp.id.toString() === requestData.empleadoId);
+    const newRequest = {
+      id: Date.now(),
+      empleadoId: parseInt(requestData.empleadoId),
+      empleadoNombre: selectedEmployee ? `${selectedEmployee.nombres} ${selectedEmployee.apellidos}` : '',
+      empleadoDni: selectedEmployee ? selectedEmployee.dni : '',
+      fechaInicio: requestData.fechaInicio,
+      fechaFin: requestData.fechaFin,
+      diasSolicitados: calculateRequestDays(requestData.fechaInicio, requestData.fechaFin),
+      periodo: requestData.periodo,
+      estado: "pendiente",
+      motivo: requestData.motivo,
+      fechaSolicitud: new Date().toISOString().split('T')[0],
+      observaciones: requestData.observaciones || ""
+    };
+    
+    setVacationRequests(prev => [newRequest, ...prev]);
+    toast({
+      title: "Solicitud creada",
+      description: "La solicitud de vacaciones ha sido registrada y está pendiente de aprobación",
+    });
+  };
+
+  // Calculate days between dates
+  const calculateRequestDays = (startDate: string, endDate: string) => {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  };
+
+  // Approve vacation request
+  const approveVacationRequest = (requestId: number) => {
+    setVacationRequests(prev => 
+      prev.map(req => 
+        req.id === requestId 
+          ? { ...req, estado: "aprobado", fechaAprobacion: new Date().toISOString().split('T')[0] }
+          : req
+      )
+    );
+    toast({
+      title: "Solicitud aprobada",
+      description: "La solicitud de vacaciones ha sido aprobada exitosamente",
+    });
+  };
+
+  // Reject vacation request
+  const rejectVacationRequest = (requestId: number) => {
+    setVacationRequests(prev => 
+      prev.map(req => 
+        req.id === requestId 
+          ? { ...req, estado: "rechazado", fechaRechazo: new Date().toISOString().split('T')[0] }
+          : req
+      )
+    );
+    toast({
+      title: "Solicitud rechazada",
+      description: "La solicitud de vacaciones ha sido rechazada",
+    });
+  };
+
+  // Generate vacation certificate PDF
+  const generateVacationCertificate = async (vacation: any) => {
+    if (!vacation || vacation.estado !== "aprobado") {
+      toast({
+        title: "Error",
+        description: "Solo se pueden generar constancias de solicitudes aprobadas",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { jsPDF } = await import('jspdf');
+      const doc = new jsPDF();
+      
+      // Header
+      doc.setFontSize(18);
+      doc.text('CONSTANCIA DE VACACIONES', 105, 30, { align: 'center' });
+      
+      // Employee info
+      doc.setFontSize(12);
+      doc.text(`Empleado: ${vacation.empleadoNombre}`, 20, 60);
+      doc.text(`DNI: ${vacation.empleadoDni}`, 20, 75);
+      doc.text(`Período: ${vacation.periodo}`, 20, 90);
+      
+      // Vacation details
+      doc.text(`Fecha de inicio: ${new Date(vacation.fechaInicio).toLocaleDateString()}`, 20, 110);
+      doc.text(`Fecha de fin: ${new Date(vacation.fechaFin).toLocaleDateString()}`, 20, 125);
+      doc.text(`Días solicitados: ${vacation.diasSolicitados}`, 20, 140);
+      doc.text(`Motivo: ${vacation.motivo}`, 20, 155);
+      
+      if (vacation.observaciones) {
+        doc.text(`Observaciones: ${vacation.observaciones}`, 20, 170);
+      }
+      
+      // Approval info
+      doc.text(`Fecha de aprobación: ${new Date(vacation.fechaAprobacion).toLocaleDateString()}`, 20, 190);
+      
+      // Signature lines
+      doc.text('_________________________', 20, 230);
+      doc.text('Firma del Empleado', 20, 240);
+      
+      doc.text('_________________________', 120, 230);
+      doc.text('Firma de RRHH', 120, 240);
+      
+      // Footer
+      doc.setFontSize(10);
+      doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 20, 270);
+      
+      doc.save(`constancia-vacaciones-${vacation.empleadoNombre.replace(/\s+/g, '-')}.pdf`);
+      
+      toast({
+        title: "Constancia generada",
+        description: "La constancia de vacaciones se ha descargado exitosamente",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error al generar la constancia PDF",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const filteredVacations = vacationRequests.filter(vacation => {
     const matchesSearch = vacation.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = !filterStatus || filterStatus === "all" || vacation.estado === filterStatus;
     return matchesSearch && matchesStatus;
@@ -96,7 +224,7 @@ const VacationsModule = () => {
   };
 
   if (view === "form") {
-    return <VacationForm onBack={handleBackToList} vacation={selectedVacation} employees={activeEmployees} />;
+    return <VacationForm onBack={handleBackToList} vacation={selectedVacation} employees={activeEmployees} onSave={addVacationRequest} />;
   }
 
   if (view === "detail" && selectedVacation) {
@@ -133,7 +261,7 @@ const VacationsModule = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Solicitudes Pendientes</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {mockVacations.filter(v => v.estado === "pendiente").length}
+                  {vacationRequests.filter(v => v.estado === "pendiente").length}
                 </p>
               </div>
               <div className="p-3 bg-warning/10 rounded-lg">
@@ -149,7 +277,7 @@ const VacationsModule = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Aprobadas Este Mes</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {mockVacations.filter(v => v.estado === "aprobado").length}
+                  {vacationRequests.filter(v => v.estado === "aprobado").length}
                 </p>
               </div>
               <div className="p-3 bg-success/10 rounded-lg">
@@ -164,7 +292,9 @@ const VacationsModule = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground/70">Días Promedio</p>
-                <p className="text-3xl font-bold text-foreground">0</p>
+                <p className="text-3xl font-bold text-foreground">
+                  {vacationRequests.length > 0 ? (vacationRequests.reduce((acc, v) => acc + v.diasSolicitados, 0) / vacationRequests.length).toFixed(1) : 0}
+                </p>
                 <p className="text-xs text-foreground/60">días por solicitud</p>
               </div>
               <div className="p-3 bg-primary/10 rounded-lg">
@@ -313,10 +443,22 @@ const VacationsModule = () => {
                     <Button variant="outline" size="sm" onClick={() => handleViewVacation(vacation)}>
                       Ver Detalle
                     </Button>
-                    <Button variant="outline" size="sm">
-                      <FileText className="h-4 w-4 mr-1" />
-                      Constancia
-                    </Button>
+                    {vacation.estado === "pendiente" && (
+                      <>
+                        <Button variant="default" size="sm" onClick={() => approveVacationRequest(vacation.id)}>
+                          Aprobar
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => rejectVacationRequest(vacation.id)}>
+                          Rechazar
+                        </Button>
+                      </>
+                    )}
+                    {vacation.estado === "aprobado" && (
+                      <Button variant="outline" size="sm" onClick={() => generateVacationCertificate(vacation)}>
+                        <FileText className="h-4 w-4 mr-1" />
+                        Constancia
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

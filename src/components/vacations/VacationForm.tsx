@@ -21,6 +21,7 @@ const VacationForm = ({ onBack, vacation, employees }: VacationFormProps) => {
     fechaInicio: vacation?.fechaInicio || "",
     fechaFin: vacation?.fechaFin || "",
     motivo: vacation?.motivo || "",
+    periodo: vacation?.periodo || "",
     observaciones: vacation?.observaciones || ""
   });
 
@@ -41,10 +42,10 @@ const VacationForm = ({ onBack, vacation, employees }: VacationFormProps) => {
   };
 
   const handleSave = () => {
-    if (!formData.empleadoId || !formData.fechaInicio || !formData.fechaFin) {
+    if (!formData.empleadoId || !formData.fechaInicio || !formData.fechaFin || !formData.periodo) {
       toast({
         title: "Error",
-        description: "Por favor complete todos los campos obligatorios",
+        description: "Por favor complete todos los campos obligatorios (empleado, fechas y período)",
         variant: "destructive"
       });
       return;
@@ -153,6 +154,22 @@ const VacationForm = ({ onBack, vacation, employees }: VacationFormProps) => {
                 <p className="text-2xl font-bold text-foreground">{calculateDays()}</p>
                 <p className="text-sm text-foreground/70">días laborables</p>
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="periodo" className="text-foreground">Período de Vacaciones *</Label>
+              <Select onValueChange={(value) => handleInputChange("periodo", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2024">2024</SelectItem>
+                  <SelectItem value="2023">2023</SelectItem>
+                  <SelectItem value="2022">2022</SelectItem>
+                  <SelectItem value="2021">2021</SelectItem>
+                  <SelectItem value="2020">2020</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>

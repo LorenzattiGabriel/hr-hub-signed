@@ -19,9 +19,9 @@ const DashboardOverview = () => {
   
   const quickStats = [
     {
-      title: "Empleados Activos",
-      value: activeEmployees.length.toString(),
-      change: "+3 este mes",
+      title: "Total Empleados",
+      value: employees.length.toString(),
+      change: `${activeEmployees.length} activos`,
       icon: Users,
       color: "text-primary",
       bgColor: "bg-primary/10"

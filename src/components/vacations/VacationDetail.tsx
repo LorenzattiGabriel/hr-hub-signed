@@ -7,31 +7,24 @@ import { useToast } from "@/hooks/use-toast";
 interface VacationDetailProps {
   vacation: any;
   onBack: () => void;
+  onApprove: () => void;
+  onReject: () => void;
+  onGeneratePDF: () => void;
 }
 
-const VacationDetail = ({ vacation, onBack }: VacationDetailProps) => {
+const VacationDetail = ({ vacation, onBack, onApprove, onReject, onGeneratePDF }: VacationDetailProps) => {
   const { toast } = useToast();
 
   const handleApprove = () => {
-    toast({
-      title: "Solicitud aprobada",
-      description: "La solicitud de vacaciones ha sido aprobada exitosamente",
-    });
+    onApprove();
   };
 
   const handleReject = () => {
-    toast({
-      title: "Solicitud rechazada",
-      description: "La solicitud de vacaciones ha sido rechazada",
-      variant: "destructive"
-    });
+    onReject();
   };
 
   const generatePDF = () => {
-    toast({
-      title: "PDF generado",
-      description: "La constancia de vacaciones se ha generado exitosamente",
-    });
+    onGeneratePDF();
   };
 
   return (

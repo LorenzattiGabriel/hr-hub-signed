@@ -104,13 +104,16 @@ const VacationsModule = () => {
 
   // Approve vacation request
   const approveVacationRequest = (requestId: number) => {
-    setVacationRequests(prev => 
-      prev.map(req => 
-        req.id === requestId 
+    setVacationRequests(prev => {
+      const updated = prev.map(req =>
+        req.id === requestId
           ? { ...req, estado: "aprobado", fechaAprobacion: new Date().toISOString().split('T')[0] }
           : req
-      )
-    );
+      );
+      const current = updated.find(r => r.id === requestId);
+      setSelectedVacation(prevSel => (prevSel && prevSel.id === requestId ? current : prevSel));
+      return updated;
+    });
     toast({
       title: "Solicitud aprobada",
       description: "La solicitud de vacaciones ha sido aprobada exitosamente",
@@ -119,13 +122,16 @@ const VacationsModule = () => {
 
   // Reject vacation request
   const rejectVacationRequest = (requestId: number) => {
-    setVacationRequests(prev => 
-      prev.map(req => 
-        req.id === requestId 
+    setVacationRequests(prev => {
+      const updated = prev.map(req =>
+        req.id === requestId
           ? { ...req, estado: "rechazado", fechaRechazo: new Date().toISOString().split('T')[0] }
           : req
-      )
-    );
+      );
+      const current = updated.find(r => r.id === requestId);
+      setSelectedVacation(prevSel => (prevSel && prevSel.id === requestId ? current : prevSel));
+      return updated;
+    });
     toast({
       title: "Solicitud rechazada",
       description: "La solicitud de vacaciones ha sido rechazada",
@@ -190,7 +196,18 @@ const VacationsModule = () => {
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       } as const;
 
-      await (html2pdf as any)().from(container).set(opt).save();
+      // Force download via Blob + anchor to work inside iframes
+      const worker = (html2pdf as any)().from(container).set(opt).toPdf();
+      const pdf = await worker.get('pdf');
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
 
       toast({
         title: "Descarga iniciada",
@@ -307,7 +324,15 @@ const VacationsModule = () => {
   }
 
   if (view === "detail" && selectedVacation) {
-    return <VacationDetail vacation={selectedVacation} onBack={handleBackToList} />;
+    return (
+      <VacationDetail
+        vacation={selectedVacation}
+        onBack={handleBackToList}
+        onApprove={() => approveVacationRequest(selectedVacation.id)}
+        onReject={() => rejectVacationRequest(selectedVacation.id)}
+        onGeneratePDF={() => generateVacationCertificate(selectedVacation)}
+      />
+    );
   }
 
   return (

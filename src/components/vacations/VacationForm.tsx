@@ -71,7 +71,7 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
     }
 
     // Solo permitir descarga si la solicitud está aprobada (cuando aplica)
-    if (vacation && vacation.estado && vacation.estado.toLowerCase() !== "aprobada") {
+    if (vacation && vacation.estado && vacation.estado.toLowerCase() !== "aprobado") {
       toast({
         title: "No disponible",
         description: "Solo puedes descargar la constancia de solicitudes aprobadas.",

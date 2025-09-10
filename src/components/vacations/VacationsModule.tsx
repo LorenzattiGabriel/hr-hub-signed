@@ -9,6 +9,7 @@ import VacationForm from "./VacationForm";
 import VacationDetail from "./VacationDetail";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/contexts/EmployeeContext";
+import html2pdf from "html2pdf.js";
 
 const VacationsModule = () => {
   const { toast } = useToast();
@@ -137,60 +138,70 @@ const VacationsModule = () => {
       toast({
         title: "Error",
         description: "Solo se pueden generar constancias de solicitudes aprobadas",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
 
     try {
-      const { jsPDF } = await import('jspdf');
-      const doc = new jsPDF();
-      
-      // Header
-      doc.setFontSize(18);
-      doc.text('CONSTANCIA DE VACACIONES', 105, 30, { align: 'center' });
-      
-      // Employee info
-      doc.setFontSize(12);
-      doc.text(`Empleado: ${vacation.empleadoNombre}`, 20, 60);
-      doc.text(`DNI: ${vacation.empleadoDni}`, 20, 75);
-      doc.text(`Período: ${vacation.periodo}`, 20, 90);
-      
-      // Vacation details
-      doc.text(`Fecha de inicio: ${new Date(vacation.fechaInicio).toLocaleDateString()}`, 20, 110);
-      doc.text(`Fecha de fin: ${new Date(vacation.fechaFin).toLocaleDateString()}`, 20, 125);
-      doc.text(`Días solicitados: ${vacation.diasSolicitados}`, 20, 140);
-      doc.text(`Motivo: ${vacation.motivo}`, 20, 155);
-      
-      if (vacation.observaciones) {
-        doc.text(`Observaciones: ${vacation.observaciones}`, 20, 170);
-      }
-      
-      // Approval info
-      doc.text(`Fecha de aprobación: ${new Date(vacation.fechaAprobacion).toLocaleDateString()}`, 20, 190);
-      
-      // Signature lines
-      doc.text('_________________________', 20, 230);
-      doc.text('Firma del Empleado', 20, 240);
-      
-      doc.text('_________________________', 120, 230);
-      doc.text('Firma de RRHH', 120, 240);
-      
-      // Footer
-      doc.setFontSize(10);
-      doc.text(`Generado el: ${new Date().toLocaleDateString()}`, 20, 270);
-      
-      doc.save(`constancia-vacaciones-${vacation.empleadoNombre.replace(/\s+/g, '-')}.pdf`);
-      
+      const empleadoNombre = vacation.empleadoNombre || "Empleado";
+      const dni = vacation.empleadoDni || "";
+      const inicio = vacation.fechaInicio ? new Date(vacation.fechaInicio).toLocaleDateString("es-AR") : "";
+      const fin = vacation.fechaFin ? new Date(vacation.fechaFin).toLocaleDateString("es-AR") : "";
+      const emitido = new Date().toLocaleDateString("es-AR");
+      const motivo = vacation.motivo || "Vacaciones";
+      const dias = vacation.diasSolicitados || 0;
+
+      const safeName = empleadoNombre.replace(/\s+/g, "_");
+      const fileName = `Constancia_Vacaciones_${safeName}_${vacation.periodo}_${vacation.fechaInicio}_${vacation.fechaFin}.pdf`;
+
+      const container = document.createElement("div");
+      container.style.padding = "24px";
+      container.style.fontFamily = "Inter, Arial, sans-serif";
+      container.style.color = "#0f1115";
+      container.innerHTML = `
+        <div style="text-align:center; margin-bottom:16px;">
+          <h1 style="margin:0; font-size:22px;">Constancia de Vacaciones</h1>
+          <p style="margin:4px 0; font-size:12px;">Período ${vacation.periodo || "-"}</p>
+        </div>
+        <p style="line-height:1.6; font-size:14px;">
+          Se deja constancia de que <strong>${empleadoNombre}</strong> ${dni ? "(DNI " + dni + ")" : ""} gozará de su período de vacaciones desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong>, totalizando <strong>${dias}</strong> días corridos.
+        </p>
+        ${motivo ? `<p style="font-size:13px;"><strong>Motivo:</strong> ${motivo}</p>` : ""}
+        ${vacation.observaciones ? `<p style=\"font-size:13px;\"><strong>Observaciones:</strong> ${vacation.observaciones}</p>` : ""}
+        <p style="margin-top:24px; font-size:13px;">Emitido el ${emitido}.</p>
+        <div style="display:flex; justify-content:space-between; margin-top:48px;">
+          <div style="text-align:center;">
+            <div style="border-top:1px solid #777; width:220px; margin:0 auto 6px;"></div>
+            <span style="font-size:12px;">Firma del Empleado</span>
+          </div>
+          <div style="text-align:center;">
+            <div style="border-top:1px solid #777; width:220px; margin:0 auto 6px;"></div>
+            <span style="font-size:12px;">Firma de la Empresa</span>
+          </div>
+        </div>
+      `;
+
+      const opt = {
+        margin: 10,
+        filename: fileName,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      } as const;
+
+      await (html2pdf as any)().from(container).set(opt).save();
+
       toast({
-        title: "Constancia generada",
-        description: "La constancia de vacaciones se ha descargado exitosamente",
+        title: "Descarga iniciada",
+        description: "La constancia se está descargando.",
       });
     } catch (error) {
+      console.error(error);
       toast({
         title: "Error",
         description: "Error al generar la constancia PDF",
-        variant: "destructive"
+        variant: "destructive",
       });
     }
   };
@@ -216,11 +227,79 @@ const VacationsModule = () => {
     setSelectedVacation(null);
   };
 
-  const generateReport = () => {
-    toast({
-      title: "Reporte generado",
-      description: "El reporte de vacaciones se ha generado exitosamente",
-    });
+  const generateReport = async () => {
+    try {
+      const fecha = new Date().toLocaleDateString("es-AR");
+      const container = document.createElement("div");
+      container.style.padding = "24px";
+      container.style.fontFamily = "Inter, Arial, sans-serif";
+      container.style.color = "#0f1115";
+
+      const resumen = {
+        pendientes: vacationRequests.filter(v => v.estado === "pendiente").length,
+        aprobadas: vacationRequests.filter(v => v.estado === "aprobado").length,
+        rechazadas: vacationRequests.filter(v => v.estado === "rechazado").length,
+      };
+
+      const filas = vacationRequests.map(v => `
+        <tr>
+          <td style="padding:6px 8px; border:1px solid #ddd;">${v.empleadoNombre}</td>
+          <td style="padding:6px 8px; border:1px solid #ddd;">${v.periodo}</td>
+          <td style="padding:6px 8px; border:1px solid #ddd;">${new Date(v.fechaInicio).toLocaleDateString("es-AR")} - ${new Date(v.fechaFin).toLocaleDateString("es-AR")}</td>
+          <td style="padding:6px 8px; border:1px solid #ddd; text-align:center;">${v.diasSolicitados}</td>
+          <td style="padding:6px 8px; border:1px solid #ddd; text-transform:capitalize;">${v.estado}</td>
+        </tr>
+      `).join("");
+
+      container.innerHTML = `
+        <div style="text-align:center; margin-bottom:16px;">
+          <h1 style="margin:0; font-size:20px;">Reporte de Solicitudes de Vacaciones</h1>
+          <p style="margin:4px 0; font-size:12px;">Emitido el ${fecha}</p>
+        </div>
+        <div style="font-size:13px; margin-bottom:12px;">
+          <strong>Resumen:</strong>
+          <span style="margin-left:8px;">Pendientes: ${resumen.pendientes}</span>
+          <span style="margin-left:8px;">Aprobadas: ${resumen.aprobadas}</span>
+          <span style="margin-left:8px;">Rechazadas: ${resumen.rechazadas}</span>
+        </div>
+        <table style="border-collapse:collapse; width:100%; font-size:12px;">
+          <thead>
+            <tr>
+              <th style="padding:6px 8px; border:1px solid #ddd; text-align:left;">Empleado</th>
+              <th style="padding:6px 8px; border:1px solid #ddd; text-align:left;">Período</th>
+              <th style="padding:6px 8px; border:1px solid #ddd; text-align:left;">Fechas</th>
+              <th style="padding:6px 8px; border:1px solid #ddd;">Días</th>
+              <th style="padding:6px 8px; border:1px solid #ddd; text-align:left;">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filas || `<tr><td colspan=\"5\" style=\"padding:10px; border:1px solid #ddd; text-align:center;\">Sin solicitudes</td></tr>`}
+          </tbody>
+        </table>
+      `;
+
+      const opt = {
+        margin: 10,
+        filename: `Reporte_Vacaciones_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      } as const;
+
+      await (html2pdf as any)().from(container).set(opt).save();
+
+      toast({
+        title: "Descarga iniciada",
+        description: "El reporte se está descargando.",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: "No se pudo generar el reporte.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (view === "form") {

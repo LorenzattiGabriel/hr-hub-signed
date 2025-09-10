@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, Edit, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import html2pdf from "html2pdf.js";
 
 interface TrainingDetailProps {
   training: any;
@@ -12,20 +13,166 @@ interface TrainingDetailProps {
 const TrainingDetail = ({ training, onBack }: TrainingDetailProps) => {
   const { toast } = useToast();
 
-  const generateCertificate = () => {
-    toast({
-      title: "Certificado generado",
-      description: "El certificado de capacitación se ha generado exitosamente",
-    });
+  const generateCertificate = async () => {
+    try {
+      const empleado = training.empleadoNombre || "Empleado";
+      const titulo = training.titulo || "Capacitación";
+      const fecha = training.fecha ? new Date(training.fecha).toLocaleDateString() : new Date().toLocaleDateString();
+      const horas = training.duracion || 0;
+      const instructor = training.instructor || "Instructor";
+      const filename = `Certificado_${empleado.replace(/\s+/g, '_')}_${titulo.replace(/\s+/g, '_')}.pdf`;
+
+      const content = `
+        <div style="font-family: Arial, sans-serif; padding: 32px; color: #111827; background: #ffffff;">
+          <div style="text-align:center; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 24px;">
+            <h1 style="margin: 0; font-size: 22px;">CERTIFICADO OFICIAL DE CAPACITACIÓN</h1>
+            <p style="margin: 6px 0 0 0; color: #6b7280;">Avícola La Paloma</p>
+          </div>
+
+          <p style="font-size: 14px; line-height: 1.6;">
+            Por medio de la presente, certificamos que <strong>${empleado}</strong> ha completado la capacitación
+            <strong>"${titulo}"</strong>, realizada el día <strong>${fecha}</strong>, con una duración total de
+            <strong>${horas} horas</strong>, dictada por <strong>${instructor}</strong>.
+          </p>
+
+          <div style="margin-top: 16px; font-size: 13px; color: #374151;">
+            <p style="margin: 4px 0;">• Estado: ${training.estado === 'completado' ? 'Completado' : 'En Progreso'}</p>
+            <p style="margin: 4px 0;">• Tipo: ${training.tipo || 'General'}</p>
+            ${training.certificacion ? '<p style="margin: 4px 0;">• Otorga certificación oficial (validez 2 años)</p>' : ''}
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 64px;">
+            <div style="text-align:center;">
+              <div style="margin-top: 64px; padding-top: 6px; border-top: 1px solid #4b5563;"></div>
+              <p style="font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">FIRMA DEL EMPLEADO</p>
+            </div>
+            <div style="text-align:center;">
+              <div style="margin-top: 64px; padding-top: 6px; border-top: 1px solid #4b5563;"></div>
+              <p style="font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">FIRMA Y SELLO</p>
+            </div>
+          </div>
+
+          <div style="text-align:center; font-size: 11px; color:#6b7280; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 12px;">
+            Generado el ${new Date().toLocaleDateString()} - Sistema RRHH Avícola La Paloma
+          </div>
+        </div>
+      `;
+
+      const container = document.createElement('div');
+      container.innerHTML = content;
+      document.body.appendChild(container);
+
+      const opt = {
+        margin: 10,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      } as const;
+
+      const worker = (html2pdf as any)().from(container).set(opt).toPdf();
+      const pdf = await worker.get('pdf');
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      container.remove();
+
+      toast({
+        title: "Descarga iniciada",
+        description: "El certificado se está descargando.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error al generar certificado",
+        description: "Intenta nuevamente.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const generateAttendance = () => {
-    toast({
-      title: "Constancia generada",
-      description: "La constancia de asistencia se ha generado exitosamente",
-    });
-  };
+  const generateAttendance = async () => {
+    try {
+      const empleado = training.empleadoNombre || "Empleado";
+      const titulo = training.titulo || "Capacitación";
+      const fecha = training.fecha ? new Date(training.fecha).toLocaleDateString() : new Date().toLocaleDateString();
+      const horas = training.duracion || 0;
+      const filename = `Constancia_Asistencia_${empleado.replace(/\s+/g, '_')}_${titulo.replace(/\s+/g, '_')}.pdf`;
 
+      const content = `
+        <div style="font-family: Arial, sans-serif; padding: 32px; color: #111827; background: #ffffff;">
+          <div style="text-align:center; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 24px;">
+            <h1 style="margin: 0; font-size: 22px;">CONSTANCIA DE ASISTENCIA</h1>
+            <p style="margin: 6px 0 0 0; color: #6b7280;">Avícola La Paloma</p>
+          </div>
+
+          <p style="font-size: 14px; line-height: 1.6;">
+            Se deja constancia de que <strong>${empleado}</strong> asistió a la capacitación
+            <strong>"${titulo}"</strong>, realizada el día <strong>${fecha}</strong>, con una duración de
+            <strong>${horas} horas</strong>.
+          </p>
+
+          ${training.instructor ? `<p style="font-size: 13px; color: #374151; margin-top: 8px;">Dictada por: <strong>${training.instructor}</strong></p>` : ''}
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 64px;">
+            <div style="text-align:center;">
+              <div style="margin-top: 64px; padding-top: 6px; border-top: 1px solid #4b5563;"></div>
+              <p style="font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">FIRMA DEL EMPLEADO</p>
+            </div>
+            <div style="text-align:center;">
+              <div style="margin-top: 64px; padding-top: 6px; border-top: 1px solid #4b5563;"></div>
+              <p style="font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">RESPONSABLE DEL ÁREA</p>
+            </div>
+          </div>
+
+          <div style="text-align:center; font-size: 11px; color:#6b7280; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 12px;">
+            Generado el ${new Date().toLocaleDateString()} - Sistema RRHH Avícola La Paloma
+          </div>
+        </div>
+      `;
+
+      const container = document.createElement('div');
+      container.innerHTML = content;
+      document.body.appendChild(container);
+
+      const opt = {
+        margin: 10,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      } as const;
+
+      const worker = (html2pdf as any)().from(container).set(opt).toPdf();
+      const pdf = await worker.get('pdf');
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      container.remove();
+
+      toast({
+        title: "Descarga iniciada",
+        description: "La constancia se está descargando.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error al generar constancia",
+        description: "Intenta nuevamente.",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

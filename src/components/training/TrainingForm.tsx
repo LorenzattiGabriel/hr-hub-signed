@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GraduationCap, Save, ArrowLeft, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import html2pdf from "html2pdf.js";
 
 interface TrainingFormProps {
   onBack: () => void;
@@ -58,22 +59,92 @@ const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
     setTimeout(() => onBack(), 1500);
   };
 
-  const generateCertificate = () => {
-    if (!formData.titulo || !formData.empleadoId) {
+  const generateCertificate = async () => {
+    if (!formData.titulo || !formData.empleadoId || !formData.fecha) {
       toast({
-        title: "Error",
-        description: "Complete los datos básicos antes de generar el certificado",
+        title: "Faltan datos",
+        description: "Complete título, empleado y fecha para generar el certificado",
         variant: "destructive"
       });
       return;
     }
 
-    toast({
-      title: "Certificado generado",
-      description: "El certificado de capacitación se ha generado exitosamente",
-    });
-  };
+    try {
+      const empleadoNombre = employees.find(e => e.id.toString() === formData.empleadoId)?.nombre || "Empleado";
+      const titulo = formData.titulo;
+      const fecha = new Date(formData.fecha).toLocaleDateString();
+      const horas = formData.duracion || "";
+      const instructor = formData.instructor || "";
+      const filename = `Certificado_${empleadoNombre.replace(/\s+/g, '_')}_${titulo.replace(/\s+/g, '_')}.pdf`;
 
+      const content = `
+        <div style="font-family: Arial, sans-serif; padding: 32px; color: #111827; background: #ffffff;">
+          <div style="text-align:center; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 24px;">
+            <h1 style=\"margin: 0; font-size: 22px;\">CERTIFICADO DE CAPACITACIÓN</h1>
+            <p style=\"margin: 6px 0 0 0; color: #6b7280;\">Avícola La Paloma</p>
+          </div>
+
+          <p style="font-size: 14px; line-height: 1.6;">
+            Se certifica que <strong>${empleadoNombre}</strong> ha realizado la capacitación
+            <strong>"${titulo}"</strong> el día <strong>${fecha}</strong>
+            ${horas ? `, con una duración de <strong>${horas} horas</strong>` : ''}
+            ${instructor ? `, dictada por <strong>${instructor}</strong>` : ''}.
+          </p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 64px;">
+            <div style="text-align:center;">
+              <div style="margin-top: 64px; padding-top: 6px; border-top: 1px solid #4b5563;"></div>
+              <p style="font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">FIRMA DEL EMPLEADO</p>
+            </div>
+            <div style="text-align:center;">
+              <div style="margin-top: 64px; padding-top: 6px; border-top: 1px solid #4b5563;"></div>
+              <p style="font-size: 12px; font-weight: 600; margin: 4px 0 0 0;">RESPONSABLE DEL ÁREA</p>
+            </div>
+          </div>
+
+          <div style="text-align:center; font-size: 11px; color:#6b7280; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 12px;">
+            Generado el ${new Date().toLocaleDateString()} - Sistema RRHH Avícola La Paloma
+          </div>
+        </div>
+      `;
+
+      const container = document.createElement('div');
+      container.innerHTML = content;
+      document.body.appendChild(container);
+
+      const opt = {
+        margin: 10,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      } as const;
+
+      const worker = (html2pdf as any)().from(container).set(opt).toPdf();
+      const pdf = await worker.get('pdf');
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      container.remove();
+
+      toast({
+        title: "Descarga iniciada",
+        description: "El certificado se está descargando.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error al generar certificado",
+        description: "Intenta nuevamente.",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

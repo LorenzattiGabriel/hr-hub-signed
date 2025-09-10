@@ -228,7 +228,7 @@ const VacationsModule = () => {
                     </td>
                     <td className="px-6 py-4">
                       <Badge variant={employee.remainingVacationDays > 0 ? "default" : "secondary"}>
-                        {employee.remainingVacationDays > 0 ? "Disponible" : "Agotado"}
+                        {employee.remainingVacationDays > 0 ? "Disponible" : "Sin días disponibles"}
                       </Badge>
                     </td>
                   </tr>

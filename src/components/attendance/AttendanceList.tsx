@@ -14,42 +14,8 @@ const AttendanceList = () => {
   const [view, setView] = useState<"list" | "upload" | "reports">("list");
   const [filterMonth, setFilterMonth] = useState("");
 
-  // Mock attendance data
-  const mockAttendance = [
-    {
-      id: 1,
-      empleadoNombre: "María José González",
-      mes: "2024-11",
-      diasTrabajados: 22,
-      diasFalta: 0,
-      llegadasTarde: 2,
-      horasExtras: 5,
-      puntualidad: 91,
-      asistencia: 100
-    },
-    {
-      id: 2,
-      empleadoNombre: "Juan Carlos Rodríguez",
-      mes: "2024-11",
-      diasTrabajados: 20,
-      diasFalta: 2,
-      llegadasTarde: 5,
-      horasExtras: 0,
-      puntualidad: 75,
-      asistencia: 91
-    },
-    {
-      id: 3,
-      empleadoNombre: "Ana Sofía Martínez",
-      mes: "2024-11",
-      diasTrabajados: 22,
-      diasFalta: 0,
-      llegadasTarde: 0,
-      horasExtras: 8,
-      puntualidad: 100,
-      asistencia: 100
-    }
-  ];
+  // Attendance data - initially empty for real data loading
+  const attendanceData: any[] = [];
 
   const handleUploadExcel = () => {
     setView("upload");
@@ -79,9 +45,10 @@ const AttendanceList = () => {
   }
 
   // Calculate totals
-  const totalLateArrivals = mockAttendance.reduce((sum, emp) => sum + emp.llegadasTarde, 0);
-  const avgPunctuality = Math.round(mockAttendance.reduce((sum, emp) => sum + emp.puntualidad, 0) / mockAttendance.length);
-  const avgAttendance = Math.round(mockAttendance.reduce((sum, emp) => sum + emp.asistencia, 0) / mockAttendance.length);
+  const totalLateArrivals = attendanceData.length > 0 ? attendanceData.reduce((sum, emp) => sum + emp.llegadasTarde, 0) : 0;
+  const avgPunctuality = attendanceData.length > 0 ? Math.round(attendanceData.reduce((sum, emp) => sum + emp.puntualidad, 0) / attendanceData.length) : 0;
+  const avgAttendance = attendanceData.length > 0 ? Math.round(attendanceData.reduce((sum, emp) => sum + emp.asistencia, 0) / attendanceData.length) : 0;
+  const activeAlerts = attendanceData.filter(emp => emp.puntualidad < 85 || emp.asistencia < 90).length;
 
   return (
     <div className="space-y-6">
@@ -159,7 +126,7 @@ const AttendanceList = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground/70">Alertas Activas</p>
-                <p className="text-3xl font-bold text-foreground">3</p>
+                <p className="text-3xl font-bold text-foreground">{activeAlerts}</p>
                 <p className="text-xs text-foreground/60">empleados</p>
               </div>
               <div className="p-3 bg-destructive/10 rounded-lg">
@@ -193,78 +160,96 @@ const AttendanceList = () => {
       </Card>
 
       {/* Attendance List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {mockAttendance.map((record) => (
-          <Card key={record.id} className="hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg text-foreground">{record.empleadoNombre}</CardTitle>
-                <Badge variant={record.puntualidad >= 95 ? "success" : record.puntualidad >= 85 ? "warning" : "destructive"}>
-                  {record.puntualidad >= 95 ? "Excelente" : record.puntualidad >= 85 ? "Bueno" : "Necesita Mejora"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Días Trabajados</p>
-                  <p className="text-2xl font-bold text-success">{record.diasTrabajados}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Días Falta</p>
-                  <p className="text-2xl font-bold text-destructive">{record.diasFalta}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Llegadas Tarde</p>
-                  <p className="text-xl font-bold text-warning">{record.llegadasTarde}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Horas Extras</p>
-                  <p className="text-xl font-bold text-primary">{record.horasExtras}</p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-foreground/70">Puntualidad</span>
-                  <span className="font-semibold text-foreground">{record.puntualidad}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full ${record.puntualidad >= 95 ? 'bg-success' : record.puntualidad >= 85 ? 'bg-warning' : 'bg-destructive'}`}
-                    style={{ width: `${record.puntualidad}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-foreground/70">Asistencia</span>
-                  <span className="font-semibold text-foreground">{record.asistencia}%</span>
-                </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full ${record.asistencia >= 95 ? 'bg-success' : record.asistencia >= 85 ? 'bg-warning' : 'bg-destructive'}`}
-                    style={{ width: `${record.asistencia}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              <div className="flex space-x-2 pt-2">
-                <Button variant="outline" size="sm">
-                  Ver Detalle
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-1" />
-                  Reporte
-                </Button>
-              </div>
+      <div className="space-y-6">
+        {attendanceData.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">No hay datos de asistencia</h3>
+              <p className="text-muted-foreground mb-6">
+                Carga un archivo Excel con los datos de asistencia para comenzar a visualizar los reportes y KPIs.
+              </p>
+              <Button onClick={handleUploadExcel}>
+                <Upload className="h-4 w-4 mr-2" />
+                Cargar Archivo Excel
+              </Button>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+            {attendanceData.map((record) => (
+              <Card key={record.id} className="hover:shadow-md transition-shadow">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg text-foreground">{record.empleadoNombre}</CardTitle>
+                    <Badge variant={record.puntualidad >= 95 ? "success" : record.puntualidad >= 85 ? "warning" : "destructive"}>
+                      {record.puntualidad >= 95 ? "Excelente" : record.puntualidad >= 85 ? "Bueno" : "Necesita Mejora"}
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-foreground/70">Días Trabajados</p>
+                      <p className="text-2xl font-bold text-success">{record.diasTrabajados}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground/70">Días Falta</p>
+                      <p className="text-2xl font-bold text-destructive">{record.diasFalta}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-foreground/70">Llegadas Tarde</p>
+                      <p className="text-xl font-bold text-warning">{record.llegadasTarde}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground/70">Horas Extras</p>
+                      <p className="text-xl font-bold text-primary">{record.horasExtras}</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-foreground/70">Puntualidad</span>
+                      <span className="font-semibold text-foreground">{record.puntualidad}%</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${record.puntualidad >= 95 ? 'bg-success' : record.puntualidad >= 85 ? 'bg-warning' : 'bg-destructive'}`}
+                        style={{ width: `${record.puntualidad}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-foreground/70">Asistencia</span>
+                      <span className="font-semibold text-foreground">{record.asistencia}%</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${record.asistencia >= 95 ? 'bg-success' : record.asistencia >= 85 ? 'bg-warning' : 'bg-destructive'}`}
+                        style={{ width: `${record.asistencia}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2 pt-2">
+                    <Button variant="outline" size="sm">
+                      Ver Detalle
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 mr-1" />
+                      Reporte
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -44,19 +44,10 @@ const VacationsModule = () => {
     return 14;
   };
 
-  // Calculate used vacation days (mock data)
+  // Calculate used vacation days (reset to 0)
   const getUsedVacationDays = (employeeId: number) => {
-    // This would come from database in real app
-    const usedDays: { [key: number]: number } = {
-      1: 5,
-      2: 8,
-      5: 12,
-      8: 7,
-      9: 0,
-      10: 14,
-      11: 3
-    };
-    return usedDays[employeeId] || 0;
+    // Reset all used vacation days to 0
+    return 0;
   };
 
   // Create employee vacation status
@@ -73,33 +64,8 @@ const VacationsModule = () => {
     };
   });
 
-  // Mock vacation requests
-  const mockVacations = [
-    {
-      id: 1,
-      empleadoId: 1,
-      empleadoNombre: "Noelia Belén Ludueña",
-      fechaInicio: "2024-12-15",
-      fechaFin: "2024-12-19",
-      diasSolicitados: 5,
-      estado: "aprobado",
-      motivo: "Vacaciones familiares",
-      fechaSolicitud: "2024-11-15",
-      observaciones: ""
-    },
-    {
-      id: 2,
-      empleadoId: 2,
-      empleadoNombre: "Mariela Desiree Díaz",
-      fechaInicio: "2024-11-20",
-      fechaFin: "2024-11-27",
-      diasSolicitados: 8,
-      estado: "pendiente",
-      motivo: "Descanso anual",
-      fechaSolicitud: "2024-11-10",
-      observaciones: ""
-    }
-  ];
+  // No vacation requests yet
+  const mockVacations: any[] = [];
 
   const filteredVacations = mockVacations.filter(vacation => {
     const matchesSearch = vacation.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());
@@ -198,7 +164,7 @@ const VacationsModule = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground/70">Días Promedio</p>
-                <p className="text-3xl font-bold text-foreground">6.5</p>
+                <p className="text-3xl font-bold text-foreground">0</p>
                 <p className="text-xs text-foreground/60">días por solicitud</p>
               </div>
               <div className="p-3 bg-primary/10 rounded-lg">

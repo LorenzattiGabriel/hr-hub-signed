@@ -141,7 +141,18 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       } as const;
 
-      await html2pdf().from(container).set(opt).save();
+      // Generate PDF and force download via anchor (works better inside iframes)
+      const worker = html2pdf().from(container).set(opt).toPdf();
+      const pdf = await worker.get('pdf');
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
 
       toast({
         title: "Descarga iniciada",

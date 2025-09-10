@@ -18,7 +18,7 @@ const VacationsModule = () => {
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedVacation, setSelectedVacation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterStatus, setFilterStatus] = useState<"all" | "pendiente" | "aprobado" | "rechazado">("all");
 
   // Calculate vacation days based on seniority
   const calculateVacationDays = (fechaIngreso: string) => {
@@ -223,9 +223,11 @@ const VacationsModule = () => {
     }
   };
 
-  const filteredVacations = vacationRequests.filter(vacation => {
-    const matchesSearch = vacation.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = !filterStatus || filterStatus === "all" || vacation.estado === filterStatus;
+  const filteredVacations = vacationRequests.filter((vacation) => {
+    const name = (vacation.empleadoNombre || "").toLowerCase();
+    const status = (vacation.estado || "").toLowerCase();
+    const matchesSearch = name.includes(searchTerm.toLowerCase());
+    const matchesStatus = filterStatus === "all" || status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -490,7 +492,7 @@ const VacationsModule = () => {
               />
             </div>
             
-            <Select onValueChange={setFilterStatus}>
+            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "pendiente" | "aprobado" | "rechazado")}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>

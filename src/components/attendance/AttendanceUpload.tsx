@@ -85,6 +85,14 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
 
   const processFile = async () => {
     if (!uploadedFile) return;
+    if (!employees || employees.length === 0) {
+      toast({
+        title: "No hay empleados cargados",
+        description: "Primero cargá/registrá empleados para poder asociar asistencias.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setProcessing(true);
     
@@ -185,7 +193,12 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
           }
 
           if (attendanceRecords.length === 0) {
-            throw new Error('No se encontraron registros válidos en el archivo');
+            toast({
+              title: "No se encontraron registros válidos",
+              description: "No hubo coincidencias de empleados por DNI o Nombre. Verifica las columnas 'DNI' o 'Empleado' y que existan empleados en el sistema.",
+              variant: "destructive",
+            });
+            return;
           }
 
           // Insert records into database
@@ -309,10 +322,18 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
                 <Button 
                   onClick={processFile} 
                   className="w-full" 
-                  disabled={processing}
+                  disabled={processing || !employees || employees.length === 0}
                 >
                   {processing ? "Procesando..." : "Procesar Archivo"}
                 </Button>
+
+                {!processing && employees && employees.length === 0 && (
+                  <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg text-center">
+                    <p className="text-sm text-warning">
+                      Debes tener empleados cargados para procesar la asistencia.
+                    </p>
+                  </div>
+                )}
                 
                 {processing && (
                   <div className="space-y-2">

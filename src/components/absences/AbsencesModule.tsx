@@ -158,7 +158,7 @@ const AbsencesModule = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Motivos Personales</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {items.filter(a => a.tipo === "personal").length}
+                  {items.filter(a => a.tipo === "personal" || a.tipo === "paternidad" || a.tipo === "familiar").length}
                 </p>
               </div>
               <div className="p-3 bg-primary/10 rounded-lg">
@@ -210,6 +210,7 @@ const AbsencesModule = () => {
                 <SelectItem value="all">Todos los tipos</SelectItem>
                 <SelectItem value="enfermedad">Enfermedad</SelectItem>
                 <SelectItem value="personal">Personal</SelectItem>
+                <SelectItem value="paternidad">Paternidad</SelectItem>
                 <SelectItem value="familiar">Familiar</SelectItem>
                 <SelectItem value="otro">Otro</SelectItem>
               </SelectContent>

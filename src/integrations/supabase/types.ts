@@ -14,13 +14,167 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      employees: {
+        Row: {
+          apellidos: string
+          created_at: string
+          departamento: string | null
+          direccion: string | null
+          dni: string
+          email: string | null
+          estado: string | null
+          fecha_ingreso: string
+          fecha_nacimiento: string | null
+          id: string
+          nombres: string
+          puesto: string | null
+          salario: number | null
+          telefono: string | null
+          tipo_contrato: string | null
+          updated_at: string
+        }
+        Insert: {
+          apellidos: string
+          created_at?: string
+          departamento?: string | null
+          direccion?: string | null
+          dni: string
+          email?: string | null
+          estado?: string | null
+          fecha_ingreso: string
+          fecha_nacimiento?: string | null
+          id?: string
+          nombres: string
+          puesto?: string | null
+          salario?: number | null
+          telefono?: string | null
+          tipo_contrato?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apellidos?: string
+          created_at?: string
+          departamento?: string | null
+          direccion?: string | null
+          dni?: string
+          email?: string | null
+          estado?: string | null
+          fecha_ingreso?: string
+          fecha_nacimiento?: string | null
+          id?: string
+          nombres?: string
+          puesto?: string | null
+          salario?: number | null
+          telefono?: string | null
+          tipo_contrato?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vacation_balances: {
+        Row: {
+          created_at: string
+          dias_adeudados: number
+          dias_totales: number
+          dias_usados: number
+          employee_id: string
+          id: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          dias_adeudados?: number
+          dias_totales?: number
+          dias_usados?: number
+          employee_id: string
+          id?: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          dias_adeudados?: number
+          dias_totales?: number
+          dias_usados?: number
+          employee_id?: string
+          id?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacation_balances_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vacation_requests: {
+        Row: {
+          created_at: string
+          dias_solicitados: number
+          employee_id: string
+          estado: string | null
+          fecha_fin: string
+          fecha_inicio: string
+          id: string
+          motivo: string | null
+          observaciones: string | null
+          periodo: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dias_solicitados: number
+          employee_id: string
+          estado?: string | null
+          fecha_fin: string
+          fecha_inicio: string
+          id?: string
+          motivo?: string | null
+          observaciones?: string | null
+          periodo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dias_solicitados?: number
+          employee_id?: string
+          estado?: string | null
+          fecha_fin?: string
+          fecha_inicio?: string
+          id?: string
+          motivo?: string | null
+          observaciones?: string | null
+          periodo?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacation_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_vacation_days: {
+        Args: { fecha_ingreso: string }
+        Returns: number
+      }
+      get_total_available_days: {
+        Args: { employee_id: string; year: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

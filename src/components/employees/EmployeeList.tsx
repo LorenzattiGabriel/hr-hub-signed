@@ -14,7 +14,7 @@ import { useEmployees } from "@/hooks/useEmployees";
 
 const EmployeeList = () => {
   const { toast } = useToast();
-  const { employees, addEmployee, updateEmployee, deleteEmployee } = useEmployees();
+  const { employees, addEmployee, updateEmployee, deleteEmployee, refetch } = useEmployees();
   const [view, setView] = useState<"list" | "form" | "detail" | "import">("list");
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -120,7 +120,7 @@ const EmployeeList = () => {
 
   if (view === "import") {
     return (
-      <EmployeeImport onComplete={handleBackToList} />
+      <EmployeeImport onComplete={handleBackToList} refetch={refetch} />
     );
   }
 

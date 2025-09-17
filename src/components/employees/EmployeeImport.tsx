@@ -8,9 +8,10 @@ import { useEmployees, type Employee } from '@/hooks/useEmployees';
 import * as XLSX from 'xlsx';
 interface EmployeeImportProps {
   onComplete: () => void;
+  refetch?: () => Promise<void>;
 }
 
-export const EmployeeImport = ({ onComplete }: EmployeeImportProps) => {
+export const EmployeeImport = ({ onComplete, refetch }: EmployeeImportProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { importEmployees, employees } = useEmployees();
@@ -231,9 +232,15 @@ export const EmployeeImport = ({ onComplete }: EmployeeImportProps) => {
         return;
       }
 
-      importEmployees(toInsert);
+      await importEmployees(toInsert);
       const skipped = uniqueParsed.length - toInsert.length;
       toast.success(`${toInsert.length} empleados importados correctamente${skipped > 0 ? `, ${skipped} omitidos por duplicados` : ''}`);
+      
+      // Actualizar la lista después de la importación
+      if (refetch) {
+        await refetch();
+      }
+      
       onComplete();
 
     } catch (error) {

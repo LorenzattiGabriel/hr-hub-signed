@@ -64,6 +64,24 @@ export const useEmployees = () => {
       salario: input.salario ?? null,
       tipo_contrato: input.tipo_contrato || input.tipoContrato,
       estado: input.estado || 'activo',
+      // Extended fields
+      cuil: input.cuil,
+      contacto_emergencia: input.contactoEmergencia,
+      telefono_emergencia: input.telefonoEmergencia,
+      parentesco_emergencia: input.parentescoEmergencia,
+      nivel_educativo: input.nivelEducativo,
+      titulo: input.titulo,
+      otros_conocimientos: input.otrosConocimientos,
+      grupo_sanguineo: input.grupoSanguineo,
+      alergias: input.alergias,
+      medicacion_habitual: input.medicacionHabitual,
+      obra_social: input.obraSocial,
+      observaciones: input.observaciones,
+      tiene_hijos: input.tieneHijos,
+      nombres_hijos: input.nombresHijos,
+      tiene_licencia: input.tieneLicencia,
+      tipo_licencia: input.tipoLicencia,
+      estado_civil: input.estadoCivil,
     };
     // Remove undefined keys
     Object.keys(db).forEach((k) => db[k] === undefined && delete db[k]);
@@ -82,11 +100,25 @@ export const useEmployees = () => {
       // Map database fields to include legacy compatibility
       const mappedEmployees = (data || []).map(emp => ({
         ...emp,
-        fechaIngreso: emp.fecha_ingreso, // Legacy compatibility
-        fechaNacimiento: emp.fecha_nacimiento, // Legacy compatibility
-        cargo: emp.puesto, // Legacy compatibility
-        sector: emp.departamento, // Legacy compatibility
-        tipoContrato: emp.tipo_contrato // Legacy compatibility
+        fechaIngreso: emp.fecha_ingreso,
+        fechaNacimiento: emp.fecha_nacimiento,
+        cargo: emp.puesto,
+        sector: emp.departamento,
+        tipoContrato: emp.tipo_contrato,
+        // Map extended fields for UI compatibility
+        contactoEmergencia: emp.contacto_emergencia,
+        telefonoEmergencia: emp.telefono_emergencia,
+        parentescoEmergencia: emp.parentesco_emergencia,
+        nivelEducativo: emp.nivel_educativo,
+        otrosConocimientos: emp.otros_conocimientos,
+        grupoSanguineo: emp.grupo_sanguineo,
+        medicacionHabitual: emp.medicacion_habitual,
+        obraSocial: emp.obra_social,
+        tieneHijos: emp.tiene_hijos,
+        nombresHijos: emp.nombres_hijos,
+        tieneLicencia: emp.tiene_licencia,
+        tipoLicencia: emp.tipo_licencia,
+        estadoCivil: emp.estado_civil
       }));
       
       setEmployees(mappedEmployees);
@@ -113,7 +145,27 @@ export const useEmployees = () => {
 
       if (error) throw error;
 
-      setEmployees(prev => [...prev, { ...data, fechaIngreso: data.fecha_ingreso, fechaNacimiento: data.fecha_nacimiento, cargo: data.puesto, sector: data.departamento, tipoContrato: data.tipo_contrato }]);
+      setEmployees(prev => [...prev, { 
+        ...data, 
+        fechaIngreso: data.fecha_ingreso, 
+        fechaNacimiento: data.fecha_nacimiento, 
+        cargo: data.puesto, 
+        sector: data.departamento, 
+        tipoContrato: data.tipo_contrato,
+        contactoEmergencia: data.contacto_emergencia,
+        telefonoEmergencia: data.telefono_emergencia,
+        parentescoEmergencia: data.parentesco_emergencia,
+        nivelEducativo: data.nivel_educativo,
+        otrosConocimientos: data.otros_conocimientos,
+        grupoSanguineo: data.grupo_sanguineo,
+        medicacionHabitual: data.medicacion_habitual,
+        obraSocial: data.obra_social,
+        tieneHijos: data.tiene_hijos,
+        nombresHijos: data.nombres_hijos,
+        tieneLicencia: data.tiene_licencia,
+        tipoLicencia: data.tipo_licencia,
+        estadoCivil: data.estado_civil
+      }]);
       
       // Create initial vacation balance for current year
       const currentYear = new Date().getFullYear();
@@ -158,7 +210,27 @@ export const useEmployees = () => {
 
       if (error) throw error;
 
-      setEmployees(prev => prev.map(emp => emp.id === id ? data : emp));
+      setEmployees(prev => prev.map(emp => emp.id === id ? { 
+        ...data, 
+        fechaIngreso: data.fecha_ingreso, 
+        fechaNacimiento: data.fecha_nacimiento, 
+        cargo: data.puesto, 
+        sector: data.departamento, 
+        tipoContrato: data.tipo_contrato,
+        contactoEmergencia: data.contacto_emergencia,
+        telefonoEmergencia: data.telefono_emergencia,
+        parentescoEmergencia: data.parentesco_emergencia,
+        nivelEducativo: data.nivel_educativo,
+        otrosConocimientos: data.otros_conocimientos,
+        grupoSanguineo: data.grupo_sanguineo,
+        medicacionHabitual: data.medicacion_habitual,
+        obraSocial: data.obra_social,
+        tieneHijos: data.tiene_hijos,
+        nombresHijos: data.nombres_hijos,
+        tieneLicencia: data.tiene_licencia,
+        tipoLicencia: data.tipo_licencia,
+        estadoCivil: data.estado_civil
+      } : emp));
       
       toast({
         title: "Éxito",
@@ -238,7 +310,20 @@ export const useEmployees = () => {
         fechaNacimiento: emp.fecha_nacimiento,
         cargo: emp.puesto,
         sector: emp.departamento,
-        tipoContrato: emp.tipo_contrato
+        tipoContrato: emp.tipo_contrato,
+        contactoEmergencia: emp.contacto_emergencia,
+        telefonoEmergencia: emp.telefono_emergencia,
+        parentescoEmergencia: emp.parentesco_emergencia,
+        nivelEducativo: emp.nivel_educativo,
+        otrosConocimientos: emp.otros_conocimientos,
+        grupoSanguineo: emp.grupo_sanguineo,
+        medicacionHabitual: emp.medicacion_habitual,
+        obraSocial: emp.obra_social,
+        tieneHijos: emp.tiene_hijos,
+        nombresHijos: emp.nombres_hijos,
+        tieneLicencia: emp.tiene_licencia,
+        tipoLicencia: emp.tipo_licencia,
+        estadoCivil: emp.estado_civil
       }));
       setEmployees(prev => [...prev, ...mapped]);
       

@@ -98,12 +98,29 @@ export const EmployeeImport = ({ onComplete }: EmployeeImportProps) => {
 
   const convertDate = (dateStr: string): string => {
     if (!dateStr) return '';
-    // Convertir formato DD/MM/YYYY a YYYY-MM-DD
+    
+    // Handle Excel serial date numbers
+    const dateValue = parseFloat(dateStr);
+    if (!isNaN(dateValue) && dateValue > 1000) {
+      // Excel serial date (days since 1900-01-01, accounting for Excel's leap year bug)
+      const excelEpoch = new Date(1900, 0, 1);
+      const jsDate = new Date(excelEpoch.getTime() + (dateValue - 2) * 24 * 60 * 60 * 1000);
+      return jsDate.toISOString().split('T')[0];
+    }
+    
+    // Handle DD/MM/YYYY format
     const parts = dateStr.split('/');
     if (parts.length === 3) {
       const [day, month, year] = parts;
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
     }
+    
+    // Try direct conversion for ISO format
+    const isoDate = new Date(dateStr);
+    if (!isNaN(isoDate.getTime())) {
+      return isoDate.toISOString().split('T')[0];
+    }
+    
     return dateStr;
   };
 

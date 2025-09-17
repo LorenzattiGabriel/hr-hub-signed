@@ -16,57 +16,108 @@ export type Database = {
     Tables: {
       employees: {
         Row: {
+          alergias: string | null
           apellidos: string
+          contacto_emergencia: string | null
           created_at: string
+          cuil: string | null
           departamento: string | null
           direccion: string | null
           dni: string
           email: string | null
           estado: string | null
+          estado_civil: string | null
           fecha_ingreso: string
           fecha_nacimiento: string | null
+          grupo_sanguineo: string | null
           id: string
+          medicacion_habitual: string | null
+          nivel_educativo: string | null
           nombres: string
+          nombres_hijos: string | null
+          obra_social: string | null
+          observaciones: string | null
+          otros_conocimientos: string | null
+          parentesco_emergencia: string | null
           puesto: string | null
           salario: number | null
           telefono: string | null
+          telefono_emergencia: string | null
+          tiene_hijos: string | null
+          tiene_licencia: string | null
           tipo_contrato: string | null
+          tipo_licencia: string | null
+          titulo: string | null
           updated_at: string
         }
         Insert: {
+          alergias?: string | null
           apellidos: string
+          contacto_emergencia?: string | null
           created_at?: string
+          cuil?: string | null
           departamento?: string | null
           direccion?: string | null
           dni: string
           email?: string | null
           estado?: string | null
+          estado_civil?: string | null
           fecha_ingreso: string
           fecha_nacimiento?: string | null
+          grupo_sanguineo?: string | null
           id?: string
+          medicacion_habitual?: string | null
+          nivel_educativo?: string | null
           nombres: string
+          nombres_hijos?: string | null
+          obra_social?: string | null
+          observaciones?: string | null
+          otros_conocimientos?: string | null
+          parentesco_emergencia?: string | null
           puesto?: string | null
           salario?: number | null
           telefono?: string | null
+          telefono_emergencia?: string | null
+          tiene_hijos?: string | null
+          tiene_licencia?: string | null
           tipo_contrato?: string | null
+          tipo_licencia?: string | null
+          titulo?: string | null
           updated_at?: string
         }
         Update: {
+          alergias?: string | null
           apellidos?: string
+          contacto_emergencia?: string | null
           created_at?: string
+          cuil?: string | null
           departamento?: string | null
           direccion?: string | null
           dni?: string
           email?: string | null
           estado?: string | null
+          estado_civil?: string | null
           fecha_ingreso?: string
           fecha_nacimiento?: string | null
+          grupo_sanguineo?: string | null
           id?: string
+          medicacion_habitual?: string | null
+          nivel_educativo?: string | null
           nombres?: string
+          nombres_hijos?: string | null
+          obra_social?: string | null
+          observaciones?: string | null
+          otros_conocimientos?: string | null
+          parentesco_emergencia?: string | null
           puesto?: string | null
           salario?: number | null
           telefono?: string | null
+          telefono_emergencia?: string | null
+          tiene_hijos?: string | null
+          tiene_licencia?: string | null
           tipo_contrato?: string | null
+          tipo_licencia?: string | null
+          titulo?: string | null
           updated_at?: string
         }
         Relationships: []

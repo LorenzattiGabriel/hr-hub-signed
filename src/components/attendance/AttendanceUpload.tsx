@@ -114,10 +114,16 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
             }
 
             const fecha = row.Fecha || row.fecha;
-            const horaEntrada = row['Hora Entrada'] || row.entrada || row['Hora de Entrada'];
-            const horaSalida = row['Hora Salida'] || row.salida || row['Hora de Salida'];
+            const horaEntrada = row.Entrada || row['Hora Entrada'] || row.entrada || row['Hora de Entrada'];
+            const horaSalida = row.Salida || row['Hora Salida'] || row.salida || row['Hora de Salida'];
+            const llegadaTarde = row['Llegada tarde'] || false;
+            const salidaTemprano = row['Salida temprano'] || false;
+            const tiempoExtra = row['Tiempo extra'] || null;
 
-            if (!fecha) continue;
+            // Use the calculated values from the fingerprint system
+            const llegadaTardeFromFile = row['Llegada tarde'] || false;
+            const salidaTempranoFromFile = row['Salida temprano'] || false;
+            const tiempoExtraFromFile = row['Tiempo extra'] || null;
 
             // Parse date
             let parsedDate;
@@ -129,14 +135,9 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
               parsedDate = new Date(fecha);
             }
 
-            // Calculate if late arrival (after 8:00 AM)
-            const llegadaTarde = horaEntrada ? 
-              new Date(`1970-01-01T${horaEntrada}`).getHours() >= 8 && 
-              new Date(`1970-01-01T${horaEntrada}`).getMinutes() > 0 : false;
-
-            // Calculate worked hours
-            let horasTrabajadas = null;
-            if (horaEntrada && horaSalida) {
+            // Calculate worked hours if not provided
+            let horasTrabajadas = tiempoExtraFromFile;
+            if (!horasTrabajadas && horaEntrada && horaSalida) {
               const entrada = new Date(`1970-01-01T${horaEntrada}`);
               const salida = new Date(`1970-01-01T${horaSalida}`);
               horasTrabajadas = (salida.getTime() - entrada.getTime()) / (1000 * 60 * 60);
@@ -148,8 +149,8 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
               hora_entrada: horaEntrada || null,
               hora_salida: horaSalida || null,
               horas_trabajadas: horasTrabajadas,
-              llegada_tarde: llegadaTarde,
-              observaciones: null
+              llegada_tarde: llegadaTardeFromFile,
+              observaciones: salidaTempranoFromFile ? 'Salida temprano detectada' : null
             });
           }
 

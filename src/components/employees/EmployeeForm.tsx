@@ -59,6 +59,12 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     obraSocial: employee?.obraSocial || "",
     medicacionHabitual: employee?.medicacionHabitual || "",
     
+    // Información Familiar y Licencias
+    tieneHijos: employee?.tieneHijos || "",
+    nombresHijos: employee?.nombresHijos || "",
+    tieneLicencia: employee?.tieneLicencia || "",
+    tipoLicencia: employee?.tipoLicencia || "",
+    
     // Observaciones
     observaciones: employee?.observaciones || ""
   });
@@ -610,6 +616,71 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                 rows={2}
               />
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Información Familiar y Licencias */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-foreground">Información Familiar y Licencias</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="tieneHijos" className="text-foreground">¿Tiene Hijos?</Label>
+              <Select onValueChange={(value) => handleInputChange("tieneHijos", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="si">Sí</SelectItem>
+                  <SelectItem value="no">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.tieneHijos === "si" && (
+              <div>
+                <Label htmlFor="nombresHijos" className="text-foreground">Nombres de los Hijos</Label>
+                <Textarea
+                  id="nombresHijos"
+                  value={formData.nombresHijos}
+                  onChange={(e) => handleInputChange("nombresHijos", e.target.value)}
+                  placeholder="Ingrese los nombres de los hijos"
+                  rows={2}
+                />
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="tieneLicencia" className="text-foreground">¿Posee Licencia de Conducir?</Label>
+              <Select onValueChange={(value) => handleInputChange("tieneLicencia", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="si">Sí</SelectItem>
+                  <SelectItem value="no">No</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.tieneLicencia === "si" && (
+              <div>
+                <Label htmlFor="tipoLicencia" className="text-foreground">Tipo de Licencia</Label>
+                <Select onValueChange={(value) => handleInputChange("tipoLicencia", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar tipo de licencia" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="clase-a">Clase A - Ciclomotores</SelectItem>
+                    <SelectItem value="clase-b">Clase B - Automóviles</SelectItem>
+                    <SelectItem value="clase-c">Clase C - Camiones</SelectItem>
+                    <SelectItem value="clase-d">Clase D - Transporte de pasajeros</SelectItem>
+                    <SelectItem value="clase-e">Clase E - Camiones articulados</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </CardContent>
         </Card>
 

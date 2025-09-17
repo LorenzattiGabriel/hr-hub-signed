@@ -28,6 +28,10 @@ interface Employee {
   medicacionHabitual?: string;
   obraSocial?: string;
   observaciones?: string;
+  tieneHijos?: string;
+  nombresHijos?: string;
+  tieneLicencia?: string;
+  tipoLicencia?: string;
   fotoDni?: File | null;
   fotoCarnet?: File | null;
 }

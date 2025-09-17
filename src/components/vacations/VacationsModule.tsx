@@ -52,10 +52,9 @@ const VacationsModule = () => {
     return 0;
   };
 
-  // Create employee vacation status
   const employeesWithVacations = activeEmployees.map(emp => {
-    const totalDays = calculateVacationDays(emp.fechaIngreso);
-    const usedDays = getUsedVacationDays(emp.id);
+    const totalDays = calculateVacationDays(emp.fecha_ingreso || emp.fechaIngreso || '');
+    const usedDays = getUsedVacationDays(parseInt(emp.id) || 0);
     const remainingDays = totalDays - usedDays;
     
     return {

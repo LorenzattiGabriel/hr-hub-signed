@@ -23,8 +23,9 @@ const DashboardOverview = () => {
     
     const today = new Date();
     const totalYears = activeEmployees.reduce((sum, employee) => {
-      if (employee.fechaIngreso) {
-        const startDate = new Date(employee.fechaIngreso);
+      const dateField = employee.fechaIngreso;
+      if (dateField) {
+        const startDate = new Date(dateField);
         const years = (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
         return sum + years;
       }

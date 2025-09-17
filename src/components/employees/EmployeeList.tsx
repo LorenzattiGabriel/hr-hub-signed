@@ -10,7 +10,7 @@ import EmployeeForm from "./EmployeeForm";
 import EmployeeDetail from "./EmployeeDetail";
 import { EmployeeImport } from "./EmployeeImport";
 import { useToast } from "@/hooks/use-toast";
-import { useEmployees } from "@/contexts/EmployeeContext";
+import { useEmployees } from "@/hooks/useEmployees";
 
 const EmployeeList = () => {
   const { toast } = useToast();
@@ -85,7 +85,7 @@ const EmployeeList = () => {
     setIsEditing(false);
   };
 
-  const handleDeleteEmployee = (id: number, name: string) => {
+  const handleDeleteEmployee = (id: string, name: string) => {
     deleteEmployee(id);
     toast({
       title: "Empleado eliminado",

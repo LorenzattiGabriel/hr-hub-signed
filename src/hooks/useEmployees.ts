@@ -57,7 +57,18 @@ export const useEmployees = () => {
         .order('apellidos', { ascending: true });
 
       if (error) throw error;
-      setEmployees(data || []);
+      
+      // Map database fields to include legacy compatibility
+      const mappedEmployees = (data || []).map(emp => ({
+        ...emp,
+        fechaIngreso: emp.fecha_ingreso, // Legacy compatibility
+        fechaNacimiento: emp.fecha_nacimiento, // Legacy compatibility
+        cargo: emp.puesto, // Legacy compatibility
+        sector: emp.departamento, // Legacy compatibility
+        tipoContrato: emp.tipo_contrato // Legacy compatibility
+      }));
+      
+      setEmployees(mappedEmployees);
     } catch (error) {
       console.error('Error fetching employees:', error);
       toast({

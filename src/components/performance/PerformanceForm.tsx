@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Star, Save, ArrowLeft, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useEmployees } from "@/contexts/EmployeeContext";
+import { useEmployees } from "@/hooks/useEmployees";
 
 interface PerformanceFormProps {
   onBack: () => void;

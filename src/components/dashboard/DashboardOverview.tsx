@@ -11,7 +11,7 @@ import {
   CheckCircle,
   Calendar
 } from "lucide-react";
-import { useEmployees } from "@/contexts/EmployeeContext";
+import { useEmployees } from "@/hooks/useEmployees";
 
 const DashboardOverview = () => {
   const { employees, getActiveEmployees } = useEmployees();

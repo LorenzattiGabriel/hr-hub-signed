@@ -8,7 +8,7 @@ import { Star, Plus, Search, Download, TrendingUp, Award, Users } from "lucide-r
 import PerformanceForm from "./PerformanceForm";
 import PerformanceDetail from "./PerformanceDetail";
 import { useToast } from "@/hooks/use-toast";
-import { useEmployees } from "@/contexts/EmployeeContext";
+import { useEmployees } from "@/hooks/useEmployees";
 
 const PerformanceList = () => {
   const { toast } = useToast();

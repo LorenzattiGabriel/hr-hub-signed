@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useEmployees } from "@/contexts/EmployeeContext";
+import { useEmployees } from "@/hooks/useEmployees";
 import { Download, Calendar, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 
 // Datos de ejemplo para reportes - se reemplazará con datos de Supabase

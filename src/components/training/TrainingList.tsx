@@ -8,7 +8,7 @@ import { GraduationCap, Plus, Search, Download, BookOpen, Award, Users } from "l
 import TrainingForm from "./TrainingForm";
 import TrainingDetail from "./TrainingDetail";
 import { useToast } from "@/hooks/use-toast";
-import { useEmployees } from "@/contexts/EmployeeContext";
+import { useEmployees } from "@/hooks/useEmployees";
 
 const TrainingList = () => {
   const { toast } = useToast();

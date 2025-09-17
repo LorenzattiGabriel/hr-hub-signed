@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useEmployees } from "@/contexts/EmployeeContext";
+import { useEmployees } from "@/hooks/useEmployees";
 import { Shirt, Plus, Download, Calendar, User, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2pdf from "html2pdf.js";
@@ -76,7 +76,7 @@ const UniformsModule = () => {
 
     const newDelivery: UniformDelivery = {
       id: Date.now(),
-      employeeId: employee.id,
+      employeeId: parseInt(employee.id) || 0,
       employeeName: `${employee.nombres} ${employee.apellidos}`,
       employeeDni: employee.dni,
       uniformType,

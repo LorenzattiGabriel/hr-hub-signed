@@ -8,7 +8,7 @@ import { Calendar, Download, Plus, Search, Clock, User, FileText, AlertCircle } 
 import AbsenceForm from "./AbsenceForm";
 import AbsenceDetail from "./AbsenceDetail";
 import { useToast } from "@/hooks/use-toast";
-import { useEmployees } from "@/contexts/EmployeeContext";
+import { useEmployees } from "@/hooks/useEmployees";
 
 const AbsencesModule = () => {
   const { toast } = useToast();

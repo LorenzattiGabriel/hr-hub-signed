@@ -9,13 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useUniforms } from "@/hooks/useUniforms";
-import { Shirt, Plus, Download, Calendar, User, Package } from "lucide-react";
+import { Shirt, Plus, Download, Calendar, User, Package, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import html2pdf from "html2pdf.js";
 
 const UniformsModule = () => {
   const { getActiveEmployees } = useEmployees();
-  const { uniforms, addUniform, loading } = useUniforms();
+  const { uniforms, addUniform, deleteUniform, loading } = useUniforms();
   const { toast } = useToast();
   const activeEmployees = getActiveEmployees();
   
@@ -84,6 +85,18 @@ const UniformsModule = () => {
       setIsDialogOpen(false);
     } catch (error) {
       // Error already handled by hook
+    }
+  };
+
+  const handleDeleteUniform = async (uniformId: string, employeeName: string) => {
+    try {
+      await deleteUniform(uniformId);
+      toast({
+        title: "Uniforme eliminado",
+        description: `El registro de uniforme de ${employeeName} ha sido eliminado`,
+      });
+    } catch (error) {
+      // El hook ya muestra el toast de error
     }
   };
 
@@ -401,7 +414,7 @@ const UniformsModule = () => {
                   </div>
                 )}
 
-                <div className="flex justify-end">
+                <div className="flex justify-end space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
@@ -410,6 +423,28 @@ const UniformsModule = () => {
                     <Download className="h-4 w-4 mr-2" />
                     Constancia PDF
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Eliminar
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción no se puede deshacer. Se eliminará permanentemente el registro de entrega de uniforme de {delivery.employeeName}.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteUniform(delivery.id, delivery.employeeName)}>
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>

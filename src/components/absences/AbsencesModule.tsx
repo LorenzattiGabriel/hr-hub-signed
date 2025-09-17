@@ -20,51 +20,8 @@ const AbsencesModule = () => {
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
-  // Mock absence data
-  const mockAbsences = [
-    {
-      id: 1,
-      empleadoId: 1,
-      empleadoNombre: "Noelia Belén Ludueña",
-      fechaInicio: "2024-11-25",
-      fechaFin: "2024-11-26",
-      tipo: "enfermedad",
-      motivo: "Gripe estacional",
-      certificadoMedico: true,
-      archivo: "certificado_medico_001.pdf",
-      estado: "aprobado",
-      fechaSolicitud: "2024-11-24",
-      observaciones: "Presentó certificado médico válido"
-    },
-    {
-      id: 2,
-      empleadoId: 5,
-      empleadoNombre: "Gerardo Damián Mateo",
-      fechaInicio: "2024-11-20",
-      fechaFin: "2024-11-20",
-      tipo: "personal",
-      motivo: "Trámite bancario urgente",
-      certificadoMedico: false,
-      archivo: null,
-      estado: "pendiente",
-      fechaSolicitud: "2024-11-19",
-      observaciones: ""
-    },
-    {
-      id: 3,
-      empleadoId: 8,
-      empleadoNombre: "Marcelo Edgar Mangold",
-      fechaInicio: "2024-11-15",
-      fechaFin: "2024-11-17",
-      tipo: "familiar",
-      motivo: "Internación de familiar directo",
-      certificadoMedico: false,
-      archivo: "constancia_hospital.pdf",
-      estado: "aprobado",
-      fechaSolicitud: "2024-11-14",
-      observaciones: "Situación familiar de emergencia"
-    }
-  ];
+  // Absences data - initially empty for real data loading
+  const mockAbsences: any[] = [];
 
   const filteredAbsences = mockAbsences.filter(absence => {
     const matchesSearch = absence.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());

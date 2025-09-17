@@ -86,10 +86,9 @@ const PerformanceList = () => {
     return <PerformanceDetail evaluation={selectedPerformance} onBack={handleBackToList} />;
   }
 
-  // Calculate averages
-  const avgScore = Math.round(mockEvaluations.reduce((sum, evaluation) => sum + evaluation.puntuacionGeneral, 0) / mockEvaluations.length);
-  const highPerformers = mockEvaluations.filter(evaluation => evaluation.puntuacionGeneral >= 90).length;
-  const needsImprovement = mockEvaluations.filter(evaluation => evaluation.puntuacionGeneral < 80).length;
+  const avgScore = mockEvaluations.length > 0 ? Math.round(mockEvaluations.reduce((sum, evaluation) => sum + evaluation.puntuacionGeneral, 0) / mockEvaluations.length) : 0;
+  const highPerformers = mockEvaluations.length > 0 ? mockEvaluations.filter(evaluation => evaluation.puntuacionGeneral >= 90).length : 0;
+  const needsImprovement = mockEvaluations.length > 0 ? mockEvaluations.filter(evaluation => evaluation.puntuacionGeneral < 80).length : 0;
 
   return (
     <div className="space-y-6">
@@ -211,12 +210,20 @@ const PerformanceList = () => {
 
       {/* Evaluation List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredEvaluations.map((evaluation) => (
-          <Card key={evaluation.id} className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg text-foreground">{evaluation.empleadoNombre}</CardTitle>
-                <div className="flex items-center space-x-2">
+        {filteredEvaluations.length === 0 ? (
+          <Card className="col-span-2">
+            <CardContent className="py-10 text-center text-muted-foreground">
+              No hay evaluaciones registradas
+            </CardContent>
+          </Card>
+        ) : (
+          filteredEvaluations.map((evaluation) => (
+            <Card key={evaluation.id} className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg text-foreground">{evaluation.empleadoNombre}</CardTitle>
+                  <div className="flex items-center space-x-2">
+                    <Badge variant={evaluation.estado === "completado" ? "success" : "warning"}>
                   <Badge variant={evaluation.estado === "completado" ? "success" : "warning"}>
                     {evaluation.estado === "completado" ? "Completado" : "En Progreso"}
                   </Badge>

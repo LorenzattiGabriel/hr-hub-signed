@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Star, Save, ArrowLeft, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useEmployees } from "@/contexts/EmployeeContext";
 
 interface PerformanceFormProps {
   onBack: () => void;
@@ -37,14 +38,9 @@ const PerformanceForm = ({ onBack, evaluation }: PerformanceFormProps) => {
     areasDesarrollo: evaluation?.areasDesarrollo?.join(", ") || ""
   });
 
-  // Mock employees data
-  const employees = [
-    { id: 1, nombre: "María José González Pérez" },
-    { id: 2, nombre: "Juan Carlos Rodríguez Silva" },
-    { id: 3, nombre: "Ana Sofía Martínez López" },
-    { id: 4, nombre: "Roberto Fernández Castro" },
-    { id: 5, nombre: "Laura García Moreno" }
-  ];
+  // Employees from context
+  const { employees: employeesCtx } = useEmployees();
+  const employees = employeesCtx.map(emp => ({ id: emp.id, nombre: `${emp.nombres} ${emp.apellidos}` }));
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

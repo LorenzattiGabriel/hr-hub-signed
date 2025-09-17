@@ -28,60 +28,32 @@ const DashboardOverview = () => {
     },
     {
       title: "Ausencias Hoy",
-      value: "5",
-      change: "2 vacaciones, 3 permisos",
+      value: "0",
+      change: "Sin datos",
       icon: CalendarDays,
       color: "text-warning",
       bgColor: "bg-warning/10"
     },
     {
       title: "Llegadas Tarde",
-      value: "12",
-      change: "Esta semana",
+      value: "0",
+      change: "Sin datos",
       icon: Clock,
       color: "text-destructive",
       bgColor: "bg-destructive/10"
     },
     {
       title: "Evaluaciones Pendientes",
-      value: "8",
-      change: "Vencen en 7 días",
+      value: "0",
+      change: "Sin datos",
       icon: ClipboardList,
       color: "text-secondary",
       bgColor: "bg-secondary/10"
     }
   ];
 
-  const recentActivities = [
-    {
-      id: 1,
-      type: "employee",
-      message: `Nuevo empleado agregado: ${employees.length > 0 ? `${employees[0].nombres} ${employees[0].apellidos}` : 'Sin empleados'}`,
-      time: "Hace 2 horas",
-      status: "success"
-    },
-    {
-      id: 2,
-      type: "vacation",
-      message: "Solicitud de vacaciones aprobada: Carlos Rodríguez",
-      time: "Hace 4 horas",
-      status: "info"
-    },
-    {
-      id: 3,
-      type: "training",
-      message: "Capacitación completada: Ana Martínez",
-      time: "Hace 6 horas",
-      status: "success"
-    },
-    {
-      id: 4,
-      type: "alert",
-      message: "Recordatorio: Evaluación de desempeño pendiente",
-      time: "Hace 1 día",
-      status: "warning"
-    }
-  ];
+  // Recent activities - start empty
+  // Recent activities - start empty
 
   const upcomingEvents = [
     {
@@ -107,18 +79,7 @@ const DashboardOverview = () => {
     }
   ];
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "success":
-        return <CheckCircle className="h-4 w-4 text-success" />;
-      case "warning":
-        return <AlertTriangle className="h-4 w-4 text-warning" />;
-      case "info":
-        return <Clock className="h-4 w-4 text-primary" />;
-      default:
-        return <Clock className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
+  // Helper for status icon (kept)
 
   return (
     <div className="space-y-6">
@@ -162,19 +123,23 @@ const DashboardOverview = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
-                  {getStatusIcon(activity.status)}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-card-foreground">
-                      {activity.message}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {activity.time}
-                    </p>
+              {recentActivities.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No hay actividad reciente</div>
+              ) : (
+                recentActivities.map((activity) => (
+                  <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                    {getStatusIcon(activity.status)}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-card-foreground">
+                        {activity.message}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {activity.time}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
             <Button variant="outline" className="w-full mt-4">
               Ver todas las actividades
@@ -182,7 +147,6 @@ const DashboardOverview = () => {
           </CardContent>
         </Card>
 
-        {/* Upcoming Events */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -191,23 +155,33 @@ const DashboardOverview = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className="border border-border rounded-lg p-3 hover:bg-muted/50 transition-colors">
-                  <h4 className="font-medium text-card-foreground text-sm">
-                    {event.title}
-                  </h4>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {event.date} a las {event.time}
-                  </p>
-                  <div className="flex items-center justify-between mt-2">
-                    <Badge variant="outline" className="text-xs">
-                      {event.attendees} participantes
-                    </Badge>
-                  </div>
+            {(() => {
+              const upcomingEvents: any[] = [];
+              if (upcomingEvents.length === 0) {
+                return (
+                  <div className="text-center py-8 text-muted-foreground">No hay eventos próximos</div>
+                );
+              }
+              return (
+                <div className="space-y-4">
+                  {upcomingEvents.map((event) => (
+                    <div key={event.id} className="border border-border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                      <h4 className="font-medium text-card-foreground text-sm">
+                        {event.title}
+                      </h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {event.date} a las {event.time}
+                      </p>
+                      <div className="flex items-center justify-between mt-2">
+                        <Badge variant="outline" className="text-xs">
+                          {event.attendees} participantes
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              );
+            })()}
             <Button variant="outline" className="w-full mt-4">
               Ver calendario completo
             </Button>

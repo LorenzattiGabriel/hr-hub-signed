@@ -33,42 +33,42 @@ const modules = [
     name: "Gestión de Empleados",
     icon: Users,
     description: "Legajo Digital",
-    badge: "12"
+    badge: "0"
   },
   {
     id: "vacations",
     name: "Vacaciones",
     icon: CalendarDays,
     description: "Gestión de vacaciones",
-    badge: "3"
+    badge: "0"
   },
   {
     id: "absences",
     name: "Ausencias y Permisos",
     icon: ClipboardList,
     description: "Permisos y Certificados",
-    badge: "2"
+    badge: "0"
   },
   {
     id: "training",
     name: "Capacitaciones",
     icon: GraduationCap,
     description: "Formación y Desarrollo",
-    badge: "3"
+    badge: "0"
   },
   {
     id: "uniforms",
     name: "Entrega de Uniformes",
     icon: Shirt,
     description: "Control de Uniformes",
-    badge: "2"
+    badge: "0"
   },
   {
     id: "attendance",
     name: "Control de Asistencia",
     icon: ClipboardList,
     description: "KPIs y Reportes",
-    badge: "New"
+    badge: ""
   },
   {
     id: "performance",
@@ -81,7 +81,7 @@ const modules = [
     name: "Nómina de Sueldos",
     icon: DollarSign,
     description: "Sueldos y Pagos",
-    badge: "New"
+    badge: ""
   },
 ];
 

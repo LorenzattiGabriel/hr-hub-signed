@@ -45,6 +45,7 @@ const TrainingList = () => {
   };
 
   const mockTrainings = getTrainingsForEmployees();
+  const totalHours = mockTrainings.reduce((sum, t) => sum + (t.duracion || 0), 0);
 
   const filteredTrainings = mockTrainings.filter(training => {
     const matchesSearch = (
@@ -160,7 +161,7 @@ const TrainingList = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground/70">Horas Totales</p>
-                <p className="text-3xl font-bold text-foreground">18</p>
+                <p className="text-3xl font-bold text-foreground">{totalHours}</p>
                 <p className="text-xs text-foreground/60">este mes</p>
               </div>
               <div className="p-3 bg-secondary/10 rounded-lg">

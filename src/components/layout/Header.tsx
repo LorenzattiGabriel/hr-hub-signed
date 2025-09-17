@@ -37,7 +37,6 @@ const Header = () => {
           </div>
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full"></span>
           </Button>
           <Button variant="ghost" size="icon">
             <Settings className="h-5 w-5" />

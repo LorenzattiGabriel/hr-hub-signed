@@ -44,10 +44,10 @@ const AttendanceList = () => {
     return <AttendanceReports onBack={handleBackToList} />;
   }
 
-  // Calculate totals
-  const totalLateArrivals = attendanceData.length > 0 ? attendanceData.reduce((sum, emp) => sum + emp.llegadasTarde, 0) : 0;
-  const avgPunctuality = attendanceData.length > 0 ? Math.round(attendanceData.reduce((sum, emp) => sum + emp.puntualidad, 0) / attendanceData.length) : 0;
-  const avgAttendance = attendanceData.length > 0 ? Math.round(attendanceData.reduce((sum, emp) => sum + emp.asistencia, 0) / attendanceData.length) : 0;
+  // Calculate totals (all zero until data is uploaded)
+  const totalLateArrivals = 0;
+  const avgPunctuality = 0;
+  const avgAttendance = 0;
   const activeAlerts = attendanceData.filter(emp => emp.puntualidad < 85 || emp.asistencia < 90).length;
 
   return (

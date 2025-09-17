@@ -210,6 +210,15 @@ export const useEmployees = () => {
   const updateEmployee = async (id: string, employeeData: Partial<Employee>) => {
     try {
       const dbUpdate = toDbEmployee(employeeData);
+      // Avoid violating NOT NULL by not sending nulls on update
+      Object.keys(dbUpdate).forEach((k) => {
+        if (dbUpdate[k] === null) delete dbUpdate[k];
+      });
+      if (Object.keys(dbUpdate).length === 0) {
+        toast({ title: 'Sin cambios', description: 'No hay cambios para actualizar.' });
+        return null as any;
+      }
+
       const { data, error } = await supabase
         .from('employees')
         .update(dbUpdate as any)

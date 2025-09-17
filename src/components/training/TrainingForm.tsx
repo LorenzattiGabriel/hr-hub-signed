@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GraduationCap, Save, ArrowLeft, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useEmployees } from "@/hooks/useEmployees";
 import html2pdf from "html2pdf.js";
 
 interface TrainingFormProps {
@@ -17,6 +18,10 @@ interface TrainingFormProps {
 
 const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
   const { toast } = useToast();
+  const { getActiveEmployees } = useEmployees();
+  const employees = getActiveEmployees();
+  
+  console.log('TrainingForm - employees:', employees); // Debug log
   const [formData, setFormData] = useState({
     titulo: training?.titulo || "",
     empleadoId: training?.empleadoId || "",
@@ -28,14 +33,7 @@ const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
     observaciones: training?.observaciones || ""
   });
 
-  // Mock employees data
-  const employees = [
-    { id: 1, nombre: "María José González Pérez" },
-    { id: 2, nombre: "Juan Carlos Rodríguez Silva" },
-    { id: 3, nombre: "Ana Sofía Martínez López" },
-    { id: 4, nombre: "Roberto Fernández Castro" },
-    { id: 5, nombre: "Laura García Moreno" }
-  ];
+  // Use real employees from database
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -70,7 +68,9 @@ const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
     }
 
     try {
-      const empleadoNombre = employees.find(e => e.id.toString() === formData.empleadoId)?.nombre || "Empleado";
+      const empleadoNombre = employees.find(e => e.id.toString() === formData.empleadoId) 
+        ? `${employees.find(e => e.id.toString() === formData.empleadoId)?.nombres} ${employees.find(e => e.id.toString() === formData.empleadoId)?.apellidos}` 
+        : "Empleado";
       const titulo = formData.titulo;
       const fecha = new Date(formData.fecha).toLocaleDateString();
       const horas = formData.duracion || "";
@@ -200,7 +200,7 @@ const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
                 <SelectContent>
                   {employees.map((emp) => (
                     <SelectItem key={emp.id} value={emp.id.toString()}>
-                      {emp.nombre}
+                      {emp.nombres} {emp.apellidos}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -290,7 +290,9 @@ const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
               <>
                 <div className="p-4 bg-muted/50 rounded-lg">
                   <h3 className="font-semibold text-foreground mb-2">
-                    {employees.find(e => e.id.toString() === formData.empleadoId)?.nombre}
+                    {employees.find(e => e.id.toString() === formData.empleadoId) 
+                      ? `${employees.find(e => e.id.toString() === formData.empleadoId)?.nombres} ${employees.find(e => e.id.toString() === formData.empleadoId)?.apellidos}`
+                      : "Empleado"}
                   </h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>

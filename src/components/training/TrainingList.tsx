@@ -14,6 +14,8 @@ const TrainingList = () => {
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
+  
+  console.log('TrainingList - activeEmployees:', activeEmployees); // Debug log
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedTraining, setSelectedTraining] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");

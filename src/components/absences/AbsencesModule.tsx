@@ -14,14 +14,42 @@ const AbsencesModule = () => {
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
+  
+  console.log('AbsencesModule - activeEmployees:', activeEmployees); // Debug log
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedAbsence, setSelectedAbsence] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
-  // Absences data - initially empty for real data loading
-  const mockAbsences: any[] = [];
+  // Generate sample absences data based on real employees
+  const getAbsencesForEmployees = () => {
+    const absenceTypes = ["enfermedad", "personal", "familiar", "vacaciones", "licencia"];
+    const absenceReasons = [
+      "Consulta médica",
+      "Asuntos personales",
+      "Cuidado familiar",
+      "Vacaciones pendientes",
+      "Licencia médica"
+    ];
+    
+    return activeEmployees.slice(0, 2).map((emp, index) => ({
+      id: Date.now() + index,
+      empleadoId: emp.id,
+      empleadoNombre: `${emp.nombres} ${emp.apellidos}`,
+      empleadoDni: emp.dni,
+      fechaInicio: new Date(Date.now() - (index * 5) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      fechaFin: new Date(Date.now() - (index * 3) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      tipo: absenceTypes[index % absenceTypes.length],
+      motivo: absenceReasons[index % absenceReasons.length],
+      estado: index === 0 ? "pendiente" : "aprobado",
+      certificadoMedico: index % 2 === 0,
+      archivo: null, // Add missing archivo property
+      observaciones: index === 0 ? "Pendiente de documentación" : "Aprobado por supervisión"
+    }));
+  };
+
+  const mockAbsences = getAbsencesForEmployees();
 
   const filteredAbsences = mockAbsences.filter(absence => {
     const matchesSearch = absence.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());

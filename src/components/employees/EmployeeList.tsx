@@ -184,7 +184,7 @@ const EmployeeList = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground/70">Promedio Antigüedad</p>
-                <p className="text-3xl font-bold text-foreground">3.2</p>
+                <p className="text-3xl font-bold text-foreground">0</p>
                 <p className="text-xs text-foreground/60">años</p>
               </div>
               <div className="p-3 bg-warning/10 rounded-lg">

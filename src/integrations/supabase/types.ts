@@ -175,6 +175,83 @@ export type Database = {
         }
         Relationships: []
       }
+      performance_evaluations: {
+        Row: {
+          areas_desarrollo: string[] | null
+          comp_comunicacion: number | null
+          comp_liderazgo: number | null
+          comp_puntualidad: number | null
+          comp_tecnicas: number | null
+          comp_trabajo_equipo: number | null
+          created_at: string
+          employee_id: string
+          estado: string
+          evaluador: string | null
+          fecha_evaluacion: string
+          fortalezas: string[] | null
+          id: string
+          obj_calidad: number | null
+          obj_cumplimiento: number | null
+          obj_eficiencia: number | null
+          observaciones: string | null
+          periodo: string
+          puntuacion_general: number | null
+          updated_at: string
+        }
+        Insert: {
+          areas_desarrollo?: string[] | null
+          comp_comunicacion?: number | null
+          comp_liderazgo?: number | null
+          comp_puntualidad?: number | null
+          comp_tecnicas?: number | null
+          comp_trabajo_equipo?: number | null
+          created_at?: string
+          employee_id: string
+          estado?: string
+          evaluador?: string | null
+          fecha_evaluacion: string
+          fortalezas?: string[] | null
+          id?: string
+          obj_calidad?: number | null
+          obj_cumplimiento?: number | null
+          obj_eficiencia?: number | null
+          observaciones?: string | null
+          periodo: string
+          puntuacion_general?: number | null
+          updated_at?: string
+        }
+        Update: {
+          areas_desarrollo?: string[] | null
+          comp_comunicacion?: number | null
+          comp_liderazgo?: number | null
+          comp_puntualidad?: number | null
+          comp_tecnicas?: number | null
+          comp_trabajo_equipo?: number | null
+          created_at?: string
+          employee_id?: string
+          estado?: string
+          evaluador?: string | null
+          fecha_evaluacion?: string
+          fortalezas?: string[] | null
+          id?: string
+          obj_calidad?: number | null
+          obj_cumplimiento?: number | null
+          obj_eficiencia?: number | null
+          observaciones?: string | null
+          periodo?: string
+          puntuacion_general?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_evaluations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainings: {
         Row: {
           calificacion: number | null

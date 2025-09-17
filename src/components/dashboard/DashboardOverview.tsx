@@ -12,9 +12,19 @@ import {
   Calendar
 } from "lucide-react";
 import { useEmployees } from "@/hooks/useEmployees";
+import { useVacationStats } from "@/hooks/useVacationStats";
+import { useAttendance } from "@/hooks/useAttendance";
+import { useTraining } from "@/hooks/useTraining";
+import { useAbsences } from "@/hooks/useAbsences";
+import { usePerformanceStats } from "@/hooks/usePerformanceStats";
 
 const DashboardOverview = () => {
   const { employees, getActiveEmployees } = useEmployees();
+  const { stats: vacationStats } = useVacationStats();
+  const { stats: attendanceStats } = useAttendance();
+  const { stats: trainingStats } = useTraining();
+  const { absences } = useAbsences();
+  const { stats: performanceStats } = usePerformanceStats();
   const activeEmployees = getActiveEmployees();
   
   // Calculate average seniority
@@ -40,40 +50,59 @@ const DashboardOverview = () => {
   const quickStats = [
     {
       title: "Días de vacaciones usados",
-      value: "0",
-      change: "Sin datos",
+      value: vacationStats.totalUsedDays.toString(),
+      change: `${vacationStats.totalEmployees} empleados`,
       icon: CalendarDays,
       color: "text-primary",
       bgColor: "bg-primary/10"
     },
     {
       title: "Días de vacaciones disponibles",
-      value: "0",
-      change: "Sin datos",
+      value: vacationStats.totalAvailableDays.toString(),
+      change: `Promedio: ${vacationStats.averageUsedDays} días`,
       icon: CalendarDays,
       color: "text-warning",
       bgColor: "bg-warning/10"
     },
     {
       title: "Llegadas tarde este mes",
-      value: "0",
-      change: "Sin datos",
+      value: attendanceStats.lateArrivals.toString(),
+      change: `${attendanceStats.totalRecords} registros`,
       icon: Clock,
       color: "text-destructive",
       bgColor: "bg-destructive/10"
     },
     {
       title: "Capacitaciones completadas",
-      value: "0",
-      change: "Sin datos",
+      value: trainingStats.completedTrainings.toString(),
+      change: `${trainingStats.completionRate}% completado`,
       icon: ClipboardList,
       color: "text-secondary",
       bgColor: "bg-secondary/10"
     }
   ];
 
-  // Recent activities - start empty
-  const recentActivities: any[] = [];
+  // Actividades recientes basadas en datos reales
+  const recentActivities = [
+    ...absences.slice(0, 2).map(absence => ({
+      id: `absence-${absence.id}`,
+      message: `${absence.empleadoNombre} solicitó ausencia por ${absence.tipo}`,
+      time: new Date(absence.created_at).toLocaleDateString(),
+      status: absence.estado === 'aprobado' ? 'success' : 'warning'
+    })),
+    ...trainingStats.completedTrainings > 0 ? [{
+      id: 'training-completed',
+      message: `${trainingStats.completedTrainings} capacitaciones completadas`,
+      time: new Date().toLocaleDateString(),
+      status: 'success'
+    }] : [],
+    ...performanceStats.completedEvaluations > 0 ? [{
+      id: 'evaluations-completed',
+      message: `${performanceStats.completedEvaluations} evaluaciones completadas`,
+      time: new Date().toLocaleDateString(),
+      status: 'info'
+    }] : []
+  ].slice(0, 5);
 
 
   // Helper for status icon

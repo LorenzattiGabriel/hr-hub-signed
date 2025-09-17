@@ -8,17 +8,17 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Star, Save, ArrowLeft, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useEmployees } from "@/hooks/useEmployees";
+import { usePerformanceEvaluations } from "@/hooks/usePerformanceEvaluations";
 
 interface PerformanceFormProps {
   onBack: () => void;
   evaluation?: any;
+  employees: any[];
 }
 
-const PerformanceForm = ({ onBack, evaluation }: PerformanceFormProps) => {
+const PerformanceForm = ({ onBack, evaluation, employees }: PerformanceFormProps) => {
   const { toast } = useToast();
-  const { getActiveEmployees } = useEmployees();
-  const employees = getActiveEmployees();
+  const { addEvaluation } = usePerformanceEvaluations();
   
   console.log('PerformanceForm - employees:', employees); // Debug log
   const [formData, setFormData] = useState({
@@ -74,7 +74,7 @@ const PerformanceForm = ({ onBack, evaluation }: PerformanceFormProps) => {
     return Math.round((competenciasAvg + objetivosAvg) / 2);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.empleadoId || !formData.periodo || !formData.evaluador) {
       toast({
         title: "Error",
@@ -84,12 +84,43 @@ const PerformanceForm = ({ onBack, evaluation }: PerformanceFormProps) => {
       return;
     }
 
-    toast({
-      title: "Evaluación guardada",
-      description: "La evaluación de desempeño ha sido registrada exitosamente",
-    });
+    try {
+      const overallScore = calculateOverallScore();
+      await addEvaluation({
+        employee_id: formData.empleadoId,
+        periodo: formData.periodo,
+        fecha_evaluacion: new Date().toISOString().split('T')[0],
+        evaluador: formData.evaluador,
+        puntuacion_general: overallScore,
+        comp_tecnicas: formData.competencias.tecnicas[0],
+        comp_liderazgo: formData.competencias.liderazgo[0],
+        comp_comunicacion: formData.competencias.comunicacion[0],
+        comp_puntualidad: formData.competencias.puntualidad[0],
+        comp_trabajo_equipo: formData.competencias.trabajoEquipo[0],
+        obj_cumplimiento: formData.objetivos.cumplimiento[0],
+        obj_calidad: formData.objetivos.calidad[0],
+        obj_eficiencia: formData.objetivos.eficiencia[0],
+        estado: 'completado',
+        observaciones: formData.observaciones,
+        fortalezas: formData.fortalezas,
+        areas_desarrollo: formData.areasDesarrollo,
+        created_at: '' as any,
+        updated_at: '' as any,
+        id: '' as any,
+      } as any);
 
-    setTimeout(() => onBack(), 1500);
+      const selectedEmployee = employees.find(emp => emp.id.toString() === formData.empleadoId);
+      const empleadoNombre = selectedEmployee ? `${selectedEmployee.nombres} ${selectedEmployee.apellidos}` : "";
+
+      toast({
+        title: "Evaluación guardada",
+        description: `La evaluación de ${empleadoNombre} ha sido registrada exitosamente`,
+      });
+
+      onBack();
+    } catch (error) {
+      // El hook ya muestra el toast de error
+    }
   };
 
   const generateReport = () => {

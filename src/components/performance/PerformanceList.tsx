@@ -9,48 +9,47 @@ import PerformanceForm from "./PerformanceForm";
 import PerformanceDetail from "./PerformanceDetail";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/hooks/useEmployees";
+import { usePerformanceEvaluations } from "@/hooks/usePerformanceEvaluations";
 
 const PerformanceList = () => {
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
+  const { evaluations, loading } = usePerformanceEvaluations();
+  
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedPerformance, setSelectedPerformance] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterPeriod, setFilterPeriod] = useState("");
 
-  // Performance evaluations based on real employees
-  const getEvaluationsForEmployees = () => {
-    return activeEmployees.slice(0, 3).map((emp, index) => ({
-      id: emp.id,
-      empleadoId: emp.id,
-      empleadoNombre: `${emp.nombres} ${emp.apellidos}`,
-      periodo: "2024-Q4",
-      fechaEvaluacion: new Date(Date.now() - (index * 5) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      evaluador: "Supervisor de Área",
-      puntuacionGeneral: 75 + Math.floor(Math.random() * 25),
-      competencias: {
-        tecnicas: 70 + Math.floor(Math.random() * 30),
-        liderazgo: 70 + Math.floor(Math.random() * 30),
-        comunicacion: 70 + Math.floor(Math.random() * 30),
-        puntualidad: 70 + Math.floor(Math.random() * 30),
-        trabajoEquipo: 70 + Math.floor(Math.random() * 30)
-      },
-      objetivos: {
-        cumplimiento: 70 + Math.floor(Math.random() * 30),
-        calidad: 70 + Math.floor(Math.random() * 30),
-        eficiencia: 70 + Math.floor(Math.random() * 30)
-      },
-      estado: index === 0 ? "completado" : "en-progreso",
-      observaciones: index === 0 ? "Excelente desempeño general" : "Evaluación en curso",
-      fortalezas: ["Responsabilidad", "Puntualidad", "Trabajo en equipo"],
-      areasDesarrollo: ["Comunicación", "Liderazgo", "Iniciativa"]
-    }));
-  };
+  // Adaptar a forma esperada por la UI existente
+  const items = evaluations.map((e) => ({
+    id: e.id,
+    empleadoId: e.employee_id,
+    empleadoNombre: e.empleadoNombre || '',
+    periodo: e.periodo,
+    fechaEvaluacion: e.fecha_evaluacion,
+    evaluador: e.evaluador || 'Sin asignar',
+    puntuacionGeneral: e.puntuacion_general || 0,
+    competencias: {
+      tecnicas: e.comp_tecnicas || 0,
+      liderazgo: e.comp_liderazgo || 0,
+      comunicacion: e.comp_comunicacion || 0,
+      puntualidad: e.comp_puntualidad || 0,
+      trabajoEquipo: e.comp_trabajo_equipo || 0
+    },
+    objetivos: {
+      cumplimiento: e.obj_cumplimiento || 0,
+      calidad: e.obj_calidad || 0,
+      eficiencia: e.obj_eficiencia || 0
+    },
+    estado: e.estado,
+    observaciones: e.observaciones || '',
+    fortalezas: e.fortalezas || [],
+    areasDesarrollo: e.areas_desarrollo || []
+  }));
 
-  const mockEvaluations = getEvaluationsForEmployees();
-
-  const filteredEvaluations = mockEvaluations.filter(evaluation => {
+  const filteredEvaluations = items.filter(evaluation => {
     const matchesSearch = evaluation.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesPeriod = !filterPeriod || filterPeriod === "all" || evaluation.periodo === filterPeriod;
     return matchesSearch && matchesPeriod;
@@ -79,16 +78,16 @@ const PerformanceList = () => {
   };
 
   if (view === "form") {
-    return <PerformanceForm onBack={handleBackToList} evaluation={selectedPerformance} />;
+    return <PerformanceForm onBack={handleBackToList} evaluation={selectedPerformance} employees={activeEmployees} />;
   }
 
   if (view === "detail" && selectedPerformance) {
     return <PerformanceDetail evaluation={selectedPerformance} onBack={handleBackToList} />;
   }
 
-  const avgScore = mockEvaluations.length > 0 ? Math.round(mockEvaluations.reduce((sum, evaluation) => sum + evaluation.puntuacionGeneral, 0) / mockEvaluations.length) : 0;
-  const highPerformers = mockEvaluations.length > 0 ? mockEvaluations.filter(evaluation => evaluation.puntuacionGeneral >= 90).length : 0;
-  const needsImprovement = mockEvaluations.length > 0 ? mockEvaluations.filter(evaluation => evaluation.puntuacionGeneral < 80).length : 0;
+  const avgScore = items.length > 0 ? Math.round(items.reduce((sum, evaluation) => sum + evaluation.puntuacionGeneral, 0) / items.length) : 0;
+  const highPerformers = items.length > 0 ? items.filter(evaluation => evaluation.puntuacionGeneral >= 90).length : 0;
+  const needsImprovement = items.length > 0 ? items.filter(evaluation => evaluation.puntuacionGeneral < 80).length : 0;
 
   return (
     <div className="space-y-6">
@@ -120,7 +119,7 @@ const PerformanceList = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Evaluaciones Completadas</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {mockEvaluations.filter(e => e.estado === "completado").length}
+                  {items.filter(e => e.estado === "completado").length}
                 </p>
               </div>
               <div className="p-3 bg-success/10 rounded-lg">

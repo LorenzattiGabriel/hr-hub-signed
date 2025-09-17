@@ -85,12 +85,32 @@ export const EmployeeProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const importEmployees = (newEmployees: Omit<Employee, 'id'>[]) => {
+    const normalizeDni = (dni: string) => String(dni ?? '').trim();
+
+    // Evitar duplicados: primero limpiar duplicados dentro del lote nuevo
+    const seenBatch = new Set<string>();
+    const uniqueBatch = newEmployees.filter(emp => {
+      const k = normalizeDni(emp.dni);
+      if (!k) return false;
+      if (seenBatch.has(k)) return false;
+      seenBatch.add(k);
+      return true;
+    });
+
+    // Evitar duplicados respecto a los existentes
+    const existingDnis = new Set(employees.map(e => normalizeDni(e.dni)));
+    const trulyNew = uniqueBatch.filter(emp => !existingDnis.has(normalizeDni(emp.dni)));
+
+    if (trulyNew.length === 0) {
+      return; // Nada que agregar
+    }
+
     const maxId = Math.max(0, ...employees.map(e => e.id));
-    const employeesWithIds = newEmployees.map((emp, index) => ({
+    const employeesWithIds = trulyNew.map((emp, index) => ({
       ...emp,
-      id: maxId + index + 1
+      id: maxId + index + 1,
     }));
-    // Solo agregar los empleados nuevos, no duplicar los existentes
+
     const updatedEmployees = [...employees, ...employeesWithIds];
     setEmployees(updatedEmployees);
     localStorage.setItem('employees', JSON.stringify(updatedEmployees, (key, value) => (key === 'fotoDni' || key === 'fotoCarnet' ? undefined : value)));

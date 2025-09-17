@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useEmployees } from '@/contexts/EmployeeContext';
 import type { Employee } from '@/contexts/EmployeeContext';
-
+import * as XLSX from 'xlsx';
 interface EmployeeImportProps {
   onComplete: () => void;
 }
@@ -14,7 +14,7 @@ interface EmployeeImportProps {
 export const EmployeeImport = ({ onComplete }: EmployeeImportProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const { importEmployees } = useEmployees();
+  const { importEmployees, employees } = useEmployees();
 
   const parseExcelData = (data: string): Omit<Employee, 'id'>[] => {
     const lines = data.split('\n').filter(line => line.trim());
@@ -134,150 +134,90 @@ export const EmployeeImport = ({ onComplete }: EmployeeImportProps) => {
     }
 
     setIsProcessing(true);
-    
-    try {
-      // Para demostración, usamos los datos que ya conocemos del Excel
-      const empleadosData: Omit<Employee, 'id'>[] = [
-        {
-          nombres: 'NOELIA BELÉN',
-          apellidos: 'LUDUEÑA',
-          dni: '35832688',
-          cuil: '',
-          cargo: 'Operario de Producción',
-          sector: 'Producción',
-          tipoContrato: 'CON PLAN SEMESTRAL',
-          fechaIngreso: '2024-05-25',
-          fechaNacimiento: '1993-12-30',
-          telefono: '3525406695',
-          email: 'belenludueña8@gmail.com',
-          direccion: '',
-          salario: 0,
-          estadoCivil: '',
-          contactoEmergencia: 'OSCAR SANCHEZ',
-          telefonoEmergencia: '3574638038',
-          parentescoEmergencia: 'ESPOSO',
-          estado: 'activo',
-          nivelEducativo: 'Secundario',
-          titulo: '',
-          otrosConocimientos: 'PELUQUERÍA',
-          grupoSanguineo: 'AB+',
-          alergias: '',
-          medicacionHabitual: '',
-          obraSocial: '',
-          observaciones: '',
-          tieneHijos: 'si',
-          nombresHijos: 'THOMAS BENJAMIN SANCHEZ- 8 AÑOS, IAN GAEL SANCHEZ-2 AÑOS',
-          tieneLicencia: 'si',
-          tipoLicencia: 'clase-b',
-          fotoDni: null,
-          fotoCarnet: null
-        },
-        {
-          nombres: 'MARIELA DESIREE',
-          apellidos: 'DIAZ',
-          dni: '41279664',
-          cuil: '',
-          cargo: 'Operario de Producción',
-          sector: 'Producción',
-          tipoContrato: 'POR TIEMPO INDETERMINADO',
-          fechaIngreso: '2020-01-07',
-          fechaNacimiento: '1997-09-24',
-          telefono: '3574412746',
-          email: 'marieladesiree27@gmail.com',
-          direccion: '',
-          salario: 0,
-          estadoCivil: '',
-          contactoEmergencia: 'MÓNICA MARIELA VACA',
-          telefonoEmergencia: '3516195254',
-          parentescoEmergencia: 'MADRE',
-          estado: 'activo',
-          nivelEducativo: 'Primario',
-          titulo: '',
-          otrosConocimientos: '',
-          grupoSanguineo: '0-',
-          alergias: '',
-          medicacionHabitual: '',
-          obraSocial: 'SANCOR',
-          observaciones: '',
-          tieneHijos: 'si',
-          nombresHijos: 'THIAGO QUINTEROS- 8 AÑOS',
-          tieneLicencia: 'si',
-          tipoLicencia: 'clase-b',
-          fotoDni: null,
-          fotoCarnet: null
-        },
-        {
-          nombres: 'JUAN SEBASTIAN',
-          apellidos: 'PERALTA',
-          dni: '39581105',
-          cuil: '',
-          cargo: 'Operario de Producción',
-          sector: 'Producción',
-          tipoContrato: 'CON PLAN SEMESTRAL',
-          fechaIngreso: '2024-11-04',
-          fechaNacimiento: '1996-02-14',
-          telefono: '3574409910',
-          email: 'jp4739391@gmail.com',
-          direccion: '',
-          salario: 0,
-          estadoCivil: '',
-          contactoEmergencia: 'ARIANE ACOSTA',
-          telefonoEmergencia: '3574638980',
-          parentescoEmergencia: 'ESPOSO',
-          estado: 'activo',
-          nivelEducativo: 'Secundario Incompleto',
-          titulo: '',
-          otrosConocimientos: 'PANADERÍA',
-          grupoSanguineo: 'B+',
-          alergias: '',
-          medicacionHabitual: '',
-          obraSocial: '',
-          observaciones: '',
-          tieneHijos: 'si',
-          nombresHijos: 'MOHANA SIMONE PERALTA- 3 AÑOS',
-          tieneLicencia: 'no',
-          tipoLicencia: '',
-          fotoDni: null,
-          fotoCarnet: null
-        },
-        {
-          nombres: 'GERARDO DAMIÁN',
-          apellidos: 'MATEO',
-          dni: '34671654',
-          cuil: '',
-          cargo: 'Chofer o repartidor',
-          sector: 'Transporte',
-          tipoContrato: 'POR TIEMPO INDETERMINADO',
-          fechaIngreso: '2023-08-04',
-          fechaNacimiento: '1989-10-23',
-          telefono: '3574651097',
-          email: 'gerardomateoonano@gmail.com',
-          direccion: '',
-          salario: 0,
-          estadoCivil: '',
-          contactoEmergencia: 'AMALIA',
-          telefonoEmergencia: '3573467086',
-          parentescoEmergencia: 'PAREJA',
-          estado: 'activo',
-          nivelEducativo: 'Primario',
-          titulo: '',
-          otrosConocimientos: '',
-          grupoSanguineo: '0+',
-          alergias: '',
-          medicacionHabitual: '',
-          obraSocial: 'OSCEP',
-          observaciones: '',
-          tieneHijos: 'si',
-          nombresHijos: 'BRUNO MATEO- 10 AÑOS, CAROLINA MATEO- 4 AÑOS, EMILIANA MATEO- 3 AÑOS',
-          tieneLicencia: 'no',
-          tipoLicencia: '',
-          fotoDni: null,
-          fotoCarnet: null
-        }
-      ];
 
-      importEmployees(empleadosData);
-      toast.success(`${empleadosData.length} empleados importados correctamente`);
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<Record<string, any>>(ws, { defval: '' });
+
+      const norm = (v: any) => String(v ?? '').trim();
+      const toBoolText = (v: any) => norm(v).toLowerCase().startsWith('s') ? 'si' : 'no';
+
+      const parsed: Omit<Employee, 'id'>[] = rows
+        .filter(r => norm(r['ESTADO']).length === 0 || norm(r['ESTADO']).toUpperCase() === 'ACTIVO')
+        .map((r) => {
+          const nombreCompleto = norm(r['Apellido y Nombre:']);
+          const hasComma = nombreCompleto.includes(',');
+          const [apellidos, nombres] = hasComma
+            ? nombreCompleto.split(',').map((s: string) => s.trim())
+            : ['', nombreCompleto];
+
+          const poseeObraSocial = toBoolText(r['Posee Obra Social']) === 'si';
+          const obraSocialDetalle = norm(r['En caso de ser afirmativo detallar cual:']);
+
+          const tipoLic = norm(r['Detallar el tipo de Licencia:']);
+
+          return {
+            nombres,
+            apellidos,
+            dni: norm(r['Seleccione DNI:']),
+            cuil: '',
+            cargo: norm(r['Puesto:']),
+            sector: 'Producción',
+            tipoContrato: norm(r['Tipo de Contrato:']),
+            fechaIngreso: convertDate(norm(r['Fecha de ingreso:'])),
+            fechaNacimiento: convertDate(norm(r['Fecha de Nacimiento:'])),
+            telefono: norm(r['Número de contacto:']),
+            email: norm(r['Correo Electrónico:']),
+            direccion: '',
+            salario: 0,
+            estadoCivil: '',
+            contactoEmergencia: norm(r['Nombre']),
+            telefonoEmergencia: norm(r['Número de contacto de emergencia:']),
+            parentescoEmergencia: norm(r['parentesco:']),
+            estado: norm(r['ESTADO']).toUpperCase() === 'ACTIVO' ? 'activo' : 'inactivo',
+            nivelEducativo: norm(r['Nivel educativo alcanzado:']),
+            titulo: norm(r['Título: (en caso de no tener colocar *No posee)']).toUpperCase() === 'NO POSEE' ? '' : norm(r['Título: (en caso de no tener colocar *No posee)']),
+            otrosConocimientos: norm(r['Otros conocimientos:']) === '-' ? '' : norm(r['Otros conocimientos:']),
+            grupoSanguineo: norm(r['Grupo y Factor Sanguíneo:']),
+            alergias: toBoolText(r['¿Tiene alergias?']) === 'si' ? 'Sí' : '',
+            medicacionHabitual: norm(r['¿Toma alguna medicación habitual?:']).toLowerCase() === 'no' ? '' : norm(r['¿Toma alguna medicación habitual?:']),
+            obraSocial: poseeObraSocial ? obraSocialDetalle : '',
+            observaciones: '',
+            tieneHijos: toBoolText(r['¿Tiene Hijos?']),
+            nombresHijos: norm(r['En caso afirmativo detallar sus nombres completos y edades']),
+            tieneLicencia: toBoolText(r['Posee licencia de conducir:']),
+            tipoLicencia: tipoLic ? mapLicenseType(tipoLic) : '',
+            fotoDni: null,
+            fotoCarnet: null,
+          } as Omit<Employee, 'id'>;
+        })
+        // Filtrar filas sin DNI
+        .filter(emp => emp.dni.length > 0);
+
+      // Deduplicar por DNI dentro del archivo
+      const seen = new Set<string>();
+      const uniqueParsed = parsed.filter(emp => {
+        const k = emp.dni;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      });
+
+      // Evitar duplicados con los ya existentes en contexto
+      const existing = new Set((employees ?? []).map(e => String(e.dni).trim()));
+      const toInsert = uniqueParsed.filter(emp => !existing.has(emp.dni));
+
+      if (toInsert.length === 0) {
+        toast.info('No hay empleados nuevos para importar (todos ya existen por DNI)');
+        onComplete();
+        return;
+      }
+
+      importEmployees(toInsert);
+      const skipped = uniqueParsed.length - toInsert.length;
+      toast.success(`${toInsert.length} empleados importados correctamente${skipped > 0 ? `, ${skipped} omitidos por duplicados` : ''}`);
       onComplete();
 
     } catch (error) {

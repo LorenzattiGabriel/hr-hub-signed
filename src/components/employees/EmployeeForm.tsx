@@ -42,6 +42,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     // Datos Laborales
     cargo: employee?.cargo || "",
     sector: employee?.sector || "",
+    tipoContrato: employee?.tipoContrato || "",
     fechaIngreso: employee?.fechaIngreso || "",
     salario: employee?.salario || "",
     estadoCivil: employee?.estadoCivil || "",
@@ -422,6 +423,22 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   <SelectItem value="administracion">Administración</SelectItem>
                   <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
                   <SelectItem value="produccion">Producción</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="tipoContrato" className="text-foreground">Tipo de Contrato</Label>
+              <Select onValueChange={(value) => handleInputChange("tipoContrato", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar tipo de contrato" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="indefinido">Contrato por tiempo indeterminado</SelectItem>
+                  <SelectItem value="temporal">Contrato temporal</SelectItem>
+                  <SelectItem value="obra">Contrato por obra o servicio</SelectItem>
+                  <SelectItem value="pasantia">Pasantía</SelectItem>
+                  <SelectItem value="eventual">Trabajo eventual</SelectItem>
                 </SelectContent>
               </Select>
             </div>

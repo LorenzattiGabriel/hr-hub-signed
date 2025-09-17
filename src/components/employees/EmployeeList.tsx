@@ -136,7 +136,7 @@ const EmployeeList = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -160,20 +160,6 @@ const EmployeeList = () => {
               </div>
               <div className="p-3 bg-success/10 rounded-lg">
                 <Users className="h-6 w-6 text-success" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Nuevos Este Mes</p>
-                <p className="text-3xl font-bold text-foreground">0</p>
-              </div>
-              <div className="p-3 bg-secondary/10 rounded-lg">
-                <Plus className="h-6 w-6 text-secondary" />
               </div>
             </div>
           </CardContent>

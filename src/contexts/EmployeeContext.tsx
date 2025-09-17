@@ -8,6 +8,7 @@ interface Employee {
   cuil?: string;
   cargo: string;
   sector: string;
+  tipoContrato: string;
   fechaIngreso: string;
   fechaNacimiento: string;
   telefono: string;

@@ -195,43 +195,23 @@ const EmployeeDetail = ({ employee, onBack, onEdit }: EmployeeDetailProps) => {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-3 bg-primary/10 rounded-lg">
-                <p className="text-2xl font-bold text-primary">14</p>
+                <p className="text-2xl font-bold text-primary">0</p>
                 <p className="text-xs text-foreground/70">Días de vacaciones usados</p>
               </div>
               <div className="text-center p-3 bg-secondary/10 rounded-lg">
-                <p className="text-2xl font-bold text-secondary">7</p>
+                <p className="text-2xl font-bold text-secondary">21</p>
                 <p className="text-xs text-foreground/70">Días de vacaciones disponibles</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-3 bg-warning/10 rounded-lg">
-                <p className="text-2xl font-bold text-warning">3</p>
+                <p className="text-2xl font-bold text-warning">0</p>
                 <p className="text-xs text-foreground/70">Llegadas tarde este mes</p>
               </div>
               <div className="text-center p-3 bg-success/10 rounded-lg">
-                <p className="text-2xl font-bold text-success">2</p>
+                <p className="text-2xl font-bold text-success">0</p>
                 <p className="text-xs text-foreground/70">Capacitaciones completadas</p>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2">
-              <h4 className="font-medium text-foreground">Acciones Rápidas</h4>
-              <div className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => generatePDF("Constancia de Vacaciones")}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Constancia de Vacaciones
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => generatePDF("Recibo de Sueldo")}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Recibo de Sueldo
-                </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start" onClick={() => generatePDF("Certificado de Trabajo")}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Certificado de Trabajo
-                </Button>
               </div>
             </div>
           </CardContent>

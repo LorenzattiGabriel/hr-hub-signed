@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Upload, ArrowLeft, FileSpreadsheet, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAttendanceData } from "@/hooks/useAttendanceData";
+import { useEmployees } from "@/hooks/useEmployees";
+import * as XLSX from 'xlsx';
 
 interface AttendanceUploadProps {
   onBack: () => void;
@@ -10,6 +13,8 @@ interface AttendanceUploadProps {
 
 const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
   const { toast } = useToast();
+  const { bulkInsert } = useAttendanceData();
+  const { employees } = useEmployees();
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -50,21 +55,121 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
     }
   };
 
-  const processFile = () => {
+  const processFile = async () => {
     if (!uploadedFile) return;
 
     setProcessing(true);
     
-    // Simulate file processing
-    setTimeout(() => {
-      setProcessing(false);
-      toast({
-        title: "Archivo procesado",
-        description: "Los datos de asistencia han sido cargados exitosamente",
-      });
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          // Process and validate data
+          const attendanceRecords = [];
+          for (const row of jsonData as any[]) {
+            // Try to find employee by DNI or name
+            const employeeDni = String(row.DNI || row.Empleado || '').trim();
+            const employeeName = String(row.Nombre || row.Empleado || '').trim();
+            
+            let employee = employees.find(emp => 
+              emp.dni === employeeDni || 
+              `${emp.nombres} ${emp.apellidos}`.toLowerCase().includes(employeeName.toLowerCase())
+            );
+
+            if (!employee && employeeName) {
+              // Try partial name match
+              employee = employees.find(emp => 
+                employeeName.toLowerCase().includes(emp.nombres.toLowerCase()) ||
+                employeeName.toLowerCase().includes(emp.apellidos.toLowerCase())
+              );
+            }
+
+            if (!employee) {
+              console.warn(`No se encontró empleado para: ${employeeName || employeeDni}`);
+              continue;
+            }
+
+            const fecha = row.Fecha || row.fecha;
+            const horaEntrada = row['Hora Entrada'] || row.entrada || row['Hora de Entrada'];
+            const horaSalida = row['Hora Salida'] || row.salida || row['Hora de Salida'];
+
+            if (!fecha) continue;
+
+            // Parse date
+            let parsedDate;
+            if (typeof fecha === 'number') {
+              // Excel date serial number
+              parsedDate = XLSX.SSF.parse_date_code(fecha);
+              parsedDate = new Date(parsedDate.y, parsedDate.m - 1, parsedDate.d);
+            } else {
+              parsedDate = new Date(fecha);
+            }
+
+            // Calculate if late arrival (after 8:00 AM)
+            const llegadaTarde = horaEntrada ? 
+              new Date(`1970-01-01T${horaEntrada}`).getHours() >= 8 && 
+              new Date(`1970-01-01T${horaEntrada}`).getMinutes() > 0 : false;
+
+            // Calculate worked hours
+            let horasTrabajadas = null;
+            if (horaEntrada && horaSalida) {
+              const entrada = new Date(`1970-01-01T${horaEntrada}`);
+              const salida = new Date(`1970-01-01T${horaSalida}`);
+              horasTrabajadas = (salida.getTime() - entrada.getTime()) / (1000 * 60 * 60);
+            }
+
+            attendanceRecords.push({
+              employee_id: employee.id,
+              fecha: parsedDate.toISOString().split('T')[0],
+              hora_entrada: horaEntrada || null,
+              hora_salida: horaSalida || null,
+              horas_trabajadas: horasTrabajadas,
+              llegada_tarde: llegadaTarde,
+              observaciones: null
+            });
+          }
+
+          if (attendanceRecords.length === 0) {
+            throw new Error('No se encontraron registros válidos en el archivo');
+          }
+
+          // Insert records into database
+          await bulkInsert(attendanceRecords);
+
+          toast({
+            title: "Archivo procesado exitosamente",
+            description: `Se procesaron ${attendanceRecords.length} registros de asistencia`,
+          });
+          
+          setTimeout(() => onBack(), 1500);
+        } catch (error) {
+          console.error('Error processing file:', error);
+          toast({
+            title: "Error procesando archivo",
+            description: "Verifique que el formato del archivo sea correcto",
+            variant: "destructive"
+          });
+        } finally {
+          setProcessing(false);
+        }
+      };
       
-      setTimeout(() => onBack(), 1500);
-    }, 3000);
+      reader.readAsArrayBuffer(uploadedFile);
+    } catch (error) {
+      console.error('Error reading file:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo leer el archivo",
+        variant: "destructive"
+      });
+      setProcessing(false);
+    }
   };
 
   const downloadTemplate = () => {

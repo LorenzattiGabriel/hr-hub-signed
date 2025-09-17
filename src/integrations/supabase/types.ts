@@ -67,6 +67,53 @@ export type Database = {
           },
         ]
       }
+      attendance: {
+        Row: {
+          created_at: string
+          employee_id: string
+          fecha: string
+          hora_entrada: string | null
+          hora_salida: string | null
+          horas_trabajadas: number | null
+          id: string
+          llegada_tarde: boolean | null
+          observaciones: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          employee_id: string
+          fecha: string
+          hora_entrada?: string | null
+          hora_salida?: string | null
+          horas_trabajadas?: number | null
+          id?: string
+          llegada_tarde?: boolean | null
+          observaciones?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          employee_id?: string
+          fecha?: string
+          hora_entrada?: string | null
+          hora_salida?: string | null
+          horas_trabajadas?: number | null
+          id?: string
+          llegada_tarde?: boolean | null
+          observaciones?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           alergias: string | null

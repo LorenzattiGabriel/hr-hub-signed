@@ -9,6 +9,7 @@ export interface UniformDelivery {
   size: string;
   quantity: number;
   delivery_date: string;
+  next_delivery_date: string | null;
   season: string;
   condition: string;
   notes: string | null;
@@ -45,6 +46,7 @@ export const useUniforms = () => {
           size: row.size,
           quantity: row.quantity,
           delivery_date: row.delivery_date,
+          next_delivery_date: row.next_delivery_date,
           season: row.season,
           condition: row.condition,
           notes: row.notes,
@@ -70,7 +72,7 @@ export const useUniforms = () => {
     }
   };
 
-  const addUniform = async (uniformData: Omit<UniformDelivery, 'id' | 'created_at' | 'updated_at' | 'employeeName' | 'employeeDni'>) => {
+  const addUniform = async (uniformData: Omit<UniformDelivery, 'id' | 'created_at' | 'updated_at' | 'employeeName' | 'employeeDni' | 'next_delivery_date'>) => {
     try {
       const insertPayload = {
         employee_id: uniformData.employee_id,
@@ -100,6 +102,7 @@ export const useUniforms = () => {
         size: data.size,
         quantity: data.quantity,
         delivery_date: data.delivery_date,
+        next_delivery_date: data.next_delivery_date,
         season: data.season,
         condition: data.condition,
         notes: data.notes,
@@ -150,6 +153,7 @@ export const useUniforms = () => {
         size: data.size,
         quantity: data.quantity,
         delivery_date: data.delivery_date,
+        next_delivery_date: data.next_delivery_date,
         season: data.season,
         condition: data.condition,
         notes: data.notes,

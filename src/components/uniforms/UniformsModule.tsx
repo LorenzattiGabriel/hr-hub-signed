@@ -25,6 +25,7 @@ const UniformsModule = () => {
   const [uniformType, setUniformType] = useState("");
   const [size, setSize] = useState("");
   const [quantity, setQuantity] = useState("1");
+  const [deliveryDate, setDeliveryDate] = useState(new Date().toISOString().split('T')[0]);
   const [season, setSeason] = useState("");
   const [condition, setCondition] = useState("");
   const [notes, setNotes] = useState("");
@@ -48,8 +49,35 @@ const UniformsModule = () => {
 
   const conditions = ["Nuevo", "Usado - Buen estado", "Usado - Estado regular"];
 
+  // Elementos de protección se entregan cuando se rompen (sin fecha programada)
+  const protectionElements = ["Barbijo", "Guantes", "Mameluco", "Sordina", "Gafas de seguridad"];
+  
+  // Uniformes tienen fechas programadas de entrega
+  const scheduledUniforms = ["Remera", "Pantalón cargo", "Campera", "Buzo", "Zapatos punta de acero"];
+
+  const isProtectionElement = (uniformType: string) => {
+    return protectionElements.includes(uniformType);
+  };
+
+  const getNextDeliveryInfo = (uniformType: string, deliveryDate: string) => {
+    if (isProtectionElement(uniformType)) {
+      return "Se entrega cuando se rompe o deteriora";
+    }
+    
+    const delivery = new Date(deliveryDate);
+    if (uniformType === "Zapatos punta de acero") {
+      const nextYear = new Date(delivery);
+      nextYear.setFullYear(delivery.getFullYear() + 1);
+      return `Próxima entrega: ${nextYear.toLocaleDateString('es-AR')} (cada 1 año)`;
+    } else {
+      const nextSixMonths = new Date(delivery);
+      nextSixMonths.setMonth(delivery.getMonth() + 6);
+      return `Próxima entrega: ${nextSixMonths.toLocaleDateString('es-AR')} (cada 6 meses)`;
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!selectedEmployee || !uniformType || !size || !season || !condition) {
+    if (!selectedEmployee || !uniformType || !size || !season || !condition || !deliveryDate) {
       toast({
         title: "Error",
         description: "Por favor completa todos los campos obligatorios",
@@ -67,7 +95,7 @@ const UniformsModule = () => {
         uniform_type: uniformType,
         size,
         quantity: parseInt(quantity),
-        delivery_date: new Date().toISOString().split('T')[0],
+        delivery_date: deliveryDate,
         season,
         condition,
         notes: notes || null,
@@ -79,6 +107,7 @@ const UniformsModule = () => {
       setUniformType("");
       setSize("");
       setQuantity("1");
+      setDeliveryDate(new Date().toISOString().split('T')[0]);
       setSeason("");
       setCondition("");
       setNotes("");
@@ -292,6 +321,15 @@ const UniformsModule = () => {
                 </div>
 
                 <div>
+                  <Label htmlFor="deliveryDate">Fecha de Entrega *</Label>
+                  <Input
+                    type="date"
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                  />
+                </div>
+
+                <div>
                   <Label htmlFor="season">Temporada *</Label>
                   <Select value={season} onValueChange={setSeason}>
                     <SelectTrigger>
@@ -403,8 +441,17 @@ const UniformsModule = () => {
                   </div>
                   <div className="flex items-center text-sm text-foreground/70">
                     <Calendar className="h-4 w-4 mr-1" />
-                    {new Date(delivery.delivery_date).toLocaleDateString('es-AR')}
+                    Entregado: {new Date(delivery.delivery_date).toLocaleDateString('es-AR')}
                   </div>
+                </div>
+
+                <div className="mb-4 p-3 bg-muted/30 rounded-lg">
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    {isProtectionElement(delivery.uniform_type) ? "Elemento de Protección" : "Uniforme de Trabajo"}
+                  </p>
+                  <p className="text-sm text-foreground/70">
+                    {getNextDeliveryInfo(delivery.uniform_type, delivery.delivery_date)}
+                  </p>
                 </div>
 
                 {delivery.notes && (

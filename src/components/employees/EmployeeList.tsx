@@ -24,13 +24,13 @@ const EmployeeList = () => {
 
   const filteredEmployees = employees.filter(employee => {
     const matchesSearch = (
-      employee.nombres.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.apellidos.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.dni.includes(searchTerm) ||
-      employee.cargo.toLowerCase().includes(searchTerm.toLowerCase())
+      employee.nombres?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.apellidos?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.dni?.includes(searchTerm) ||
+      (employee.cargo || employee.puesto || '')?.toLowerCase().includes(searchTerm.toLowerCase())
     );
     
-    const matchesSector = !filterSector || filterSector === "all" || employee.sector === filterSector;
+    const matchesSector = !filterSector || filterSector === "all" || (employee.sector || employee.departamento) === filterSector;
     const matchesStatus = !filterStatus || filterStatus === "all" || employee.estado === filterStatus;
     
     return matchesSearch && matchesSector && matchesStatus;
@@ -223,8 +223,8 @@ const EmployeeList = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-foreground">{employee.dni}</td>
-                    <td className="px-6 py-4 text-foreground">{employee.cargo}</td>
-                    <td className="px-6 py-4 text-foreground">{employee.sector}</td>
+                    <td className="px-6 py-4 text-foreground">{employee.cargo || employee.puesto || '-'}</td>
+                    <td className="px-6 py-4 text-foreground">{employee.sector || employee.departamento || '-'}</td>
                     <td className="px-6 py-4">
                       <Badge variant={employee.estado === "activo" ? "default" : "secondary"}>
                         {employee.estado === "activo" ? "Activo" : "Inactivo"}

@@ -19,15 +19,15 @@ const DashboardOverview = () => {
   
   const quickStats = [
     {
-      title: "Total Empleados",
-      value: employees.length.toString(),
-      change: `${activeEmployees.length} activos`,
-      icon: Users,
+      title: "Días de vacaciones usados",
+      value: "0",
+      change: "Sin datos",
+      icon: CalendarDays,
       color: "text-primary",
       bgColor: "bg-primary/10"
     },
     {
-      title: "Ausencias Hoy",
+      title: "Días de vacaciones disponibles",
       value: "0",
       change: "Sin datos",
       icon: CalendarDays,
@@ -35,7 +35,7 @@ const DashboardOverview = () => {
       bgColor: "bg-warning/10"
     },
     {
-      title: "Llegadas Tarde",
+      title: "Llegadas tarde este mes",
       value: "0",
       change: "Sin datos",
       icon: Clock,
@@ -43,7 +43,7 @@ const DashboardOverview = () => {
       bgColor: "bg-destructive/10"
     },
     {
-      title: "Evaluaciones Pendientes",
+      title: "Capacitaciones completadas",
       value: "0",
       change: "Sin datos",
       icon: ClipboardList,
@@ -178,28 +178,6 @@ const DashboardOverview = () => {
         </Card>
       </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Acciones Rápidas</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button variant="premium" className="h-20 flex-col space-y-2">
-              <Users className="h-6 w-6" />
-              <span>Nuevo Empleado</span>
-            </Button>
-            <Button variant="secondary" className="h-20 flex-col space-y-2">
-              <CalendarDays className="h-6 w-6" />
-              <span>Registrar Ausencia</span>
-            </Button>
-            <Button variant="success" className="h-20 flex-col space-y-2">
-              <ClipboardList className="h-6 w-6" />
-              <span>Generar Reporte</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

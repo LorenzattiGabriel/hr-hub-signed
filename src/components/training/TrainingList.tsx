@@ -196,9 +196,11 @@ const TrainingList = () => {
               <SelectContent>
                 <SelectItem value="all">Todos los tipos</SelectItem>
                 <SelectItem value="seguridad">Seguridad</SelectItem>
-                <SelectItem value="tecnico">Técnico</SelectItem>
-                <SelectItem value="administrativo">Administrativo</SelectItem>
+                <SelectItem value="tecnica">Técnico</SelectItem>
+                <SelectItem value="administrativa">Administrativo</SelectItem>
                 <SelectItem value="calidad">Calidad</SelectItem>
+                <SelectItem value="liderazgo">Liderazgo</SelectItem>
+                <SelectItem value="otro">Otro</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -207,105 +209,120 @@ const TrainingList = () => {
 
       {/* Training List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {filteredTrainings.map((training) => (
-          <Card key={training.id} className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg text-foreground">{training.titulo}</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Select 
-                    value={training.estado} 
-                    onValueChange={(value) => handleStatusChange(training.id, value)}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="pendiente">Pendiente</SelectItem>
-                      <SelectItem value="en_progreso">En Progreso</SelectItem>
-                      <SelectItem value="completado">Completado</SelectItem>
-                      <SelectItem value="cancelado">Cancelado</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Badge variant={
-                    training.estado === "completado" ? "default" : 
-                    training.estado === "en_progreso" ? "secondary" :
-                    training.estado === "cancelado" ? "destructive" : "outline"
-                  }>
-                    {training.estado === "completado" ? "Completado" : 
-                     training.estado === "en_progreso" ? "En Progreso" :
-                     training.estado === "cancelado" ? "Cancelado" : "Pendiente"}
-                  </Badge>
+        {loading ? (
+          <div className="col-span-full text-center py-12">
+            <div className="animate-pulse">
+              <GraduationCap className="h-12 w-12 text-foreground/40 mx-auto mb-4" />
+              <p className="text-foreground/70">Cargando capacitaciones...</p>
+            </div>
+          </div>
+        ) : filteredTrainings.length === 0 ? (
+          <div className="col-span-full">
+            <Card>
+              <CardContent className="p-12 text-center">
+                <GraduationCap className="h-12 w-12 text-foreground/40 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
+                  {items.length === 0 ? "No hay capacitaciones registradas" : "No se encontraron capacitaciones"}
+                </h3>
+                <p className="text-foreground/70">
+                  {items.length === 0 
+                    ? "Comienza creando la primera capacitación" 
+                    : "No hay capacitaciones que coincidan con los filtros seleccionados."
+                  }
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          filteredTrainings.map((training) => (
+            <Card key={training.id} className="hover:shadow-md transition-shadow cursor-pointer">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg text-foreground">{training.titulo}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Select 
+                      value={training.estado} 
+                      onValueChange={(value) => handleStatusChange(training.id, value)}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pendiente">Pendiente</SelectItem>
+                        <SelectItem value="en_progreso">En Progreso</SelectItem>
+                        <SelectItem value="completado">Completado</SelectItem>
+                        <SelectItem value="cancelado">Cancelado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Badge variant={
+                      training.estado === "completado" ? "default" : 
+                      training.estado === "en_progreso" ? "secondary" :
+                      training.estado === "cancelado" ? "destructive" : "outline"
+                    }>
+                      {training.estado === "completado" ? "Completado" : 
+                       training.estado === "en_progreso" ? "En Progreso" :
+                       training.estado === "cancelado" ? "Cancelado" : "Pendiente"}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Empleado</p>
-                <p className="text-foreground">{training.empleadoNombre}</p>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">Fecha</p>
-                  <p className="text-foreground">{new Date(training.fecha).toLocaleDateString()}</p>
+                  <p className="text-sm font-medium text-foreground/70">Empleado</p>
+                  <p className="text-foreground">{training.empleadoNombre}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Duración</p>
-                  <p className="text-foreground">{training.duracion} horas</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-foreground/70">Fecha</p>
+                    <p className="text-foreground">{new Date(training.fecha).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground/70">Duración</p>
+                    <p className="text-foreground">{training.duracion} horas</p>
+                  </div>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Tipo</p>
-                  <Badge variant="outline">
-                    {training.tipo === "seguridad" ? "Seguridad" : 
-                     training.tipo === "tecnico" ? "Técnico" : "Administrativo"}
-                  </Badge>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-foreground/70">Tipo</p>
+                    <Badge variant="outline">
+                      {training.tipo === "seguridad" ? "Seguridad" : 
+                       training.tipo === "tecnica" ? "Técnico" : 
+                       training.tipo === "administrativa" ? "Administrativo" :
+                       training.tipo === "calidad" ? "Calidad" :
+                       training.tipo === "liderazgo" ? "Liderazgo" : "Otro"}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground/70">Certificación</p>
+                    {training.certificacion ? (
+                      <Badge variant="default">Sí</Badge>
+                    ) : (
+                      <Badge variant="outline">No</Badge>
+                    )}
+                  </div>
                 </div>
+
                 <div>
-                  <p className="text-sm font-medium text-foreground/70">Certificación</p>
-                  {training.certificacion ? (
-                    <Badge variant="success">Sí</Badge>
-                  ) : (
-                    <Badge variant="outline">No</Badge>
-                  )}
+                  <p className="text-sm font-medium text-foreground/70">Instructor</p>
+                  <p className="text-foreground text-sm">{training.instructor}</p>
                 </div>
-              </div>
 
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Instructor</p>
-                <p className="text-foreground text-sm">{training.instructor}</p>
-              </div>
-
-              <div className="flex space-x-2 pt-2">
-                <Button variant="outline" size="sm" onClick={() => handleViewTraining(training)}>
-                  Ver Detalle
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-1" />
-                  Certificado
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                <div className="flex space-x-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => handleViewTraining(training)}>
+                    Ver Detalle
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-1" />
+                    Certificado
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
-
-      {filteredTrainings.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <GraduationCap className="h-12 w-12 text-foreground/40 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              No se encontraron capacitaciones
-            </h3>
-            <p className="text-foreground/70">
-              No hay capacitaciones que coincidan con los filtros seleccionados.
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };

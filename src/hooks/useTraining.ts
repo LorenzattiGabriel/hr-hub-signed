@@ -49,6 +49,26 @@ export const useTraining = () => {
 
   useEffect(() => {
     fetchTrainingStats();
+
+    // Set up real-time subscription
+    const channel = (supabase as any)
+      .channel('training-stats-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'trainings'
+        },
+        () => {
+          fetchTrainingStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      (supabase as any).removeChannel(channel);
+    };
   }, []);
 
   return {

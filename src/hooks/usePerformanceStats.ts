@@ -59,6 +59,26 @@ export const usePerformanceStats = () => {
 
   useEffect(() => {
     fetchPerformanceStats();
+
+    // Set up real-time subscription
+    const channel = (supabase as any)
+      .channel('performance-stats-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'performance_evaluations'
+        },
+        () => {
+          fetchPerformanceStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      (supabase as any).removeChannel(channel);
+    };
   }, []);
 
   return {

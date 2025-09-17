@@ -67,14 +67,32 @@ const EmployeeList = () => {
   };
 
   const handleSaveEmployee = (data: any) => {
-    if (data.id) {
-      updateEmployee(data.id, data);
+    // Sanitize payload to avoid sending non-DB fields like 'alergias'
+    const sanitized: any = {
+      id: data.id,
+      dni: data.dni,
+      nombres: data.nombres,
+      apellidos: data.apellidos,
+      email: data.email,
+      telefono: data.telefono,
+      direccion: data.direccion,
+      fechaIngreso: data.fechaIngreso,
+      fechaNacimiento: data.fechaNacimiento,
+      cargo: data.cargo,
+      sector: data.sector,
+      salario: data.salario,
+      tipoContrato: data.tipoContrato,
+      estado: data.estado,
+    };
+
+    if (sanitized.id) {
+      updateEmployee(sanitized.id, sanitized);
       toast({
         title: "Empleado actualizado",
         description: "Los datos del empleado se han actualizado exitosamente",
       });
     } else {
-      addEmployee(data);
+      addEmployee(sanitized);
       toast({
         title: "Empleado agregado",
         description: "El nuevo empleado se ha agregado exitosamente",

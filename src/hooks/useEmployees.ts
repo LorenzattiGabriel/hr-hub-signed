@@ -49,6 +49,27 @@ export const useEmployees = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  const toDbEmployee = (input: Partial<Employee>) => {
+    const db: Record<string, any> = {
+      dni: input.dni,
+      nombres: input.nombres,
+      apellidos: input.apellidos,
+      email: input.email,
+      telefono: input.telefono,
+      direccion: input.direccion,
+      fecha_nacimiento: input.fecha_nacimiento || input.fechaNacimiento || null,
+      fecha_ingreso: input.fecha_ingreso || input.fechaIngreso || null,
+      puesto: input.puesto || input.cargo,
+      departamento: input.departamento || input.sector,
+      salario: input.salario ?? null,
+      tipo_contrato: input.tipo_contrato || input.tipoContrato,
+      estado: input.estado || 'activo',
+    };
+    // Remove undefined keys
+    Object.keys(db).forEach((k) => db[k] === undefined && delete db[k]);
+    return db;
+  };
+
   const fetchEmployees = async () => {
     try {
       const { data, error } = await supabase
@@ -83,19 +104,20 @@ export const useEmployees = () => {
 
   const addEmployee = async (employeeData: Omit<Employee, 'id'>) => {
     try {
+      const dbEmployee = toDbEmployee(employeeData);
       const { data, error } = await supabase
         .from('employees')
-        .insert([employeeData])
+        .insert([dbEmployee] as any)
         .select()
         .single();
 
       if (error) throw error;
 
-      setEmployees(prev => [...prev, data]);
+      setEmployees(prev => [...prev, { ...data, fechaIngreso: data.fecha_ingreso, fechaNacimiento: data.fecha_nacimiento, cargo: data.puesto, sector: data.departamento, tipoContrato: data.tipo_contrato }]);
       
       // Create initial vacation balance for current year
       const currentYear = new Date().getFullYear();
-      const vacationDays = await calculateVacationDays(employeeData.fecha_ingreso);
+      const vacationDays = await calculateVacationDays(dbEmployee.fecha_ingreso);
       
       await supabase
         .from('vacation_balances')
@@ -126,9 +148,10 @@ export const useEmployees = () => {
 
   const updateEmployee = async (id: string, employeeData: Partial<Employee>) => {
     try {
+      const dbUpdate = toDbEmployee(employeeData);
       const { data, error } = await supabase
         .from('employees')
-        .update(employeeData)
+        .update(dbUpdate as any)
         .eq('id', id)
         .select()
         .single();
@@ -182,9 +205,10 @@ export const useEmployees = () => {
 
   const importEmployees = async (employeesData: Omit<Employee, 'id'>[]) => {
     try {
+      const dbEmployees = employeesData.map((e) => toDbEmployee(e));
       const { data, error } = await supabase
         .from('employees')
-        .insert(employeesData)
+        .insert(dbEmployees as any)
         .select();
 
       if (error) throw error;
@@ -206,9 +230,17 @@ export const useEmployees = () => {
 
       await supabase
         .from('vacation_balances')
-        .insert(balancesToInsert);
+        .insert(balancesToInsert as any);
 
-      setEmployees(prev => [...prev, ...(data || [])]);
+      const mapped = (data || []).map(emp => ({
+        ...emp,
+        fechaIngreso: emp.fecha_ingreso,
+        fechaNacimiento: emp.fecha_nacimiento,
+        cargo: emp.puesto,
+        sector: emp.departamento,
+        tipoContrato: emp.tipo_contrato
+      }));
+      setEmployees(prev => [...prev, ...mapped]);
       
       toast({
         title: "Éxito",

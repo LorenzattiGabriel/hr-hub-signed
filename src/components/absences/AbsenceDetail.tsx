@@ -85,12 +85,13 @@ const AbsenceDetail = ({ absence, onBack }: AbsenceDetailProps) => {
           </div>
         </div>
         <div className="flex space-x-2">
+          {/* Botón PDF - siempre visible para testing */}
           <AbsencePDF 
             absenceData={absence}
             trigger={
-              <Button variant="outline">
+              <Button variant="outline" className="bg-blue-50 hover:bg-blue-100 border-blue-200">
                 <Download className="h-4 w-4 mr-2" />
-                Descargar PDF
+                Certificado PDF
               </Button>
             }
           />

@@ -374,6 +374,7 @@ export type Database = {
           delivery_date: string
           employee_id: string
           id: string
+          next_delivery_date: string | null
           notes: string | null
           quantity: number
           season: string
@@ -388,6 +389,7 @@ export type Database = {
           delivery_date: string
           employee_id: string
           id?: string
+          next_delivery_date?: string | null
           notes?: string | null
           quantity?: number
           season: string
@@ -402,6 +404,7 @@ export type Database = {
           delivery_date?: string
           employee_id?: string
           id?: string
+          next_delivery_date?: string | null
           notes?: string | null
           quantity?: number
           season?: string
@@ -516,6 +519,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_next_delivery_date: {
+        Args: { delivery_date_param: string; uniform_type_param: string }
+        Returns: string
+      }
       calculate_vacation_days: {
         Args: { fecha_ingreso: string }
         Returns: number

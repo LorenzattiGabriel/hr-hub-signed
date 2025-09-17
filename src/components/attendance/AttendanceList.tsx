@@ -4,51 +4,50 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart3, Upload, Download, Clock, TrendingUp, AlertTriangle, Users } from "lucide-react";
+import { BarChart3, Upload, Download, Clock, TrendingUp, AlertTriangle, Users, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import AttendanceUpload from "./AttendanceUpload";
 import AttendanceReports from "./AttendanceReports";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/hooks/useEmployees";
+import { useAttendanceData } from "@/hooks/useAttendanceData";
 
 const AttendanceList = () => {
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
+  const { records, loading, deleteRecord } = useAttendanceData();
   const activeEmployees = getActiveEmployees();
   const [view, setView] = useState<"list" | "upload" | "reports">("list");
   const [filterMonth, setFilterMonth] = useState("");
 
-  console.log('AttendanceList - activeEmployees:', activeEmployees); // Debug log
+  console.log('AttendanceList - records:', records); // Debug log
 
-  // Generate attendance data based on real employees
-  const getAttendanceForEmployees = () => {
-    const today = new Date();
-    const attendanceData: any[] = [];
-    
-    activeEmployees.slice(0, 5).forEach((emp, empIndex) => {
-      // Generate attendance for last 7 days
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        
-        const attendance = {
-          id: `${emp.id}-${date.getTime()}`,
-          empleadoId: emp.id,
-          empleadoNombre: `${emp.nombres} ${emp.apellidos}`,
-          empleadoDni: emp.dni,
-          fecha: date.toISOString().split('T')[0],
-          horaEntrada: `0${7 + (empIndex % 2)}:${30 + (i * 5)}:00`,
-          horaSalida: `1${6 + (empIndex % 2)}:${15 + (i * 3)}:00`,
-          estado: i === 0 && empIndex === 0 ? "ausente" : "presente",
-          observaciones: i === 0 && empIndex === 0 ? "Ausencia justificada" : ""
-        };
-        attendanceData.push(attendance);
-      }
-    });
-    
-    return attendanceData;
+  // Map records with employee info
+  const attendanceWithEmployees = records.map(record => {
+    const employee = activeEmployees.find(emp => emp.id === record.employee_id);
+    return {
+      ...record,
+      empleadoNombre: employee ? `${employee.nombres} ${employee.apellidos}` : 'Empleado no encontrado',
+      empleadoDni: employee?.dni || '',
+      horaEntrada: record.hora_entrada || '--',
+      horaSalida: record.hora_salida || '--',
+      horasTrabajadas: record.horas_trabajadas || 0,
+      llegadaTarde: record.llegada_tarde,
+      observaciones: record.observaciones || ''
+    };
+  });
+
+  const handleDeleteRecord = async (recordId: string, employeeName: string) => {
+    try {
+      await deleteRecord(recordId);
+      toast({
+        title: "Registro eliminado",
+        description: `El registro de asistencia de ${employeeName} ha sido eliminado`,
+      });
+    } catch (error) {
+      // El hook ya muestra el toast de error
+    }
   };
-
-  const attendanceData = getAttendanceForEmployees();
 
   const handleUploadExcel = () => {
     setView("upload");
@@ -77,11 +76,12 @@ const AttendanceList = () => {
     return <AttendanceReports onBack={handleBackToList} />;
   }
 
-  // Calculate totals (all zero until data is uploaded)
-  const totalLateArrivals = 0;
-  const avgPunctuality = 0;
-  const avgAttendance = 0;
-  const activeAlerts = attendanceData.filter(emp => emp.puntualidad < 85 || emp.asistencia < 90).length;
+  // Calculate totals from real data
+  const totalLateArrivals = records.filter(r => r.llegada_tarde).length;
+  const totalRecords = records.length;
+  const avgPunctuality = totalRecords > 0 ? Math.round(((totalRecords - totalLateArrivals) / totalRecords) * 100) : 0;
+  const avgAttendance = totalRecords > 0 ? 95 : 0; // Placeholder calculation
+  const activeAlerts = records.filter(r => r.llegada_tarde || !r.hora_entrada).length;
 
   return (
     <div className="space-y-6">
@@ -194,7 +194,14 @@ const AttendanceList = () => {
 
       {/* Attendance List */}
       <div className="space-y-6">
-        {attendanceData.length === 0 ? (
+        {loading ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
+              <h3 className="text-xl font-semibold text-foreground mb-2">Cargando registros...</h3>
+            </CardContent>
+          </Card>
+        ) : attendanceWithEmployees.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -210,64 +217,50 @@ const AttendanceList = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {attendanceData.map((record) => (
+            {attendanceWithEmployees.map((record) => (
               <Card key={record.id} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg text-foreground">{record.empleadoNombre}</CardTitle>
-                    <Badge variant={record.puntualidad >= 95 ? "success" : record.puntualidad >= 85 ? "warning" : "destructive"}>
-                      {record.puntualidad >= 95 ? "Excelente" : record.puntualidad >= 85 ? "Bueno" : "Necesita Mejora"}
+                    <Badge variant={record.llegadaTarde ? "destructive" : "default"}>
+                      {record.llegadaTarde ? "Llegada Tarde" : "Puntual"}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-foreground/70">Días Trabajados</p>
-                      <p className="text-2xl font-bold text-success">{record.diasTrabajados}</p>
+                      <p className="text-sm font-medium text-foreground/70">Fecha</p>
+                      <p className="text-foreground">{new Date(record.fecha).toLocaleDateString()}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground/70">Días Falta</p>
-                      <p className="text-2xl font-bold text-destructive">{record.diasFalta}</p>
+                      <p className="text-sm font-medium text-foreground/70">DNI</p>
+                      <p className="text-foreground">{record.empleadoDni}</p>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-sm font-medium text-foreground/70">Llegadas Tarde</p>
-                      <p className="text-xl font-bold text-warning">{record.llegadasTarde}</p>
+                      <p className="text-sm font-medium text-foreground/70">Hora Entrada</p>
+                      <p className="text-foreground">{record.horaEntrada}</p>
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-foreground/70">Horas Extras</p>
-                      <p className="text-xl font-bold text-primary">{record.horasExtras}</p>
+                      <p className="text-sm font-medium text-foreground/70">Hora Salida</p>
+                      <p className="text-foreground">{record.horaSalida}</p>
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-foreground/70">Puntualidad</span>
-                      <span className="font-semibold text-foreground">{record.puntualidad}%</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full ${record.puntualidad >= 95 ? 'bg-success' : record.puntualidad >= 85 ? 'bg-warning' : 'bg-destructive'}`}
-                        style={{ width: `${record.puntualidad}%` }}
-                      ></div>
-                    </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground/70">Horas Trabajadas</p>
+                    <p className="text-xl font-bold text-primary">{record.horasTrabajadas || 0} hrs</p>
                   </div>
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-foreground/70">Asistencia</span>
-                      <span className="font-semibold text-foreground">{record.asistencia}%</span>
+                  {record.observaciones && (
+                    <div>
+                      <p className="text-sm font-medium text-foreground/70">Observaciones</p>
+                      <p className="text-foreground text-sm">{record.observaciones}</p>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full ${record.asistencia >= 95 ? 'bg-success' : record.asistencia >= 85 ? 'bg-warning' : 'bg-destructive'}`}
-                        style={{ width: `${record.asistencia}%` }}
-                      ></div>
-                    </div>
-                  </div>
+                  )}
 
                   <div className="flex space-x-2 pt-2">
                     <Button variant="outline" size="sm">
@@ -277,6 +270,28 @@ const AttendanceList = () => {
                       <Download className="h-4 w-4 mr-1" />
                       Reporte
                     </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <Trash2 className="h-4 w-4 mr-1" />
+                          Eliminar
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción no se puede deshacer. Se eliminará permanentemente el registro de asistencia de {record.empleadoNombre} del {new Date(record.fecha).toLocaleDateString()}.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeleteRecord(record.id, record.empleadoNombre)}>
+                            Eliminar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </CardContent>
               </Card>

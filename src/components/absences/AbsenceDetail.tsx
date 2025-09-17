@@ -28,6 +28,10 @@ const AbsenceDetail = ({ absence, onBack }: AbsenceDetailProps) => {
         title: "Ausencia aprobada",
         description: "La ausencia ha sido aprobada exitosamente",
       });
+      // Actualizar el estado local inmediatamente
+      absence.estado = 'aprobado';
+      // Volver a la lista para mostrar los cambios
+      setTimeout(() => onBack(), 1000);
     } catch (error) {
       toast({
         title: "Error",
@@ -45,6 +49,10 @@ const AbsenceDetail = ({ absence, onBack }: AbsenceDetailProps) => {
         description: "La ausencia ha sido rechazada",
         variant: "destructive"
       });
+      // Actualizar el estado local inmediatamente
+      absence.estado = 'rechazado';
+      // Volver a la lista para mostrar los cambios
+      setTimeout(() => onBack(), 1000);
     } catch (error) {
       toast({
         title: "Error",

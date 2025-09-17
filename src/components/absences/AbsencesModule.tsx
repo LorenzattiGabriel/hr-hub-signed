@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -42,6 +42,14 @@ const AbsencesModule = () => {
     archivo: a.archivo_url,
     observaciones: a.observaciones || ''
   }));
+
+  // Forzar actualización cuando cambian los datos
+  const [refreshKey, setRefreshKey] = useState(0);
+  
+  // Actualizar cuando cambien las ausencias
+  useEffect(() => {
+    setRefreshKey(prev => prev + 1);
+  }, [absences]);
 
   const filteredAbsences = items.filter(absence => {
     const matchesSearch = absence.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());

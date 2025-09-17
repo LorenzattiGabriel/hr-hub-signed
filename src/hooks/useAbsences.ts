@@ -122,6 +122,11 @@ export const useAbsences = () => {
 
   const updateAbsence = async (id: string, absenceData: Partial<Absence>) => {
     try {
+      // Actualizar inmediatamente en el estado local (optimistic update)
+      setAbsences((prev) => prev.map((a) => 
+        a.id === id ? { ...a, ...absenceData } : a
+      ));
+
       const { data, error } = await (supabase as any)
         .from('absences')
         .update(absenceData)
@@ -149,11 +154,14 @@ export const useAbsences = () => {
         empleadoDni: emp?.dni ?? ''
       };
 
+      // Confirmar actualización con datos reales del servidor
       setAbsences((prev) => prev.map((a) => (a.id === id ? updated : a)));
       toast({ title: 'Éxito', description: 'Ausencia actualizada correctamente' });
       return data;
     } catch (error) {
       console.error('Error updating absence:', error);
+      // Revertir el cambio optimista en caso de error
+      await fetchAbsences();
       toast({ title: 'Error', description: 'No se pudo actualizar la ausencia', variant: 'destructive' });
       throw error;
     }

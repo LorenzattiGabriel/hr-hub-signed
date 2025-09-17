@@ -43,10 +43,10 @@ const TrainingForm = ({ onBack, training, employees }: TrainingFormProps) => {
   };
 
   const handleSave = async () => {
-    if (!formData.titulo || !formData.empleadoId || !formData.fecha) {
+    if (!formData.titulo || !formData.empleadoId || !formData.fecha || !formData.tipo) {
       toast({
         title: "Error",
-        description: "Por favor complete todos los campos obligatorios",
+        description: "Por favor complete título, empleado, fecha y tipo",
         variant: "destructive"
       });
       return;
@@ -264,11 +264,11 @@ const TrainingForm = ({ onBack, training, employees }: TrainingFormProps) => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="seguridad">Seguridad e Higiene</SelectItem>
-                  <SelectItem value="tecnico">Técnico - Operativo</SelectItem>
-                  <SelectItem value="administrativo">Administrativo</SelectItem>
+                  <SelectItem value="tecnica">Técnico - Operativo</SelectItem>
+                  <SelectItem value="administrativa">Administrativo</SelectItem>
                   <SelectItem value="calidad">Control de Calidad</SelectItem>
                   <SelectItem value="liderazgo">Liderazgo</SelectItem>
-                  <SelectItem value="otros">Otros</SelectItem>
+                  <SelectItem value="otro">Otros</SelectItem>
                 </SelectContent>
               </Select>
             </div>

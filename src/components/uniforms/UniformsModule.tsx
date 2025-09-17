@@ -8,31 +8,17 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useEmployees } from "@/hooks/useEmployees";
+import { useUniforms } from "@/hooks/useUniforms";
 import { Shirt, Plus, Download, Calendar, User, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2pdf from "html2pdf.js";
 
-interface UniformDelivery {
-  id: number;
-  employeeId: number;
-  employeeName: string;
-  employeeDni: string;
-  uniformType: string;
-  size: string;
-  quantity: number;
-  deliveryDate: string;
-  season: string;
-  condition: string;
-  notes: string;
-  status: "entregado" | "pendiente" | "devuelto";
-}
-
 const UniformsModule = () => {
   const { getActiveEmployees } = useEmployees();
+  const { uniforms, addUniform, loading } = useUniforms();
   const { toast } = useToast();
   const activeEmployees = getActiveEmployees();
   
-  const [uniformDeliveries, setUniformDeliveries] = useState<UniformDelivery[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [uniformType, setUniformType] = useState("");
@@ -61,7 +47,7 @@ const UniformsModule = () => {
 
   const conditions = ["Nuevo", "Usado - Buen estado", "Usado - Estado regular"];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedEmployee || !uniformType || !size || !season || !condition) {
       toast({
         title: "Error",
@@ -74,40 +60,34 @@ const UniformsModule = () => {
     const employee = activeEmployees.find(emp => emp.id.toString() === selectedEmployee);
     if (!employee) return;
 
-    const newDelivery: UniformDelivery = {
-      id: Date.now(),
-      employeeId: parseInt(employee.id) || 0,
-      employeeName: `${employee.nombres} ${employee.apellidos}`,
-      employeeDni: employee.dni,
-      uniformType,
-      size,
-      quantity: parseInt(quantity),
-      deliveryDate: new Date().toISOString().split('T')[0],
-      season,
-      condition,
-      notes,
-      status: "entregado"
-    };
+    try {
+      await addUniform({
+        employee_id: employee.id,
+        uniform_type: uniformType,
+        size,
+        quantity: parseInt(quantity),
+        delivery_date: new Date().toISOString().split('T')[0],
+        season,
+        condition,
+        notes: notes || null,
+        status: "entregado"
+      });
 
-    setUniformDeliveries(prev => [newDelivery, ...prev]);
-    
-    // Reset form
-    setSelectedEmployee("");
-    setUniformType("");
-    setSize("");
-    setQuantity("1");
-    setSeason("");
-    setCondition("");
-    setNotes("");
-    setIsDialogOpen(false);
-
-    toast({
-      title: "Éxito",
-      description: "Entrega de uniforme registrada correctamente",
-    });
+      // Reset form
+      setSelectedEmployee("");
+      setUniformType("");
+      setSize("");
+      setQuantity("1");
+      setSeason("");
+      setCondition("");
+      setNotes("");
+      setIsDialogOpen(false);
+    } catch (error) {
+      // Error already handled by hook
+    }
   };
 
-  const generateDeliveryReceipt = (delivery: UniformDelivery) => {
+  const generateDeliveryReceipt = (delivery: any) => {
     const content = `
       <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
         <div style="text-align: center; margin-bottom: 30px;">
@@ -123,12 +103,12 @@ const UniformsModule = () => {
         
         <div style="margin-bottom: 20px;">
           <h3 style="color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Detalle del Uniforme</h3>
-          <p><strong>Tipo:</strong> ${delivery.uniformType}</p>
+          <p><strong>Tipo:</strong> ${delivery.uniform_type}</p>
           <p><strong>Talle:</strong> ${delivery.size}</p>
           <p><strong>Cantidad:</strong> ${delivery.quantity}</p>
           <p><strong>Temporada:</strong> ${delivery.season}</p>
           <p><strong>Estado:</strong> ${delivery.condition}</p>
-          <p><strong>Fecha de entrega:</strong> ${new Date(delivery.deliveryDate).toLocaleDateString('es-AR')}</p>
+          <p><strong>Fecha de entrega:</strong> ${new Date(delivery.delivery_date).toLocaleDateString('es-AR')}</p>
           ${delivery.notes ? `<p><strong>Observaciones:</strong> ${delivery.notes}</p>` : ''}
         </div>
         
@@ -149,7 +129,7 @@ const UniformsModule = () => {
 
     const opt = {
       margin: 1,
-      filename: `constancia-uniforme-${delivery.employeeName.replace(/\s+/g, '-')}-${delivery.id}.pdf`,
+      filename: `constancia-uniforme-${delivery.employeeName?.replace(/\s+/g, '-')}-${delivery.id}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -168,8 +148,8 @@ const UniformsModule = () => {
         
         <div style="margin-bottom: 20px;">
           <h3 style="color: #1f2937;">Resumen</h3>
-          <p><strong>Total de entregas:</strong> ${uniformDeliveries.length}</p>
-          <p><strong>Empleados con uniformes:</strong> ${new Set(uniformDeliveries.map(d => d.employeeId)).size}</p>
+          <p><strong>Total de entregas:</strong> ${uniforms.length}</p>
+          <p><strong>Empleados con uniformes:</strong> ${new Set(uniforms.map(d => d.employee_id)).size}</p>
         </div>
         
         <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
@@ -183,12 +163,12 @@ const UniformsModule = () => {
             </tr>
           </thead>
           <tbody>
-            ${uniformDeliveries.map(delivery => `
+            ${uniforms.map(delivery => `
               <tr>
                 <td style="border: 1px solid #d1d5db; padding: 8px;">${delivery.employeeName}</td>
-                <td style="border: 1px solid #d1d5db; padding: 8px;">${delivery.uniformType}</td>
+                <td style="border: 1px solid #d1d5db; padding: 8px;">${delivery.uniform_type}</td>
                 <td style="border: 1px solid #d1d5db; padding: 8px;">${delivery.size}</td>
-                <td style="border: 1px solid #d1d5db; padding: 8px;">${new Date(delivery.deliveryDate).toLocaleDateString('es-AR')}</td>
+                <td style="border: 1px solid #d1d5db; padding: 8px;">${new Date(delivery.delivery_date).toLocaleDateString('es-AR')}</td>
                 <td style="border: 1px solid #d1d5db; padding: 8px;">${delivery.status}</td>
               </tr>
             `).join('')}
@@ -351,7 +331,16 @@ const UniformsModule = () => {
       </div>
 
       <div className="grid gap-4">
-        {uniformDeliveries.length === 0 ? (
+        {loading ? (
+          <Card>
+            <CardContent className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
+                <p className="text-lg font-medium text-foreground">Cargando entregas...</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : uniforms.length === 0 ? (
           <Card>
             <CardContent className="flex items-center justify-center py-12">
               <div className="text-center">
@@ -362,7 +351,7 @@ const UniformsModule = () => {
             </CardContent>
           </Card>
         ) : (
-          uniformDeliveries.map((delivery) => (
+          uniforms.map((delivery) => (
             <Card key={delivery.id}>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -382,7 +371,7 @@ const UniformsModule = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
                     <p className="text-sm font-medium text-foreground">Tipo de Uniforme</p>
-                    <p className="text-foreground/70">{delivery.uniformType}</p>
+                    <p className="text-foreground/70">{delivery.uniform_type}</p>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">Talle y Cantidad</p>
@@ -401,7 +390,7 @@ const UniformsModule = () => {
                   </div>
                   <div className="flex items-center text-sm text-foreground/70">
                     <Calendar className="h-4 w-4 mr-1" />
-                    {new Date(delivery.deliveryDate).toLocaleDateString('es-AR')}
+                    {new Date(delivery.delivery_date).toLocaleDateString('es-AR')}
                   </div>
                 </div>
 

@@ -367,6 +367,59 @@ export type Database = {
           },
         ]
       }
+      uniforms: {
+        Row: {
+          condition: string
+          created_at: string
+          delivery_date: string
+          employee_id: string
+          id: string
+          notes: string | null
+          quantity: number
+          season: string
+          size: string
+          status: string
+          uniform_type: string
+          updated_at: string
+        }
+        Insert: {
+          condition: string
+          created_at?: string
+          delivery_date: string
+          employee_id: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          season: string
+          size: string
+          status?: string
+          uniform_type: string
+          updated_at?: string
+        }
+        Update: {
+          condition?: string
+          created_at?: string
+          delivery_date?: string
+          employee_id?: string
+          id?: string
+          notes?: string | null
+          quantity?: number
+          season?: string
+          size?: string
+          status?: string
+          uniform_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uniforms_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vacation_balances: {
         Row: {
           created_at: string

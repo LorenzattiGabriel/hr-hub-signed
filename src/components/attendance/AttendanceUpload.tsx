@@ -49,9 +49,27 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
   };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input triggered', e.target.files);
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setUploadedFile(file);
+      console.log('File selected:', file.name, file.type, file.size);
+      
+      // Validate file type
+      if (file.type.includes("sheet") || file.name.endsWith(".xlsx") || file.name.endsWith(".xls") || file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.type === "application/vnd.ms-excel") {
+        setUploadedFile(file);
+        toast({
+          title: "Archivo seleccionado",
+          description: `Archivo ${file.name} listo para procesar`,
+        });
+      } else {
+        toast({
+          title: "Formato incorrecto",
+          description: "Por favor selecciona un archivo Excel (.xlsx o .xls)",
+          variant: "destructive"
+        });
+      }
+    } else {
+      console.log('No file selected');
     }
   };
 
@@ -226,14 +244,14 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
               
               <input
                 type="file"
-                accept=".xlsx,.xls"
+                accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                 onChange={handleFileInput}
                 className="hidden"
                 id="file-upload"
               />
               <label htmlFor="file-upload">
-                <Button variant="outline" className="cursor-pointer">
-                  Seleccionar Archivo
+                <Button variant="outline" className="cursor-pointer" asChild>
+                  <span>Seleccionar Archivo</span>
                 </Button>
               </label>
               

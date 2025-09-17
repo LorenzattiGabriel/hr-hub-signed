@@ -53,33 +53,22 @@ const DashboardOverview = () => {
   ];
 
   // Recent activities - start empty
-  // Recent activities - start empty
+  const recentActivities: any[] = [];
 
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: "Capacitación en Seguridad",
-      date: "15 Nov",
-      time: "14:00",
-      attendees: 12
-    },
-    {
-      id: 2,
-      title: "Reunión de Evaluación",
-      date: "18 Nov",
-      time: "10:00",
-      attendees: 5
-    },
-    {
-      id: 3,
-      title: "Entrega de Uniformes",
-      date: "20 Nov",
-      time: "09:00",
-      attendees: 8
+
+  // Helper for status icon
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "success":
+        return <CheckCircle className="h-4 w-4 text-success" />;
+      case "warning":
+        return <AlertTriangle className="h-4 w-4 text-warning" />;
+      case "info":
+        return <Clock className="h-4 w-4 text-primary" />;
+      default:
+        return <Clock className="h-4 w-4 text-muted-foreground" />;
     }
-  ];
-
-  // Helper for status icon (kept)
+  };
 
   return (
     <div className="space-y-6">

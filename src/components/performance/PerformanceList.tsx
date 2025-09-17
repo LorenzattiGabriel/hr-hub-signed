@@ -224,21 +224,20 @@ const PerformanceList = () => {
                   <CardTitle className="text-lg text-foreground">{evaluation.empleadoNombre}</CardTitle>
                   <div className="flex items-center space-x-2">
                     <Badge variant={evaluation.estado === "completado" ? "success" : "warning"}>
-                  <Badge variant={evaluation.estado === "completado" ? "success" : "warning"}>
-                    {evaluation.estado === "completado" ? "Completado" : "En Progreso"}
-                  </Badge>
-                  <div className="text-right">
-                    <div className={`text-2xl font-bold ${
-                      evaluation.puntuacionGeneral >= 90 ? 'text-success' :
-                      evaluation.puntuacionGeneral >= 80 ? 'text-primary' :
-                      evaluation.puntuacionGeneral >= 70 ? 'text-warning' : 'text-destructive'
-                    }`}>
-                      {evaluation.puntuacionGeneral}
+                      {evaluation.estado === "completado" ? "Completado" : "En Progreso"}
+                    </Badge>
+                    <div className="text-right">
+                      <div className={`text-2xl font-bold ${
+                        evaluation.puntuacionGeneral >= 90 ? 'text-success' :
+                        evaluation.puntuacionGeneral >= 80 ? 'text-primary' :
+                        evaluation.puntuacionGeneral >= 70 ? 'text-warning' : 'text-destructive'
+                      }`}>
+                        {evaluation.puntuacionGeneral}
+                      </div>
+                      <div className="text-xs text-foreground/60">puntos</div>
                     </div>
-                    <div className="text-xs text-foreground/60">puntos</div>
                   </div>
                 </div>
-              </div>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4">
@@ -304,7 +303,8 @@ const PerformanceList = () => {
               </div>
             </CardContent>
           </Card>
-        ))}
+        ))
+        )}
       </div>
 
       {filteredEvaluations.length === 0 && (

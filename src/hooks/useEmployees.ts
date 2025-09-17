@@ -50,38 +50,47 @@ export const useEmployees = () => {
   const { toast } = useToast();
 
   const toDbEmployee = (input: Partial<Employee>) => {
+    // Helper function to safely convert to number or null
+    const toNumber = (value: any) => {
+      if (value === null || value === undefined || value === '' || value === 0) {
+        return null;
+      }
+      const num = Number(value);
+      return isNaN(num) ? null : num;
+    };
+
     const db: Record<string, any> = {
       dni: input.dni,
       nombres: input.nombres,
       apellidos: input.apellidos,
-      email: input.email,
-      telefono: input.telefono,
-      direccion: input.direccion,
+      email: input.email || null,
+      telefono: input.telefono || null,
+      direccion: input.direccion || null,
       fecha_nacimiento: input.fecha_nacimiento || input.fechaNacimiento || null,
       fecha_ingreso: input.fecha_ingreso || input.fechaIngreso || null,
-      puesto: input.puesto || input.cargo,
-      departamento: input.departamento || input.sector,
-      salario: input.salario ?? null,
-      tipo_contrato: input.tipo_contrato || input.tipoContrato,
+      puesto: input.puesto || input.cargo || null,
+      departamento: input.departamento || input.sector || null,
+      salario: toNumber(input.salario),
+      tipo_contrato: input.tipo_contrato || input.tipoContrato || null,
       estado: input.estado || 'activo',
       // Extended fields
-      cuil: input.cuil,
-      contacto_emergencia: input.contactoEmergencia,
-      telefono_emergencia: input.telefonoEmergencia,
-      parentesco_emergencia: input.parentescoEmergencia,
-      nivel_educativo: input.nivelEducativo,
-      titulo: input.titulo,
-      otros_conocimientos: input.otrosConocimientos,
-      grupo_sanguineo: input.grupoSanguineo,
-      alergias: input.alergias,
-      medicacion_habitual: input.medicacionHabitual,
-      obra_social: input.obraSocial,
-      observaciones: input.observaciones,
-      tiene_hijos: input.tieneHijos,
-      nombres_hijos: input.nombresHijos,
-      tiene_licencia: input.tieneLicencia,
-      tipo_licencia: input.tipoLicencia,
-      estado_civil: input.estadoCivil,
+      cuil: input.cuil || null,
+      contacto_emergencia: input.contactoEmergencia || null,
+      telefono_emergencia: input.telefonoEmergencia || null,
+      parentesco_emergencia: input.parentescoEmergencia || null,
+      nivel_educativo: input.nivelEducativo || null,
+      titulo: input.titulo || null,
+      otros_conocimientos: input.otrosConocimientos || null,
+      grupo_sanguineo: input.grupoSanguineo || null,
+      alergias: input.alergias || null,
+      medicacion_habitual: input.medicacionHabitual || null,
+      obra_social: input.obraSocial || null,
+      observaciones: input.observaciones || null,
+      tiene_hijos: input.tieneHijos || null,
+      nombres_hijos: input.nombresHijos || null,
+      tiene_licencia: input.tieneLicencia || null,
+      tipo_licencia: input.tipoLicencia || null,
+      estado_civil: input.estadoCivil || null,
     };
     // Remove undefined keys
     Object.keys(db).forEach((k) => db[k] === undefined && delete db[k]);

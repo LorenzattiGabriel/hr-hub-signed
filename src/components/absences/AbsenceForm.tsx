@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, Upload, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAbsences } from "@/hooks/useAbsences";
 
 interface AbsenceFormProps {
   onBack: () => void;
@@ -17,6 +18,7 @@ interface AbsenceFormProps {
 
 const AbsenceForm = ({ onBack, absence, employees }: AbsenceFormProps) => {
   const { toast } = useToast();
+  const { addAbsence } = useAbsences();
   const [formData, setFormData] = useState({
     empleadoId: absence?.empleadoId || "",
     fechaInicio: absence?.fechaInicio || "",
@@ -36,7 +38,7 @@ const AbsenceForm = ({ onBack, absence, employees }: AbsenceFormProps) => {
     setFormData(prev => ({ ...prev, archivo: file }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.empleadoId || !formData.fechaInicio || !formData.fechaFin || !formData.tipo || !formData.motivo) {
       toast({
         title: "Error",
@@ -46,15 +48,34 @@ const AbsenceForm = ({ onBack, absence, employees }: AbsenceFormProps) => {
       return;
     }
 
-    const selectedEmployee = employees.find(emp => emp.id.toString() === formData.empleadoId);
-    const empleadoNombre = selectedEmployee ? `${selectedEmployee.nombres} ${selectedEmployee.apellidos}` : "";
+    try {
+      await addAbsence({
+        employee_id: formData.empleadoId,
+        fecha_inicio: formData.fechaInicio,
+        fecha_fin: formData.fechaFin,
+        tipo: formData.tipo,
+        motivo: formData.motivo,
+        estado: 'pendiente',
+        certificado_medico: !!formData.certificadoMedico,
+        archivo_url: null,
+        observaciones: formData.observaciones,
+        created_at: '' as any,
+        updated_at: '' as any,
+        id: '' as any,
+      } as any);
 
-    toast({
-      title: "Ausencia registrada",
-      description: `La ausencia de ${empleadoNombre} ha sido registrada exitosamente`,
-    });
+      const selectedEmployee = employees.find(emp => emp.id.toString() === formData.empleadoId);
+      const empleadoNombre = selectedEmployee ? `${selectedEmployee.nombres} ${selectedEmployee.apellidos}` : "";
 
-    setTimeout(() => onBack(), 1500);
+      toast({
+        title: "Ausencia registrada",
+        description: `La ausencia de ${empleadoNombre} ha sido registrada exitosamente`,
+      });
+
+      onBack();
+    } catch (e) {
+      // El hook ya muestra el toast de error
+    }
   };
 
   return (

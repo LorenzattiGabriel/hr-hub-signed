@@ -9,6 +9,7 @@ import AbsenceForm from "./AbsenceForm";
 import AbsenceDetail from "./AbsenceDetail";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/hooks/useEmployees";
+import { useAbsences } from "@/hooks/useAbsences";
 
 const AbsencesModule = () => {
   const { toast } = useToast();
@@ -22,36 +23,26 @@ const AbsencesModule = () => {
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
 
-  // Generate sample absences data based on real employees
-  const getAbsencesForEmployees = () => {
-    const absenceTypes = ["enfermedad", "personal", "familiar", "vacaciones", "licencia"];
-    const absenceReasons = [
-      "Consulta médica",
-      "Asuntos personales",
-      "Cuidado familiar",
-      "Vacaciones pendientes",
-      "Licencia médica"
-    ];
-    
-    return activeEmployees.slice(0, 2).map((emp, index) => ({
-      id: Date.now() + index,
-      empleadoId: emp.id,
-      empleadoNombre: `${emp.nombres} ${emp.apellidos}`,
-      empleadoDni: emp.dni,
-      fechaInicio: new Date(Date.now() - (index * 5) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      fechaFin: new Date(Date.now() - (index * 3) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      tipo: absenceTypes[index % absenceTypes.length],
-      motivo: absenceReasons[index % absenceReasons.length],
-      estado: index === 0 ? "pendiente" : "aprobado",
-      certificadoMedico: index % 2 === 0,
-      archivo: null, // Add missing archivo property
-      observaciones: index === 0 ? "Pendiente de documentación" : "Aprobado por supervisión"
-    }));
-  };
+  // Datos reales de ausencias
+  const { absences, loading } = useAbsences();
 
-  const mockAbsences = getAbsencesForEmployees();
+  // Adaptar a forma esperada por la UI existente
+  const items = absences.map((a) => ({
+    id: a.id,
+    empleadoId: a.employee_id,
+    empleadoNombre: a.empleadoNombre || '',
+    empleadoDni: a.empleadoDni || '',
+    fechaInicio: a.fecha_inicio,
+    fechaFin: a.fecha_fin,
+    tipo: a.tipo,
+    motivo: a.motivo || '',
+    estado: a.estado,
+    certificadoMedico: a.certificado_medico,
+    archivo: a.archivo_url,
+    observaciones: a.observaciones || ''
+  }));
 
-  const filteredAbsences = mockAbsences.filter(absence => {
+  const filteredAbsences = items.filter(absence => {
     const matchesSearch = absence.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = !filterType || filterType === "all" || absence.tipo === filterType;
     const matchesStatus = !filterStatus || filterStatus === "all" || absence.estado === filterStatus;
@@ -118,7 +109,7 @@ const AbsencesModule = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Ausencias Pendientes</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {mockAbsences.filter(a => a.estado === "pendiente").length}
+                  {items.filter(a => a.estado === "pendiente").length}
                 </p>
               </div>
               <div className="p-3 bg-warning/10 rounded-lg">
@@ -134,7 +125,7 @@ const AbsencesModule = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Por Enfermedad</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {mockAbsences.filter(a => a.tipo === "enfermedad").length}
+                  {items.filter(a => a.tipo === "enfermedad").length}
                 </p>
               </div>
               <div className="p-3 bg-destructive/10 rounded-lg">
@@ -150,7 +141,7 @@ const AbsencesModule = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Motivos Personales</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {mockAbsences.filter(a => a.tipo === "personal").length}
+                  {items.filter(a => a.tipo === "personal").length}
                 </p>
               </div>
               <div className="p-3 bg-primary/10 rounded-lg">
@@ -166,7 +157,7 @@ const AbsencesModule = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Con Certificado</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {mockAbsences.filter(a => a.certificadoMedico || a.archivo).length}
+                  {items.filter(a => a.certificadoMedico || a.archivo).length}
                 </p>
               </div>
               <div className="p-3 bg-success/10 rounded-lg">

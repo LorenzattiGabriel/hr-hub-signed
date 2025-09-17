@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      absences: {
+        Row: {
+          archivo_url: string | null
+          certificado_medico: boolean
+          created_at: string
+          employee_id: string
+          estado: string
+          fecha_fin: string
+          fecha_inicio: string
+          id: string
+          motivo: string | null
+          observaciones: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          archivo_url?: string | null
+          certificado_medico?: boolean
+          created_at?: string
+          employee_id: string
+          estado?: string
+          fecha_fin: string
+          fecha_inicio: string
+          id?: string
+          motivo?: string | null
+          observaciones?: string | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          archivo_url?: string | null
+          certificado_medico?: boolean
+          created_at?: string
+          employee_id?: string
+          estado?: string
+          fecha_fin?: string
+          fecha_inicio?: string
+          id?: string
+          motivo?: string | null
+          observaciones?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "absences_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           alergias: string | null

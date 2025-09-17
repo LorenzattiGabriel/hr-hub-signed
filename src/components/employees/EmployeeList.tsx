@@ -170,7 +170,7 @@ const EmployeeList = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground/70">Nuevos Este Mes</p>
-                <p className="text-3xl font-bold text-foreground">2</p>
+                <p className="text-3xl font-bold text-foreground">0</p>
               </div>
               <div className="p-3 bg-secondary/10 rounded-lg">
                 <Plus className="h-6 w-6 text-secondary" />

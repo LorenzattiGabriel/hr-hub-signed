@@ -3,7 +3,7 @@ import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import EmployeeList from "@/components/employees/EmployeeList";
 import DashboardOverview from "@/components/dashboard/DashboardOverview";
-import VacationsModule from "@/components/vacations/VacationsModule";
+import VacationsModule from "@/components/vacations/VacationsModuleV2";
 import AbsencesModule from "@/components/absences/AbsencesModule";
 import TrainingList from "@/components/training/TrainingList";
 import UniformsModule from "@/components/uniforms/UniformsModule";
@@ -11,7 +11,6 @@ import AttendanceList from "@/components/attendance/AttendanceList";
 import PerformanceList from "@/components/performance/PerformanceList";
 import CalendarList from "@/components/calendar/CalendarList";
 import PayrollModule from "@/components/payroll/PayrollModule";
-import { EmployeeProvider } from "@/contexts/EmployeeContext";
 
 const Index = () => {
   const [activeModule, setActiveModule] = useState("dashboard");
@@ -42,19 +41,17 @@ const Index = () => {
   };
 
   return (
-    <EmployeeProvider>
-      <div className="min-h-screen bg-background">
-        <Header />
-        <div className="flex">
-          <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} />
-          <main className="flex-1 container-padding section-spacing overflow-auto">
-            <div className="max-w-7xl mx-auto">
-              {renderContent()}
-            </div>
-          </main>
-        </div>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="flex">
+        <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} />
+        <main className="flex-1 container-padding section-spacing overflow-auto">
+          <div className="max-w-7xl mx-auto">
+            {renderContent()}
+          </div>
+        </main>
       </div>
-    </EmployeeProvider>
+    </div>
   );
 };
 

@@ -4,8 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { useEmployees } from '@/contexts/EmployeeContext';
-import type { Employee } from '@/contexts/EmployeeContext';
+import { useEmployees, type Employee } from '@/hooks/useEmployees';
 import * as XLSX from 'xlsx';
 interface EmployeeImportProps {
   onComplete: () => void;
@@ -58,11 +57,11 @@ export const EmployeeImport = ({ onComplete }: EmployeeImportProps) => {
             nombres: nombres || nombreCompleto,
             apellidos: apellidos || '',
             dni,
-            cuil: '',
+            fecha_ingreso: convertDate(fechaIngreso),
             cargo,
             sector: 'Producción', // Default
             tipoContrato,
-            fechaIngreso: convertDate(fechaIngreso),
+            fechaIngreso: convertDate(fechaIngreso), // Legacy field
             fechaNacimiento: convertDate(fechaNacimiento),
             telefono,
             email,

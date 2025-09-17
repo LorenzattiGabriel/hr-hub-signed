@@ -4,139 +4,53 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar, Download, Plus, Search, Clock, User, FileText } from "lucide-react";
-import VacationForm from "./VacationForm";
+import VacationForm from "./VacationFormV2";
 import VacationDetail from "./VacationDetail";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useVacations } from "@/hooks/useVacations";
 import html2pdf from "html2pdf.js";
 
-const VacationsModule = () => {
+export const VacationsModule = () => {
   const { toast } = useToast();
-  const { getActiveEmployees } = useEmployees();
-  const activeEmployees = getActiveEmployees();
+  const { employees, getActiveEmployees } = useEmployees();
+  const { 
+    vacationRequests, 
+    vacationBalances,
+    addVacationRequest, 
+    approveVacationRequest, 
+    rejectVacationRequest,
+    getEmployeeVacationBalance 
+  } = useVacations();
+
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedVacation, setSelectedVacation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | "pendiente" | "aprobado" | "rechazado">("all");
+  const [filterStatus, setFilterStatus] = useState("todos");
 
-  // Calculate vacation days based on seniority
-  const calculateVacationDays = (fechaIngreso: string) => {
-    if (!fechaIngreso) return 0;
-    
-    const ingresoDate = new Date(fechaIngreso);
-    const today = new Date();
-    let years = today.getFullYear() - ingresoDate.getFullYear();
-    
-    const monthDiff = today.getMonth() - ingresoDate.getMonth();
-    const dayDiff = today.getDate() - ingresoDate.getDate();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-      years--;
-    }
-    
-    // Según la ley laboral argentina
-    if (years < 1) return 0;
-    if (years >= 1 && years < 5) return 14;
-    if (years >= 5 && years < 10) return 21;
-    if (years >= 10 && years < 20) return 28;
-    if (years >= 20) return 35;
-    
-    return 14;
-  };
-
-  // Calculate used vacation days (reset to 0)
-  const getUsedVacationDays = (employeeId: number) => {
-    // Reset all used vacation days to 0
-    return 0;
-  };
-
-  // Create employee vacation status
-  const employeesWithVacations = activeEmployees.map(emp => {
-    const totalDays = calculateVacationDays(emp.fechaIngreso);
-    const usedDays = getUsedVacationDays(emp.id);
-    const remainingDays = totalDays - usedDays;
+  // Create employees with vacation information from database
+  const employeesWithVacations = getActiveEmployees().map(employee => {
+    const currentYear = new Date().getFullYear();
+    const balance = getEmployeeVacationBalance(employee.id, currentYear);
     
     return {
-      ...emp,
-      totalVacationDays: totalDays,
-      usedVacationDays: usedDays,
-      remainingVacationDays: remainingDays
+      ...employee,
+      vacationDays: balance?.dias_totales || 0,
+      diasAdeudados: balance?.dias_adeudados || 0,
+      usedDays: balance?.dias_usados || 0,
+      availableDays: (balance?.dias_totales || 0) + (balance?.dias_adeudados || 0) - (balance?.dias_usados || 0)
     };
   });
 
-  // Vacation requests state
-  const [vacationRequests, setVacationRequests] = useState<any[]>([]);
-
-  // Add new vacation request
-  const addVacationRequest = (requestData: any) => {
-    const selectedEmployee = activeEmployees.find(emp => emp.id.toString() === requestData.empleadoId);
-    const newRequest = {
-      id: Date.now(),
-      empleadoId: parseInt(requestData.empleadoId),
-      empleadoNombre: selectedEmployee ? `${selectedEmployee.nombres} ${selectedEmployee.apellidos}` : '',
-      empleadoDni: selectedEmployee ? selectedEmployee.dni : '',
-      fechaInicio: requestData.fechaInicio,
-      fechaFin: requestData.fechaFin,
-      diasSolicitados: calculateRequestDays(requestData.fechaInicio, requestData.fechaFin),
-      periodo: requestData.periodo,
-      estado: "pendiente",
-      motivo: requestData.motivo,
-      fechaSolicitud: new Date().toISOString().split('T')[0],
-      observaciones: requestData.observaciones || ""
-    };
-    
-    setVacationRequests(prev => [newRequest, ...prev]);
-    toast({
-      title: "Solicitud creada",
-      description: "La solicitud de vacaciones ha sido registrada y está pendiente de aprobación",
-    });
-  };
-
-  // Calculate days between dates
-  const calculateRequestDays = (startDate: string, endDate: string) => {
-    if (!startDate || !endDate) return 0;
+  // Function to calculate days between dates
+  const calculateRequestDays = (startDate: string, endDate: string): number => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const diffTime = Math.abs(end.getTime() - start.getTime());
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-  };
-
-  // Approve vacation request
-  const approveVacationRequest = (requestId: number) => {
-    setVacationRequests(prev => {
-      const updated = prev.map(req =>
-        req.id === requestId
-          ? { ...req, estado: "aprobado", fechaAprobacion: new Date().toISOString().split('T')[0] }
-          : req
-      );
-      const current = updated.find(r => r.id === requestId);
-      setSelectedVacation(prevSel => (prevSel && prevSel.id === requestId ? current : prevSel));
-      return updated;
-    });
-    toast({
-      title: "Solicitud aprobada",
-      description: "La solicitud de vacaciones ha sido aprobada exitosamente",
-    });
-  };
-
-  // Reject vacation request
-  const rejectVacationRequest = (requestId: number) => {
-    setVacationRequests(prev => {
-      const updated = prev.map(req =>
-        req.id === requestId
-          ? { ...req, estado: "rechazado", fechaRechazo: new Date().toISOString().split('T')[0] }
-          : req
-      );
-      const current = updated.find(r => r.id === requestId);
-      setSelectedVacation(prevSel => (prevSel && prevSel.id === requestId ? current : prevSel));
-      return updated;
-    });
-    toast({
-      title: "Solicitud rechazada",
-      description: "La solicitud de vacaciones ha sido rechazada",
-    });
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays + 1; // +1 to include final day
   };
 
   // Generate vacation certificate PDF
@@ -151,16 +65,18 @@ const VacationsModule = () => {
     }
 
     try {
-      const empleadoNombre = vacation.empleadoNombre || "Empleado";
-      const dni = vacation.empleadoDni || "";
-      const inicio = vacation.fechaInicio ? new Date(vacation.fechaInicio).toLocaleDateString("es-AR") : "";
-      const fin = vacation.fechaFin ? new Date(vacation.fechaFin).toLocaleDateString("es-AR") : "";
+      const empleadoNombre = vacation.employee 
+        ? `${vacation.employee.nombres} ${vacation.employee.apellidos}` 
+        : "Empleado";
+      const dni = vacation.employee?.dni || "";
+      const inicio = vacation.fecha_inicio ? new Date(vacation.fecha_inicio).toLocaleDateString("es-AR") : "";
+      const fin = vacation.fecha_fin ? new Date(vacation.fecha_fin).toLocaleDateString("es-AR") : "";
       const emitido = new Date().toLocaleDateString("es-AR");
       const motivo = vacation.motivo || "Vacaciones";
-      const dias = vacation.diasSolicitados || 0;
+      const dias = vacation.dias_solicitados || 0;
 
       const safeName = empleadoNombre.replace(/\s+/g, "_");
-      const fileName = `Constancia_Vacaciones_${safeName}_${vacation.periodo}_${vacation.fechaInicio}_${vacation.fechaFin}.pdf`;
+      const fileName = `Constancia_Vacaciones_${safeName}_${vacation.periodo}_${vacation.fecha_inicio}_${vacation.fecha_fin}.pdf`;
 
       const container = document.createElement("div");
       container.style.padding = "24px";
@@ -225,10 +141,12 @@ const VacationsModule = () => {
   };
 
   const filteredVacations = vacationRequests.filter((vacation) => {
-    const name = (vacation.empleadoNombre || "").toLowerCase();
+    const name = vacation.employee 
+      ? `${vacation.employee.nombres} ${vacation.employee.apellidos}`.toLowerCase()
+      : "";
     const status = (vacation.estado || "").toLowerCase();
     const matchesSearch = name.includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || status === filterStatus;
+    const matchesStatus = filterStatus === "todos" || status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
@@ -263,10 +181,10 @@ const VacationsModule = () => {
 
       const filas = vacationRequests.map(v => `
         <tr>
-          <td style="padding:6px 8px; border:1px solid #ddd;">${v.empleadoNombre}</td>
+          <td style="padding:6px 8px; border:1px solid #ddd;">${v.employee ? `${v.employee.nombres} ${v.employee.apellidos}` : ''}</td>
           <td style="padding:6px 8px; border:1px solid #ddd;">${v.periodo}</td>
-          <td style="padding:6px 8px; border:1px solid #ddd;">${new Date(v.fechaInicio).toLocaleDateString("es-AR")} - ${new Date(v.fechaFin).toLocaleDateString("es-AR")}</td>
-          <td style="padding:6px 8px; border:1px solid #ddd; text-align:center;">${v.diasSolicitados}</td>
+          <td style="padding:6px 8px; border:1px solid #ddd;">${new Date(v.fecha_inicio).toLocaleDateString("es-AR")} - ${new Date(v.fecha_fin).toLocaleDateString("es-AR")}</td>
+          <td style="padding:6px 8px; border:1px solid #ddd; text-align:center;">${v.dias_solicitados}</td>
           <td style="padding:6px 8px; border:1px solid #ddd; text-transform:capitalize;">${v.estado}</td>
         </tr>
       `).join("");
@@ -323,7 +241,17 @@ const VacationsModule = () => {
   };
 
   if (view === "form") {
-    return <VacationForm onBack={handleBackToList} vacation={selectedVacation} employees={activeEmployees} onSave={addVacationRequest} />;
+    return (
+      <VacationForm 
+        onBack={handleBackToList} 
+        vacation={selectedVacation} 
+        employees={getActiveEmployees()} 
+        onSave={async (requestData) => {
+          await addVacationRequest(requestData);
+          handleBackToList();
+        }} 
+      />
+    );
   }
 
   if (view === "detail" && selectedVacation) {
@@ -331,8 +259,8 @@ const VacationsModule = () => {
       <VacationDetail
         vacation={selectedVacation}
         onBack={handleBackToList}
-          onApprove={() => approveVacationRequest(selectedVacation.id)}
-          onReject={() => rejectVacationRequest(selectedVacation.id)}
+        onApprove={() => approveVacationRequest(selectedVacation.id)}
+        onReject={() => rejectVacationRequest(selectedVacation.id)}
         onGeneratePDF={() => generateVacationCertificate(selectedVacation)}
       />
     );
@@ -400,7 +328,7 @@ const VacationsModule = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Días Promedio</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {vacationRequests.length > 0 ? (vacationRequests.reduce((acc, v) => acc + v.diasSolicitados, 0) / vacationRequests.length).toFixed(1) : 0}
+                  {vacationRequests.length > 0 ? (vacationRequests.reduce((acc, v) => acc + v.dias_solicitados, 0) / vacationRequests.length).toFixed(1) : 0}
                 </p>
                 <p className="text-xs text-foreground/60">días por solicitud</p>
               </div>
@@ -434,153 +362,159 @@ const VacationsModule = () => {
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-border">
-                <tr className="text-left">
-                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Empleado</th>
-                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">DNI</th>
-                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Días Totales</th>
-                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Días Usados</th>
-                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Días Disponibles</th>
-                  <th className="px-6 py-3 text-sm font-medium text-foreground/70">Estado</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Empleado</TableHead>
+                  <TableHead>DNI</TableHead>
+                  <TableHead>Puesto</TableHead>
+                  <TableHead>Días Totales</TableHead>
+                  <TableHead>Días Adeudados</TableHead>
+                  <TableHead>Días Usados</TableHead>
+                  <TableHead>Días Disponibles</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {employeesWithVacations.map((employee) => (
-                  <tr key={employee.id} className="hover:bg-muted/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-foreground">
-                          {employee.nombres} {employee.apellidos}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-foreground">{employee.dni}</td>
-                    <td className="px-6 py-4 text-foreground font-semibold">{employee.totalVacationDays}</td>
-                    <td className="px-6 py-4 text-foreground">{employee.usedVacationDays}</td>
-                    <td className="px-6 py-4">
-                      <span className={`font-semibold ${employee.remainingVacationDays <= 5 ? 'text-warning' : 'text-foreground'}`}>
-                        {employee.remainingVacationDays}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant={employee.remainingVacationDays > 0 ? "default" : "secondary"}>
-                        {employee.remainingVacationDays > 0 ? "Disponible" : "Sin días disponibles"}
-                      </Badge>
-                    </td>
-                  </tr>
+                  <TableRow key={employee.id}>
+                    <TableCell className="font-medium">
+                      {employee.nombres} {employee.apellidos}
+                    </TableCell>
+                    <TableCell>{employee.dni}</TableCell>
+                    <TableCell>{employee.puesto}</TableCell>
+                    <TableCell>{employee.vacationDays}</TableCell>
+                    <TableCell className="text-orange-600 font-medium">{employee.diasAdeudados}</TableCell>
+                    <TableCell>{employee.usedDays}</TableCell>
+                    <TableCell className="font-medium">{employee.availableDays}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
 
-      {/* Search and Filters */}
+      {/* Vacation Requests */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="text-foreground">Solicitudes de Vacaciones</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
+          <div className="flex space-x-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por empleado..."
+                placeholder="Buscar empleado..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-64"
               />
             </div>
-            
-            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as "all" | "pendiente" | "aprobado" | "rechazado")}>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filtrar por estado" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="todos">Todos los estados</SelectItem>
                 <SelectItem value="pendiente">Pendiente</SelectItem>
                 <SelectItem value="aprobado">Aprobado</SelectItem>
                 <SelectItem value="rechazado">Rechazado</SelectItem>
               </SelectContent>
             </Select>
           </div>
-
-          {/* Vacation Requests List */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredVacations.map((vacation) => (
-              <Card key={vacation.id} className="hover:shadow-md transition-shadow cursor-pointer">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg text-foreground">{vacation.empleadoNombre}</CardTitle>
-                    <Badge variant={vacation.estado === "aprobado" ? "default" : vacation.estado === "pendiente" ? "secondary" : "destructive"}>
-                      {vacation.estado === "aprobado" ? "Aprobado" : vacation.estado === "pendiente" ? "Pendiente" : "Rechazado"}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-foreground/70">Fecha Inicio</p>
-                      <p className="text-foreground">{new Date(vacation.fechaInicio).toLocaleDateString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground/70">Fecha Fin</p>
-                      <p className="text-foreground">{new Date(vacation.fechaFin).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-foreground/70">Días Solicitados</p>
-                      <p className="text-foreground font-semibold">{vacation.diasSolicitados}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground/70">Estado</p>
-                      <p className="text-foreground">{vacation.estado}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-foreground/70">Motivo</p>
-                    <p className="text-foreground text-sm">{vacation.motivo}</p>
-                  </div>
-
-                  <div className="flex space-x-2 pt-2">
-                    <Button variant="outline" size="sm" onClick={() => handleViewVacation(vacation)}>
-                      Ver Detalle
-                    </Button>
-                    {vacation.estado === "pendiente" && (
-                      <>
-                        <Button variant="default" size="sm" onClick={() => approveVacationRequest(vacation.id)}>
-                          Aprobar
-                        </Button>
-                        <Button variant="destructive" size="sm" onClick={() => rejectVacationRequest(vacation.id)}>
-                          Rechazar
-                        </Button>
-                      </>
-                    )}
-                    {vacation.estado === "aprobado" && (
-                      <Button variant="outline" size="sm" onClick={() => generateVacationCertificate(vacation)}>
-                        <FileText className="h-4 w-4 mr-1" />
-                        Constancia
-                      </Button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {filteredVacations.length === 0 && (
-            <div className="text-center py-8">
-              <Calendar className="h-12 w-12 text-foreground/40 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                No se encontraron solicitudes
+        </CardHeader>
+        <CardContent>
+          {filteredVacations.length === 0 ? (
+            <div className="text-center py-12">
+              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-foreground mb-2">
+                No hay solicitudes de vacaciones
               </h3>
-              <p className="text-foreground/70">
-                No hay solicitudes que coincidan con los filtros seleccionados.
+              <p className="text-muted-foreground mb-4">
+                {searchTerm || filterStatus !== "todos" 
+                  ? "No se encontraron solicitudes que coincidan con los filtros."
+                  : "Comienza creando una nueva solicitud de vacaciones."}
               </p>
+              {(!searchTerm && filterStatus === "todos") && (
+                <Button onClick={handleNewVacation}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nueva Solicitud
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredVacations.map((vacation) => (
+                <Card key={vacation.id} className="cursor-pointer hover:bg-accent/50 transition-colors">
+                  <CardContent className="p-4" onClick={() => handleViewVacation(vacation)}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2">
+                            <h4 className="font-medium text-foreground">
+                              {vacation.employee ? `${vacation.employee.nombres} ${vacation.employee.apellidos}` : 'Empleado'}
+                            </h4>
+                            <Badge 
+                              variant={
+                                vacation.estado === "aprobado" ? "default" :
+                                vacation.estado === "pendiente" ? "secondary" : "destructive"
+                              }
+                            >
+                              {vacation.estado}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            <span className="mr-4">
+                              📅 {new Date(vacation.fecha_inicio).toLocaleDateString("es-AR")} - {new Date(vacation.fecha_fin).toLocaleDateString("es-AR")}
+                            </span>
+                            <span className="mr-4">📊 {vacation.dias_solicitados} días</span>
+                            {vacation.motivo && <span>💼 {vacation.motivo}</span>}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        {vacation.estado === "pendiente" && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-green-600 border-green-600 hover:bg-green-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                approveVacationRequest(vacation.id);
+                              }}
+                            >
+                              ✓ Aprobar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-600 hover:bg-red-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                rejectVacationRequest(vacation.id);
+                              }}
+                            >
+                              ✗ Rechazar
+                            </Button>
+                          </>
+                        )}
+                        {vacation.estado === "aprobado" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              generateVacationCertificate(vacation);
+                            }}
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            Constancia
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           )}
         </CardContent>

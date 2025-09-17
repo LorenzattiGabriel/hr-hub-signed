@@ -65,19 +65,19 @@ export const EmployeeProvider = ({ children }: { children: ReactNode }) => {
     const newId = Math.max(0, ...employees.map(e => e.id)) + 1;
     const newEmployees = [{ ...employee, id: newId }, ...employees];
     setEmployees(newEmployees);
-    localStorage.setItem('employees', JSON.stringify(newEmployees));
+    localStorage.setItem('employees', JSON.stringify(newEmployees, (key, value) => (key === 'fotoDni' || key === 'fotoCarnet' ? undefined : value)));
   };
 
   const updateEmployee = (id: number, updatedEmployee: Partial<Employee>) => {
     const newEmployees = employees.map(emp => emp.id === id ? { ...emp, ...updatedEmployee } : emp);
     setEmployees(newEmployees);
-    localStorage.setItem('employees', JSON.stringify(newEmployees));
+    localStorage.setItem('employees', JSON.stringify(newEmployees, (key, value) => (key === 'fotoDni' || key === 'fotoCarnet' ? undefined : value)));
   };
 
   const deleteEmployee = (id: number) => {
     const newEmployees = employees.filter(emp => emp.id !== id);
     setEmployees(newEmployees);
-    localStorage.setItem('employees', JSON.stringify(newEmployees));
+    localStorage.setItem('employees', JSON.stringify(newEmployees, (key, value) => (key === 'fotoDni' || key === 'fotoCarnet' ? undefined : value)));
   };
 
   const getActiveEmployees = () => {
@@ -92,7 +92,7 @@ export const EmployeeProvider = ({ children }: { children: ReactNode }) => {
     }));
     const updatedEmployees = [...employeesWithIds, ...employees];
     setEmployees(updatedEmployees);
-    localStorage.setItem('employees', JSON.stringify(updatedEmployees));
+    localStorage.setItem('employees', JSON.stringify(updatedEmployees, (key, value) => (key === 'fotoDni' || key === 'fotoCarnet' ? undefined : value)));
   };
 
   return (

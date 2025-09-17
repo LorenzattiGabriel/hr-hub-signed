@@ -255,7 +255,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
               </div>
               <div>
                 <Label htmlFor="estadoCivil" className="text-foreground">Estado Civil</Label>
-                <Select onValueChange={(value) => handleInputChange("estadoCivil", value)}>
+                <Select value={formData.estadoCivil} onValueChange={(value) => handleInputChange("estadoCivil", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar estado civil" />
                   </SelectTrigger>
@@ -365,7 +365,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
 
               <div>
                 <Label htmlFor="parentescoEmergencia" className="text-foreground">Parentesco</Label>
-                <Select onValueChange={(value) => handleInputChange("parentescoEmergencia", value)}>
+                <Select value={formData.parentescoEmergencia} onValueChange={(value) => handleInputChange("parentescoEmergencia", value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar parentesco" />
                   </SelectTrigger>
@@ -404,7 +404,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="cargo" className="text-foreground">Puesto/Cargo</Label>
-              <Select onValueChange={(value) => handleInputChange("cargo", value)}>
+              <Select value={formData.cargo} onValueChange={(value) => handleInputChange("cargo", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar puesto" />
                 </SelectTrigger>
@@ -421,7 +421,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
 
             <div>
               <Label htmlFor="sector" className="text-foreground">Sector</Label>
-              <Select onValueChange={(value) => handleInputChange("sector", value)}>
+              <Select value={formData.sector} onValueChange={(value) => handleInputChange("sector", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar sector" />
                 </SelectTrigger>
@@ -435,7 +435,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
 
             <div>
               <Label htmlFor="tipoContrato" className="text-foreground">Tipo de Contrato</Label>
-              <Select onValueChange={(value) => handleInputChange("tipoContrato", value)}>
+              <Select value={formData.tipoContrato} onValueChange={(value) => handleInputChange("tipoContrato", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar tipo de contrato" />
                 </SelectTrigger>

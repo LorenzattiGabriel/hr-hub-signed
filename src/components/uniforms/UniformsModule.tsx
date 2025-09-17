@@ -30,16 +30,16 @@ const UniformsModule = () => {
   const [notes, setNotes] = useState("");
 
   const uniformTypes = [
-    "Camisa",
-    "Pantalón",
-    "Overol",
-    "Chaleco",
-    "Zapatos de seguridad",
-    "Casco",
+    "Barbijo",
     "Guantes",
+    "Mameluco",
+    "Sordina",
     "Gafas de seguridad",
-    "Delantal",
-    "Uniforme completo"
+    "Remera",
+    "Pantalón cargo",
+    "Zapatos punta de acero",
+    "Campera",
+    "Buzo"
   ];
 
   const sizes = ["XS", "S", "M", "L", "XL", "XXL", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45"];

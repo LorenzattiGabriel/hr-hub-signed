@@ -36,12 +36,19 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      if (file.type.includes("sheet") || file.name.endsWith(".xlsx") || file.name.endsWith(".xls")) {
+      const lower = file.name.toLowerCase();
+      const extensionValid = /\.(xlsx|xls|xlsm|csv)$/.test(lower);
+      const mimeValid = file.type?.includes("sheet") || file.type === "application/vnd.ms-excel" || file.type === "text/csv" || file.type === "application/csv" || file.type === "application/octet-stream";
+      if (extensionValid || mimeValid) {
         setUploadedFile(file);
+        toast({
+          title: "Archivo seleccionado",
+          description: `Archivo ${file.name} listo para procesar`,
+        });
       } else {
         toast({
           title: "Formato incorrecto",
-          description: "Por favor selecciona un archivo Excel (.xlsx o .xls)",
+          description: "Formatos permitidos: .xlsx, .xls, .xlsm, .csv",
           variant: "destructive"
         });
       }
@@ -54,8 +61,11 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
       const file = e.target.files[0];
       console.log('File selected:', file.name, file.type, file.size);
       
-      // Validate file type
-      if (file.type.includes("sheet") || file.name.endsWith(".xlsx") || file.name.endsWith(".xls") || file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.type === "application/vnd.ms-excel") {
+      // Validate file type by extension OR MIME (some sensors export 'octet-stream' or empty type)
+      const lower = file.name.toLowerCase();
+      const extensionValid = /\.(xlsx|xls|xlsm|csv)$/.test(lower);
+      const mimeValid = file.type?.includes("sheet") || file.type === "application/vnd.ms-excel" || file.type === "text/csv" || file.type === "application/csv" || file.type === "application/octet-stream" || file.type === "";
+      if (extensionValid || mimeValid) {
         setUploadedFile(file);
         toast({
           title: "Archivo seleccionado",
@@ -64,7 +74,7 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
       } else {
         toast({
           title: "Formato incorrecto",
-          description: "Por favor selecciona un archivo Excel (.xlsx o .xls)",
+          description: "Formatos permitidos: .xlsx, .xls, .xlsm, .csv",
           variant: "destructive"
         });
       }
@@ -82,8 +92,16 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
       const reader = new FileReader();
       reader.onload = async (e) => {
         try {
-          const data = new Uint8Array(e.target?.result as ArrayBuffer);
-          const workbook = XLSX.read(data, { type: 'array' });
+          const fileName = uploadedFile.name.toLowerCase();
+          const isCSV = fileName.endsWith('.csv');
+          let workbook: XLSX.WorkBook;
+          if (isCSV) {
+            const text = e.target?.result as string;
+            workbook = XLSX.read(text, { type: 'string' });
+          } else {
+            const data = new Uint8Array(e.target?.result as ArrayBuffer);
+            workbook = XLSX.read(data, { type: 'array' });
+          }
           const sheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[sheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
@@ -125,14 +143,26 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
             const salidaTempranoFromFile = row['Salida temprano'] || false;
             const tiempoExtraFromFile = row['Tiempo extra'] || null;
 
-            // Parse date
-            let parsedDate;
+            // Parse date (supports Excel serials and DD/MM/AAAA)
+            let parsedDate: Date;
             if (typeof fecha === 'number') {
-              // Excel date serial number
-              parsedDate = XLSX.SSF.parse_date_code(fecha);
-              parsedDate = new Date(parsedDate.y, parsedDate.m - 1, parsedDate.d);
+              const d = XLSX.SSF.parse_date_code(fecha);
+              parsedDate = new Date(d.y, d.m - 1, d.d);
+            } else if (typeof fecha === 'string') {
+              const f = fecha.toString().trim();
+              if (/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(f)) {
+                const [dd, mm, yy] = f.split('/').map(Number);
+                const year = yy < 100 ? 2000 + yy : yy;
+                parsedDate = new Date(year, (mm || 1) - 1, dd || 1);
+              } else {
+                parsedDate = new Date(f);
+              }
             } else {
               parsedDate = new Date(fecha);
+            }
+            if (isNaN(parsedDate.getTime())) {
+              console.warn('Fecha inválida:', fecha);
+              continue;
             }
 
             // Calculate worked hours if not provided
@@ -179,7 +209,12 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
         }
       };
       
-      reader.readAsArrayBuffer(uploadedFile);
+      const isCSV = uploadedFile.name.toLowerCase().endsWith('.csv');
+      if (isCSV) {
+        reader.readAsText(uploadedFile);
+      } else {
+        reader.readAsArrayBuffer(uploadedFile);
+      }
     } catch (error) {
       console.error('Error reading file:', error);
       toast({
@@ -245,7 +280,7 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
               
               <input
                 type="file"
-                accept=".xlsx,.xls,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                accept=".xlsx,.xls,.xlsm,.csv,text/csv,application/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                 onChange={handleFileInput}
                 className="hidden"
                 id="file-upload"

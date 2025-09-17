@@ -42,24 +42,37 @@ interface EmployeeContextType {
 
 const EmployeeContext = createContext<EmployeeContextType | undefined>(undefined);
 
-const initialEmployees: Employee[] = [];
+const getStoredEmployees = (): Employee[] => {
+  try {
+    const stored = localStorage.getItem('employees');
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+};
+
+const initialEmployees: Employee[] = getStoredEmployees();
 
 export const EmployeeProvider = ({ children }: { children: ReactNode }) => {
   const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
 
   const addEmployee = (employee: Omit<Employee, 'id'>) => {
     const newId = Math.max(0, ...employees.map(e => e.id)) + 1;
-    setEmployees(prev => [{ ...employee, id: newId }, ...prev]);
+    const newEmployees = [{ ...employee, id: newId }, ...employees];
+    setEmployees(newEmployees);
+    localStorage.setItem('employees', JSON.stringify(newEmployees));
   };
 
   const updateEmployee = (id: number, updatedEmployee: Partial<Employee>) => {
-    setEmployees(prev => 
-      prev.map(emp => emp.id === id ? { ...emp, ...updatedEmployee } : emp)
-    );
+    const newEmployees = employees.map(emp => emp.id === id ? { ...emp, ...updatedEmployee } : emp);
+    setEmployees(newEmployees);
+    localStorage.setItem('employees', JSON.stringify(newEmployees));
   };
 
   const deleteEmployee = (id: number) => {
-    setEmployees(prev => prev.filter(emp => emp.id !== id));
+    const newEmployees = employees.filter(emp => emp.id !== id);
+    setEmployees(newEmployees);
+    localStorage.setItem('employees', JSON.stringify(newEmployees));
   };
 
   const getActiveEmployees = () => {

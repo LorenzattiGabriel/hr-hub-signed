@@ -17,6 +17,25 @@ const DashboardOverview = () => {
   const { employees, getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
   
+  // Calculate average seniority
+  const calculateAverageSeniority = () => {
+    if (activeEmployees.length === 0) return 0;
+    
+    const today = new Date();
+    const totalYears = activeEmployees.reduce((sum, employee) => {
+      if (employee.fechaIngreso) {
+        const startDate = new Date(employee.fechaIngreso);
+        const years = (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+        return sum + years;
+      }
+      return sum;
+    }, 0);
+    
+    return Math.round((totalYears / activeEmployees.length) * 10) / 10; // Round to 1 decimal
+  };
+  
+  const averageSeniority = calculateAverageSeniority();
+  
   const quickStats = [
     {
       title: "Días de vacaciones usados",
@@ -99,6 +118,52 @@ const DashboardOverview = () => {
             </Card>
           );
         })}
+      </div>
+
+      {/* Employee Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Empleados</p>
+                <p className="text-3xl font-bold text-card-foreground">{employees.length}</p>
+              </div>
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <Users className="h-6 w-6 text-primary" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Empleados Activos</p>
+                <p className="text-3xl font-bold text-card-foreground">{activeEmployees.length}</p>
+              </div>
+              <div className="p-3 bg-success/10 rounded-lg">
+                <Users className="h-6 w-6 text-success" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Promedio Antigüedad</p>
+                <p className="text-3xl font-bold text-card-foreground">{averageSeniority}</p>
+                <p className="text-xs text-muted-foreground">años</p>
+              </div>
+              <div className="p-3 bg-warning/10 rounded-lg">
+                <Clock className="h-6 w-6 text-warning" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

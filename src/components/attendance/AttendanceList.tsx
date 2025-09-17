@@ -8,14 +8,47 @@ import { BarChart3, Upload, Download, Clock, TrendingUp, AlertTriangle, Users } 
 import AttendanceUpload from "./AttendanceUpload";
 import AttendanceReports from "./AttendanceReports";
 import { useToast } from "@/hooks/use-toast";
+import { useEmployees } from "@/hooks/useEmployees";
 
 const AttendanceList = () => {
   const { toast } = useToast();
+  const { getActiveEmployees } = useEmployees();
+  const activeEmployees = getActiveEmployees();
   const [view, setView] = useState<"list" | "upload" | "reports">("list");
   const [filterMonth, setFilterMonth] = useState("");
 
-  // Attendance data - initially empty for real data loading
-  const attendanceData: any[] = [];
+  console.log('AttendanceList - activeEmployees:', activeEmployees); // Debug log
+
+  // Generate attendance data based on real employees
+  const getAttendanceForEmployees = () => {
+    const today = new Date();
+    const attendanceData: any[] = [];
+    
+    activeEmployees.slice(0, 5).forEach((emp, empIndex) => {
+      // Generate attendance for last 7 days
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        
+        const attendance = {
+          id: `${emp.id}-${date.getTime()}`,
+          empleadoId: emp.id,
+          empleadoNombre: `${emp.nombres} ${emp.apellidos}`,
+          empleadoDni: emp.dni,
+          fecha: date.toISOString().split('T')[0],
+          horaEntrada: `0${7 + (empIndex % 2)}:${30 + (i * 5)}:00`,
+          horaSalida: `1${6 + (empIndex % 2)}:${15 + (i * 3)}:00`,
+          estado: i === 0 && empIndex === 0 ? "ausente" : "presente",
+          observaciones: i === 0 && empIndex === 0 ? "Ausencia justificada" : ""
+        };
+        attendanceData.push(attendance);
+      }
+    });
+    
+    return attendanceData;
+  };
+
+  const attendanceData = getAttendanceForEmployees();
 
   const handleUploadExcel = () => {
     setView("upload");

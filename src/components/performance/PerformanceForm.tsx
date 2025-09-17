@@ -17,6 +17,10 @@ interface PerformanceFormProps {
 
 const PerformanceForm = ({ onBack, evaluation }: PerformanceFormProps) => {
   const { toast } = useToast();
+  const { getActiveEmployees } = useEmployees();
+  const employees = getActiveEmployees();
+  
+  console.log('PerformanceForm - employees:', employees); // Debug log
   const [formData, setFormData] = useState({
     empleadoId: evaluation?.empleadoId || "",
     periodo: evaluation?.periodo || "",
@@ -38,9 +42,7 @@ const PerformanceForm = ({ onBack, evaluation }: PerformanceFormProps) => {
     areasDesarrollo: evaluation?.areasDesarrollo?.join(", ") || ""
   });
 
-  // Employees from context
-  const { employees: employeesCtx } = useEmployees();
-  const employees = employeesCtx.map(emp => ({ id: emp.id, nombre: `${emp.nombres} ${emp.apellidos}` }));
+  // Remove duplicate employee declaration since we already have it above
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -166,7 +168,7 @@ const PerformanceForm = ({ onBack, evaluation }: PerformanceFormProps) => {
                 <SelectContent>
                   {employees.map((emp) => (
                     <SelectItem key={emp.id} value={emp.id.toString()}>
-                      {emp.nombre}
+                      {emp.nombres} {emp.apellidos}
                     </SelectItem>
                   ))}
                 </SelectContent>

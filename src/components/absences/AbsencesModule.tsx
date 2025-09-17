@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Download, Plus, Search, Clock, User, FileText, AlertCircle } from "lucide-react";
+import { Calendar, Download, Plus, Search, Clock, User, FileText, AlertCircle, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import AbsenceForm from "./AbsenceForm";
 import AbsenceDetail from "./AbsenceDetail";
 import { useToast } from "@/hooks/use-toast";
@@ -24,7 +25,7 @@ const AbsencesModule = () => {
   const [filterStatus, setFilterStatus] = useState("");
 
   // Datos reales de ausencias
-  const { absences, loading } = useAbsences();
+  const { absences, loading, deleteAbsence } = useAbsences();
 
   // Adaptar a forma esperada por la UI existente
   const items = absences.map((a) => ({
@@ -62,6 +63,14 @@ const AbsencesModule = () => {
   const handleBackToList = () => {
     setView("list");
     setSelectedAbsence(null);
+  };
+
+  const handleDeleteAbsence = async (absenceId: string) => {
+    try {
+      await deleteAbsence(absenceId);
+    } catch (error) {
+      // El hook ya muestra el toast de error
+    }
   };
 
   const generateReport = () => {
@@ -272,6 +281,28 @@ const AbsencesModule = () => {
                     Archivo
                   </Button>
                 )}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Eliminar
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. Se eliminará permanentemente la ausencia de {absence.empleadoNombre}.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteAbsence(absence.id)}>
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>

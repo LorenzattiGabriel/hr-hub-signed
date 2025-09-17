@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GraduationCap, Plus, Search, Download, BookOpen, Award, Users } from "lucide-react";
+import { GraduationCap, Plus, Search, Download, BookOpen, Award, Users, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import TrainingForm from "./TrainingForm";
 import TrainingDetail from "./TrainingDetail";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +16,7 @@ const TrainingList = () => {
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
-  const { trainings, loading, updateTrainingStatus } = useTrainings();
+  const { trainings, loading, updateTrainingStatus, deleteTraining } = useTrainings();
   
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedTraining, setSelectedTraining] = useState<any>(null);
@@ -51,6 +52,14 @@ const TrainingList = () => {
   const handleStatusChange = async (trainingId: string, newStatus: any) => {
     try {
       await updateTrainingStatus(trainingId, newStatus);
+    } catch (error) {
+      // El hook ya muestra el toast de error
+    }
+  };
+
+  const handleDeleteTraining = async (trainingId: string) => {
+    try {
+      await deleteTraining(trainingId);
     } catch (error) {
       // El hook ya muestra el toast de error
     }
@@ -317,6 +326,28 @@ const TrainingList = () => {
                     <Download className="h-4 w-4 mr-1" />
                     Certificado
                   </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Eliminar
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Esta acción no se puede deshacer. Se eliminará permanentemente la capacitación "{training.titulo}" de {training.empleadoNombre}.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDeleteTraining(training.id)}>
+                          Eliminar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </CardContent>
             </Card>

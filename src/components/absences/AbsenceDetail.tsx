@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, FileText, Calendar, User, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAbsences } from "@/hooks/useAbsences";
+import AbsencePDF from "./AbsencePDF";
 
 interface AbsenceDetailProps {
   absence: any;
@@ -84,6 +85,15 @@ const AbsenceDetail = ({ absence, onBack }: AbsenceDetailProps) => {
           </div>
         </div>
         <div className="flex space-x-2">
+          <AbsencePDF 
+            absenceData={absence}
+            trigger={
+              <Button variant="outline">
+                <Download className="h-4 w-4 mr-2" />
+                Descargar PDF
+              </Button>
+            }
+          />
           {(absence.certificadoMedico || absence.archivo) && (
             <Button variant="outline" onClick={downloadCertificate}>
               <Download className="h-4 w-4 mr-2" />

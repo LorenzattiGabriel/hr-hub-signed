@@ -8,42 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useEmployees } from "@/contexts/EmployeeContext";
 import { Search, Filter, Download, Eye } from "lucide-react";
 
-// Datos de ejemplo - se reemplazará con datos de Supabase
-const mockPayrollData = [
-  {
-    id: 1,
-    employeeId: 1,
-    employeeName: "Juan Pérez",
-    type: "salary",
-    amount: 85000,
-    period: "2024-01",
-    paymentDate: "2024-01-31",
-    description: "Sueldo enero 2024",
-    status: "paid"
-  },
-  {
-    id: 2,
-    employeeId: 1,
-    employeeName: "Juan Pérez",
-    type: "advance",
-    amount: 15000,
-    period: "2024-01",
-    paymentDate: "2024-01-15",
-    description: "Adelanto quincena",
-    status: "paid"
-  },
-  {
-    id: 3,
-    employeeId: 2,
-    employeeName: "María García",
-    type: "commission",
-    amount: 12000,
-    period: "2024-01",
-    paymentDate: "2024-01-31",
-    description: "Comisión por ventas",
-    status: "pending"
-  }
-];
+// Payroll data - initially empty for real data loading
+const mockPayrollData: any[] = [];
 
 const PayrollList = () => {
   const { employees } = useEmployees();

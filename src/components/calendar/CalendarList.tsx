@@ -9,30 +9,8 @@ const CalendarList = () => {
   const { toast } = useToast();
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Mock calendar events
-  const mockEvents = [
-    {
-      id: 1,
-      title: "Vacaciones - María González",
-      date: "2024-12-15",
-      type: "vacation",
-      empleado: "María José González"
-    },
-    {
-      id: 2,
-      title: "Capacitación Bioseguridad",
-      date: "2024-12-10",
-      type: "training",
-      empleado: "Todos los empleados"
-    },
-    {
-      id: 3,
-      title: "Evaluación de Desempeño",
-      date: "2024-12-20",
-      type: "evaluation",
-      empleado: "Juan Carlos Rodríguez"
-    }
-  ];
+  // Calendar events - initially empty for real data loading
+  const mockEvents: any[] = [];
 
   const addEvent = () => {
     toast({
@@ -134,34 +112,42 @@ const CalendarList = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {mockEvents.map((event) => (
-              <div key={event.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-4">
-                  <div className={`p-2 rounded-lg ${
-                    event.type === "vacation" ? "bg-success/10" :
-                    event.type === "training" ? "bg-warning/10" : "bg-primary/10"
-                  }`}>
-                    {event.type === "vacation" ? <Users className="h-4 w-4" /> :
-                     event.type === "training" ? <Clock className="h-4 w-4" /> :
-                     <CheckCircle className="h-4 w-4" />}
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">{event.title}</p>
-                    <p className="text-sm text-foreground/70">{event.empleado}</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium text-foreground">{new Date(event.date).toLocaleDateString()}</p>
-                  <Badge variant={
-                    event.type === "vacation" ? "success" :
-                    event.type === "training" ? "warning" : "default"
-                  }>
-                    {event.type === "vacation" ? "Vacaciones" :
-                     event.type === "training" ? "Capacitación" : "Evaluación"}
-                  </Badge>
-                </div>
+            {mockEvents.length === 0 ? (
+              <div className="text-center py-8">
+                <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-foreground/70">No hay eventos programados</p>
+                <p className="text-sm text-foreground/50">Los eventos aparecerán aquí cuando los agregues</p>
               </div>
-            ))}
+            ) : (
+              mockEvents.map((event) => (
+                <div key={event.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className={`p-2 rounded-lg ${
+                      event.type === "vacation" ? "bg-success/10" :
+                      event.type === "training" ? "bg-warning/10" : "bg-primary/10"
+                    }`}>
+                      {event.type === "vacation" ? <Users className="h-4 w-4" /> :
+                       event.type === "training" ? <Clock className="h-4 w-4" /> :
+                       <CheckCircle className="h-4 w-4" />}
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">{event.title}</p>
+                      <p className="text-sm text-foreground/70">{event.empleado}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium text-foreground">{new Date(event.date).toLocaleDateString()}</p>
+                    <Badge variant={
+                      event.type === "vacation" ? "success" :
+                      event.type === "training" ? "warning" : "default"
+                    }>
+                      {event.type === "vacation" ? "Vacaciones" :
+                       event.type === "training" ? "Capacitación" : "Evaluación"}
+                    </Badge>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

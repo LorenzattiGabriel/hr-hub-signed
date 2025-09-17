@@ -13,12 +13,14 @@ import { useEmployees } from "@/hooks/useEmployees";
 import { useAbsences } from "@/hooks/useAbsences";
 
 const AbsencesModule = () => {
+  console.log("🔍 AbsencesModule rendering...");
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
   
   console.log('AbsencesModule - activeEmployees:', activeEmployees); // Debug log
   const [view, setView] = useState<"list" | "form" | "detail">("list");
+  console.log("📋 Current view:", view);
   const [selectedAbsence, setSelectedAbsence] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
@@ -123,6 +125,8 @@ const AbsencesModule = () => {
   if (view === "detail" && selectedAbsence) {
     return <AbsenceDetail absence={selectedAbsence} onBack={handleBackToList} />;
   }
+
+  console.log("📊 Rendering list view with", filteredAbsences.length, "absences");
 
   return (
     <div className="space-y-6">

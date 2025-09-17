@@ -4,17 +4,18 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Filter, Download, FileText, Users, Trash2 } from "lucide-react";
+import { Search, Plus, Filter, Download, FileText, Users, Trash2, Upload } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import EmployeeForm from "./EmployeeForm";
 import EmployeeDetail from "./EmployeeDetail";
+import { EmployeeImport } from "./EmployeeImport";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/contexts/EmployeeContext";
 
 const EmployeeList = () => {
   const { toast } = useToast();
   const { employees, addEmployee, updateEmployee, deleteEmployee } = useEmployees();
-  const [view, setView] = useState<"list" | "form" | "detail">("list");
+  const [view, setView] = useState<"list" | "form" | "detail" | "import">("list");
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -92,6 +93,10 @@ const EmployeeList = () => {
     });
   };
 
+  const handleImportEmployees = () => {
+    setView("import");
+  };
+
   if (view === "form") {
     return (
       <EmployeeForm 
@@ -113,6 +118,12 @@ const EmployeeList = () => {
     );
   }
 
+  if (view === "import") {
+    return (
+      <EmployeeImport onComplete={handleBackToList} />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -127,6 +138,10 @@ const EmployeeList = () => {
           <Button variant="outline" onClick={generateReport}>
             <FileText className="h-4 w-4 mr-2" />
             Generar Reporte
+          </Button>
+          <Button variant="outline" onClick={handleImportEmployees}>
+            <Upload className="h-4 w-4 mr-2" />
+            Importar Excel
           </Button>
           <Button onClick={handleNewEmployee}>
             <Plus className="h-4 w-4 mr-2" />

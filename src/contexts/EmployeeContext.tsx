@@ -42,6 +42,7 @@ interface EmployeeContextType {
   updateEmployee: (id: number, employee: Partial<Employee>) => void;
   deleteEmployee: (id: number) => void;
   getActiveEmployees: () => Employee[];
+  importEmployees: (employees: Omit<Employee, 'id'>[]) => void;
 }
 
 const EmployeeContext = createContext<EmployeeContextType | undefined>(undefined);
@@ -83,13 +84,25 @@ export const EmployeeProvider = ({ children }: { children: ReactNode }) => {
     return employees.filter(emp => emp.estado === "activo");
   };
 
+  const importEmployees = (newEmployees: Omit<Employee, 'id'>[]) => {
+    const maxId = Math.max(0, ...employees.map(e => e.id));
+    const employeesWithIds = newEmployees.map((emp, index) => ({
+      ...emp,
+      id: maxId + index + 1
+    }));
+    const updatedEmployees = [...employeesWithIds, ...employees];
+    setEmployees(updatedEmployees);
+    localStorage.setItem('employees', JSON.stringify(updatedEmployees));
+  };
+
   return (
     <EmployeeContext.Provider value={{ 
       employees, 
       addEmployee, 
       updateEmployee, 
       deleteEmployee,
-      getActiveEmployees 
+      getActiveEmployees,
+      importEmployees
     }}>
       {children}
     </EmployeeContext.Provider>

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, FileText, Calendar, User, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAbsences } from "@/hooks/useAbsences";
 
 interface AbsenceDetailProps {
   absence: any;
@@ -11,6 +12,7 @@ interface AbsenceDetailProps {
 
 const AbsenceDetail = ({ absence, onBack }: AbsenceDetailProps) => {
   const { toast } = useToast();
+  const { updateAbsence } = useAbsences();
 
   const downloadCertificate = () => {
     toast({
@@ -19,19 +21,37 @@ const AbsenceDetail = ({ absence, onBack }: AbsenceDetailProps) => {
     });
   };
 
-  const approveAbsence = () => {
-    toast({
-      title: "Ausencia aprobada",
-      description: "La ausencia ha sido aprobada exitosamente",
-    });
+  const approveAbsence = async () => {
+    try {
+      await updateAbsence(absence.id, { estado: 'aprobado' });
+      toast({
+        title: "Ausencia aprobada",
+        description: "La ausencia ha sido aprobada exitosamente",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo aprobar la ausencia",
+        variant: "destructive"
+      });
+    }
   };
 
-  const rejectAbsence = () => {
-    toast({
-      title: "Ausencia rechazada",
-      description: "La ausencia ha sido rechazada",
-      variant: "destructive"
-    });
+  const rejectAbsence = async () => {
+    try {
+      await updateAbsence(absence.id, { estado: 'rechazado' });
+      toast({
+        title: "Ausencia rechazada",
+        description: "La ausencia ha sido rechazada",
+        variant: "destructive"
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo rechazar la ausencia",
+        variant: "destructive"
+      });
+    }
   };
 
   const calculateDuration = () => {

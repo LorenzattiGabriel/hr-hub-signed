@@ -150,52 +150,6 @@ const EmployeeList = () => {
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Total Empleados</p>
-                <p className="text-3xl font-bold text-foreground">{employees.length}</p>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Empleados Activos</p>
-                <p className="text-3xl font-bold text-foreground">{employees.filter(e => e.estado === "activo").length}</p>
-              </div>
-              <div className="p-3 bg-success/10 rounded-lg">
-                <Users className="h-6 w-6 text-success" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Promedio Antigüedad</p>
-                <p className="text-3xl font-bold text-foreground">0</p>
-                <p className="text-xs text-foreground/60">años</p>
-              </div>
-              <div className="p-3 bg-warning/10 rounded-lg">
-                <Filter className="h-6 w-6 text-warning" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Search and Filters */}
       <Card>
         <CardHeader>

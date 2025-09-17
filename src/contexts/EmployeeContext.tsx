@@ -90,7 +90,8 @@ export const EmployeeProvider = ({ children }: { children: ReactNode }) => {
       ...emp,
       id: maxId + index + 1
     }));
-    const updatedEmployees = [...employeesWithIds, ...employees];
+    // Solo agregar los empleados nuevos, no duplicar los existentes
+    const updatedEmployees = [...employees, ...employeesWithIds];
     setEmployees(updatedEmployees);
     localStorage.setItem('employees', JSON.stringify(updatedEmployees, (key, value) => (key === 'fotoDni' || key === 'fotoCarnet' ? undefined : value)));
   };

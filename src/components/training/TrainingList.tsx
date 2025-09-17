@@ -9,47 +9,37 @@ import TrainingForm from "./TrainingForm";
 import TrainingDetail from "./TrainingDetail";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/hooks/useEmployees";
+import { useTrainings } from "@/hooks/useTrainings";
 
 const TrainingList = () => {
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
+  const { trainings, loading, updateTrainingStatus } = useTrainings();
   
-  console.log('TrainingList - activeEmployees:', activeEmployees); // Debug log
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedTraining, setSelectedTraining] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
 
-  // Training data based on real employees
-  const getTrainingsForEmployees = () => {
-    const trainingTitles = [
-      "Bioseguridad en Granjas Avícolas",
-      "Manejo de Equipos de Incubación", 
-      "Primeros Auxilios en el Trabajo",
-      "Seguridad Industrial",
-      "Calidad en Procesos"
-    ];
-    
-    return activeEmployees.slice(0, 3).map((emp, index) => ({
-      id: emp.id,
-      titulo: trainingTitles[index] || "Capacitación General",
-      empleadoId: emp.id,
-      empleadoNombre: `${emp.nombres} ${emp.apellidos}`,
-      fecha: new Date(Date.now() - (index * 10) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      duracion: 4 + (index * 2),
-      tipo: ["seguridad", "tecnico", "administrativo"][index % 3],
-      instructor: ["Dr. Carlos Pérez", "Ing. Ana Martínez", "Cruz Roja Argentina"][index % 3],
-      estado: index === 0 ? "completado" : "en-progreso",
-      certificacion: index % 2 === 0,
-      observaciones: index === 0 ? "Excelente participación" : ""
-    }));
-  };
+  // Adaptar a forma esperada por la UI existente
+  const items = trainings.map((t) => ({
+    id: t.id,
+    titulo: t.titulo,
+    empleadoId: t.employee_id,
+    empleadoNombre: t.empleadoNombre || '',
+    fecha: t.fecha_inicio || t.created_at.split('T')[0],
+    duracion: t.duracion_horas || 0,
+    tipo: t.tipo,
+    instructor: t.instructor || 'Sin asignar',
+    estado: t.estado,
+    certificacion: !!t.certificado_url,
+    observaciones: t.observaciones || ''
+  }));
 
-  const mockTrainings = getTrainingsForEmployees();
-  const totalHours = mockTrainings.reduce((sum, t) => sum + (t.duracion || 0), 0);
+  const totalHours = items.reduce((sum, t) => sum + (t.duracion || 0), 0);
 
-  const filteredTrainings = mockTrainings.filter(training => {
+  const filteredTrainings = items.filter(training => {
     const matchesSearch = (
       training.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
       training.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase())
@@ -57,6 +47,14 @@ const TrainingList = () => {
     const matchesType = !filterType || filterType === "all" || training.tipo === filterType;
     return matchesSearch && matchesType;
   });
+
+  const handleStatusChange = async (trainingId: string, newStatus: any) => {
+    try {
+      await updateTrainingStatus(trainingId, newStatus);
+    } catch (error) {
+      // El hook ya muestra el toast de error
+    }
+  };
 
   const handleNewTraining = () => {
     setSelectedTraining(null);
@@ -81,7 +79,7 @@ const TrainingList = () => {
   };
 
   if (view === "form") {
-    return <TrainingForm onBack={handleBackToList} training={selectedTraining} />;
+    return <TrainingForm onBack={handleBackToList} training={selectedTraining} employees={activeEmployees} />;
   }
 
   if (view === "detail" && selectedTraining) {
@@ -117,7 +115,7 @@ const TrainingList = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-foreground/70">Total Capacitaciones</p>
-                <p className="text-3xl font-bold text-foreground">{mockTrainings.length}</p>
+                <p className="text-3xl font-bold text-foreground">{items.length}</p>
               </div>
               <div className="p-3 bg-primary/10 rounded-lg">
                 <BookOpen className="h-6 w-6 text-primary" />
@@ -132,7 +130,7 @@ const TrainingList = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">Completadas</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {mockTrainings.filter(t => t.estado === "completado").length}
+                  {items.filter(t => t.estado === "completado").length}
                 </p>
               </div>
               <div className="p-3 bg-success/10 rounded-lg">
@@ -148,7 +146,7 @@ const TrainingList = () => {
               <div>
                 <p className="text-sm font-medium text-foreground/70">En Progreso</p>
                 <p className="text-3xl font-bold text-foreground">
-                  {mockTrainings.filter(t => t.estado === "en-progreso").length}
+                  {items.filter(t => t.estado === "en_progreso").length}
                 </p>
               </div>
               <div className="p-3 bg-warning/10 rounded-lg">
@@ -214,9 +212,31 @@ const TrainingList = () => {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg text-foreground">{training.titulo}</CardTitle>
-                <Badge variant={training.estado === "completado" ? "success" : "warning"}>
-                  {training.estado === "completado" ? "Completado" : "En Progreso"}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Select 
+                    value={training.estado} 
+                    onValueChange={(value) => handleStatusChange(training.id, value)}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pendiente">Pendiente</SelectItem>
+                      <SelectItem value="en_progreso">En Progreso</SelectItem>
+                      <SelectItem value="completado">Completado</SelectItem>
+                      <SelectItem value="cancelado">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Badge variant={
+                    training.estado === "completado" ? "default" : 
+                    training.estado === "en_progreso" ? "secondary" :
+                    training.estado === "cancelado" ? "destructive" : "outline"
+                  }>
+                    {training.estado === "completado" ? "Completado" : 
+                     training.estado === "en_progreso" ? "En Progreso" :
+                     training.estado === "cancelado" ? "Cancelado" : "Pendiente"}
+                  </Badge>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface TrainingStats {
   completedTrainings: number;
   pendingTrainings: number;
+  inProgressTrainings: number;
   totalTrainings: number;
   completionRate: number;
 }
@@ -12,6 +13,7 @@ export const useTraining = () => {
   const [stats, setStats] = useState<TrainingStats>({
     completedTrainings: 0,
     pendingTrainings: 0,
+    inProgressTrainings: 0,
     totalTrainings: 0,
     completionRate: 0
   });
@@ -19,18 +21,22 @@ export const useTraining = () => {
 
   const fetchTrainingStats = async () => {
     try {
-      // Since training table might not exist yet, we'll simulate data
-      // In a real implementation, you would query the training/courses table
-      
-      // Simulate data for now
-      const completed = 25;
-      const pending = 8;
-      const total = completed + pending;
+      const { data, error } = await (supabase as any)
+        .from('trainings')
+        .select('estado');
+
+      if (error) throw error;
+
+      const completed = (data || []).filter((t: any) => t.estado === 'completado').length;
+      const pending = (data || []).filter((t: any) => t.estado === 'pendiente').length;
+      const inProgress = (data || []).filter((t: any) => t.estado === 'en_progreso').length;
+      const total = (data || []).length;
       const rate = total > 0 ? (completed / total) * 100 : 0;
 
       setStats({
         completedTrainings: completed,
         pendingTrainings: pending,
+        inProgressTrainings: inProgress,
         totalTrainings: total,
         completionRate: Math.round(rate)
       });

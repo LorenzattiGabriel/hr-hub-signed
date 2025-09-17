@@ -8,20 +8,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GraduationCap, Save, ArrowLeft, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useEmployees } from "@/hooks/useEmployees";
+import { useTrainings } from "@/hooks/useTrainings";
 import html2pdf from "html2pdf.js";
 
 interface TrainingFormProps {
   onBack: () => void;
   training?: any;
+  employees: any[];
 }
 
-const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
+const TrainingForm = ({ onBack, training, employees }: TrainingFormProps) => {
   const { toast } = useToast();
-  const { getActiveEmployees } = useEmployees();
-  const employees = getActiveEmployees();
+  const { addTraining } = useTrainings();
   
   console.log('TrainingForm - employees:', employees); // Debug log
+  
   const [formData, setFormData] = useState({
     titulo: training?.titulo || "",
     empleadoId: training?.empleadoId || "",
@@ -29,6 +30,8 @@ const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
     duracion: training?.duracion || "",
     tipo: training?.tipo || "",
     instructor: training?.instructor || "",
+    modalidad: training?.modalidad || "",
+    descripcion: training?.descripcion || "",
     certificacion: training?.certificacion || false,
     observaciones: training?.observaciones || ""
   });
@@ -39,7 +42,7 @@ const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.titulo || !formData.empleadoId || !formData.fecha) {
       toast({
         title: "Error",
@@ -49,12 +52,36 @@ const TrainingForm = ({ onBack, training }: TrainingFormProps) => {
       return;
     }
 
-    toast({
-      title: "Capacitación guardada",
-      description: "La capacitación ha sido registrada exitosamente",
-    });
+    try {
+      await addTraining({
+        employee_id: formData.empleadoId,
+        titulo: formData.titulo,
+        descripcion: formData.descripcion || null,
+        tipo: formData.tipo,
+        estado: 'pendiente',
+        fecha_inicio: formData.fecha,
+        fecha_fin: null,
+        fecha_vencimiento: null,
+        instructor: formData.instructor || null,
+        modalidad: formData.modalidad as any || null,
+        duracion_horas: parseInt(formData.duracion) || null,
+        calificacion: null,
+        certificado_url: null,
+        observaciones: formData.observaciones || null,
+        created_at: '' as any,
+        updated_at: '' as any,
+        id: '' as any,
+      } as any);
 
-    setTimeout(() => onBack(), 1500);
+      toast({
+        title: "Capacitación guardada",
+        description: "La capacitación ha sido registrada exitosamente",
+      });
+
+      onBack();
+    } catch (error) {
+      // El hook ya muestra el toast de error
+    }
   };
 
   const generateCertificate = async () => {

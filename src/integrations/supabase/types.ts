@@ -175,6 +175,74 @@ export type Database = {
         }
         Relationships: []
       }
+      trainings: {
+        Row: {
+          calificacion: number | null
+          certificado_url: string | null
+          created_at: string
+          descripcion: string | null
+          duracion_horas: number | null
+          employee_id: string
+          estado: string
+          fecha_fin: string | null
+          fecha_inicio: string | null
+          fecha_vencimiento: string | null
+          id: string
+          instructor: string | null
+          modalidad: string | null
+          observaciones: string | null
+          tipo: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          calificacion?: number | null
+          certificado_url?: string | null
+          created_at?: string
+          descripcion?: string | null
+          duracion_horas?: number | null
+          employee_id: string
+          estado?: string
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          fecha_vencimiento?: string | null
+          id?: string
+          instructor?: string | null
+          modalidad?: string | null
+          observaciones?: string | null
+          tipo: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          calificacion?: number | null
+          certificado_url?: string | null
+          created_at?: string
+          descripcion?: string | null
+          duracion_horas?: number | null
+          employee_id?: string
+          estado?: string
+          fecha_fin?: string | null
+          fecha_inicio?: string | null
+          fecha_vencimiento?: string | null
+          id?: string
+          instructor?: string | null
+          modalidad?: string | null
+          observaciones?: string | null
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trainings_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vacation_balances: {
         Row: {
           created_at: string

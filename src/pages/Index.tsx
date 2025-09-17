@@ -11,6 +11,7 @@ import AttendanceList from "@/components/attendance/AttendanceList";
 import PerformanceList from "@/components/performance/PerformanceList";
 import CalendarList from "@/components/calendar/CalendarList";
 import PayrollModule from "@/components/payroll/PayrollModule";
+import { AddEmployeeButton } from "@/components/debug/AddEmployeeButton";
 
 const Index = () => {
   const [activeModule, setActiveModule] = useState("dashboard");
@@ -51,6 +52,7 @@ const Index = () => {
           </div>
         </main>
       </div>
+      <AddEmployeeButton />
     </div>
   );
 };

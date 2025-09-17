@@ -43,7 +43,7 @@ const UniformsModule = () => {
     "Buzo"
   ];
 
-  const sizes = ["XS", "S", "M", "L", "XL", "XXL", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45"];
+  const sizes = ["Sin talle", "XS", "S", "M", "L", "XL", "XXL", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45"];
 
   const seasons = ["Verano", "Invierno", "Todo el año"];
 

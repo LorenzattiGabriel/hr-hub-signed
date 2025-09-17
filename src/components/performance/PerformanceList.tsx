@@ -4,7 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, Plus, Search, Download, TrendingUp, Award, Users } from "lucide-react";
+import { Star, Plus, Search, Download, TrendingUp, Award, Users, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import PerformanceForm from "./PerformanceForm";
 import PerformanceDetail from "./PerformanceDetail";
 import { useToast } from "@/hooks/use-toast";
@@ -15,7 +16,7 @@ const PerformanceList = () => {
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
-  const { evaluations, loading } = usePerformanceEvaluations();
+  const { evaluations, loading, deleteEvaluation } = usePerformanceEvaluations();
   
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedPerformance, setSelectedPerformance] = useState<any>(null);
@@ -54,6 +55,18 @@ const PerformanceList = () => {
     const matchesPeriod = !filterPeriod || filterPeriod === "all" || evaluation.periodo === filterPeriod;
     return matchesSearch && matchesPeriod;
   });
+
+  const handleDeleteEvaluation = async (evaluationId: string, employeeName: string) => {
+    try {
+      await deleteEvaluation(evaluationId);
+      toast({
+        title: "Evaluación eliminada",
+        description: `La evaluación de ${employeeName} ha sido eliminada`,
+      });
+    } catch (error) {
+      // El hook ya muestra el toast de error
+    }
+  };
 
   const handleNewEvaluation = () => {
     setSelectedPerformance(null);
@@ -299,6 +312,28 @@ const PerformanceList = () => {
                   <Download className="h-4 w-4 mr-1" />
                   PDF
                 </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Eliminar
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. Se eliminará permanentemente la evaluación de desempeño de {evaluation.empleadoNombre} del período {evaluation.periodo}.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteEvaluation(evaluation.id, evaluation.empleadoNombre)}>
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </CardContent>
           </Card>

@@ -23,6 +23,9 @@ const AbsencesModule = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
+  const [filterEmployee, setFilterEmployee] = useState("");
+  const [filterMonth, setFilterMonth] = useState("");
+  const [filterYear, setFilterYear] = useState("");
 
   // Datos reales de ausencias
   const { absences, loading, deleteAbsence } = useAbsences();
@@ -55,8 +58,33 @@ const AbsencesModule = () => {
     const matchesSearch = absence.empleadoNombre.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = !filterType || filterType === "all" || absence.tipo === filterType;
     const matchesStatus = !filterStatus || filterStatus === "all" || absence.estado === filterStatus;
-    return matchesSearch && matchesType && matchesStatus;
+    const matchesEmployee = !filterEmployee || filterEmployee === "all" || absence.empleadoId === filterEmployee;
+    
+    // Filtro por mes y año
+    const absenceDate = new Date(absence.fechaInicio);
+    const matchesMonth = !filterMonth || filterMonth === "all" || (absenceDate.getMonth() + 1).toString() === filterMonth;
+    const matchesYear = !filterYear || filterYear === "all" || absenceDate.getFullYear().toString() === filterYear;
+    
+    return matchesSearch && matchesType && matchesStatus && matchesEmployee && matchesMonth && matchesYear;
   });
+
+  // Obtener años únicos de las ausencias para el filtro
+  const availableYears = [...new Set(items.map(absence => new Date(absence.fechaInicio).getFullYear()))].sort((a, b) => b - a);
+
+  const months = [
+    { value: "1", label: "Enero" },
+    { value: "2", label: "Febrero" },
+    { value: "3", label: "Marzo" },
+    { value: "4", label: "Abril" },
+    { value: "5", label: "Mayo" },
+    { value: "6", label: "Junio" },
+    { value: "7", label: "Julio" },
+    { value: "8", label: "Agosto" },
+    { value: "9", label: "Septiembre" },
+    { value: "10", label: "Octubre" },
+    { value: "11", label: "Noviembre" },
+    { value: "12", label: "Diciembre" }
+  ];
 
   const handleNewAbsence = () => {
     setSelectedAbsence(null);
@@ -191,20 +219,34 @@ const AbsencesModule = () => {
           <CardTitle className="text-foreground">Filtros y Búsqueda</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
               <Input
-                placeholder="Buscar por empleado..."
+                placeholder="Buscar empleado..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
             
+            <Select onValueChange={setFilterEmployee}>
+              <SelectTrigger>
+                <SelectValue placeholder="Todos los empleados" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los empleados</SelectItem>
+                {activeEmployees.map((employee) => (
+                  <SelectItem key={employee.id} value={employee.id}>
+                    {employee.nombres} {employee.apellidos}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
             <Select onValueChange={setFilterType}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filtrar por tipo" />
+              <SelectTrigger>
+                <SelectValue placeholder="Tipo de ausencia" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los tipos</SelectItem>
@@ -216,9 +258,43 @@ const AbsencesModule = () => {
               </SelectContent>
             </Select>
 
+            <Select onValueChange={setFilterMonth}>
+              <SelectTrigger>
+                <SelectValue placeholder="Mes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los meses</SelectItem>
+                {months.map((month) => (
+                  <SelectItem key={month.value} value={month.value}>
+                    {month.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select onValueChange={setFilterYear}>
+              <SelectTrigger>
+                <SelectValue placeholder="Año" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los años</SelectItem>
+                {availableYears.map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="mt-4 flex justify-between items-center">
+            <p className="text-sm text-foreground/70">
+              Mostrando {filteredAbsences.length} de {items.length} ausencias
+            </p>
+            
             <Select onValueChange={setFilterStatus}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filtrar por estado" />
+                <SelectValue placeholder="Estado" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos los estados</SelectItem>
@@ -232,105 +308,133 @@ const AbsencesModule = () => {
       </Card>
 
       {/* Absence List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredAbsences.map((absence) => (
-          <Card key={absence.id} className="hover:shadow-md transition-shadow cursor-pointer">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg text-foreground">{absence.empleadoNombre}</CardTitle>
-                <Badge variant={absence.estado === "aprobado" ? "default" : absence.estado === "pendiente" ? "secondary" : "destructive"}>
-                  {absence.estado === "aprobado" ? "Aprobado" : absence.estado === "pendiente" ? "Pendiente" : "Rechazado"}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Fecha Inicio</p>
-                  <p className="text-foreground">{new Date(absence.fechaInicio).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Fecha Fin</p>
-                  <p className="text-foreground">{new Date(absence.fechaFin).toLocaleDateString()}</p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Tipo</p>
-                  <Badge variant="outline" className="capitalize">{absence.tipo}</Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-foreground/70">Certificado</p>
-                  <div className="flex items-center space-x-1">
-                    {absence.certificadoMedico || absence.archivo ? (
-                      <Badge variant="default" className="text-xs">
-                        <FileText className="h-3 w-3 mr-1" />
-                        Sí
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="text-xs">No</Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Motivo</p>
-                <p className="text-foreground text-sm">{absence.motivo}</p>
-              </div>
-
-              <div className="flex space-x-2 pt-2">
-                <Button variant="outline" size="sm" onClick={() => handleViewAbsence(absence)}>
-                  Ver Detalle
-                </Button>
-                {(absence.certificadoMedico || absence.archivo) && (
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-1" />
-                    Archivo
-                  </Button>
-                )}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Eliminar
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Esta acción no se puede deshacer. Se eliminará permanentemente la ausencia de {absence.empleadoNombre}.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteAbsence(absence.id)}>
-                        Eliminar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {filteredAbsences.length === 0 && (
-        <Card>
-          <CardContent className="p-12 text-center">
-            <AlertCircle className="h-12 w-12 text-foreground/40 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              No se encontraron ausencias
-            </h3>
-            <p className="text-foreground/70">
-              No hay ausencias que coincidan con los filtros seleccionados.
-            </p>
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-foreground">Lista de Ausencias y Permisos</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {filteredAbsences.length === 0 ? (
+            <div className="p-12 text-center">
+              <AlertCircle className="h-12 w-12 text-foreground/40 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No se encontraron ausencias
+              </h3>
+              <p className="text-foreground/70">
+                No hay ausencias que coincidan con los filtros seleccionados.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-3 px-4 font-medium text-foreground/70">Empleado</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground/70">Período</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground/70">Tipo</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground/70">Estado</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground/70">Certificado</th>
+                    <th className="text-left py-3 px-4 font-medium text-foreground/70">Motivo</th>
+                    <th className="text-center py-3 px-4 font-medium text-foreground/70">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAbsences.map((absence) => (
+                    <tr key={absence.id} className="border-b border-border hover:bg-muted/30 transition-colors">
+                      <td className="py-4 px-4">
+                        <div>
+                          <div className="font-medium text-foreground">{absence.empleadoNombre}</div>
+                          <div className="text-sm text-foreground/70">DNI: {absence.empleadoDni}</div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="text-sm">
+                          <div className="text-foreground">
+                            {new Date(absence.fechaInicio).toLocaleDateString('es-AR')}
+                          </div>
+                          <div className="text-foreground/70">
+                            al {new Date(absence.fechaFin).toLocaleDateString('es-AR')}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge variant="outline" className="capitalize">
+                          {absence.tipo}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge 
+                          variant={
+                            absence.estado === "aprobado" 
+                              ? "default" 
+                              : absence.estado === "pendiente" 
+                              ? "secondary" 
+                              : "destructive"
+                          }
+                        >
+                          {absence.estado === "aprobado" ? "Aprobado" : absence.estado === "pendiente" ? "Pendiente" : "Rechazado"}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4">
+                        {absence.certificadoMedico || absence.archivo ? (
+                          <Badge variant="default" className="text-xs">
+                            <FileText className="h-3 w-3 mr-1" />
+                            Sí
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">No</Badge>
+                        )}
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="text-sm text-foreground max-w-[200px] truncate" title={absence.motivo}>
+                          {absence.motivo}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex space-x-1 justify-center">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleViewAbsence(absence)}
+                            className="text-xs"
+                          >
+                            Ver
+                          </Button>
+                          {(absence.certificadoMedico || absence.archivo) && (
+                            <Button variant="outline" size="sm" className="text-xs">
+                              <Download className="h-3 w-3" />
+                            </Button>
+                          )}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="text-xs text-destructive">
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción no se puede deshacer. Se eliminará permanentemente la ausencia de {absence.empleadoNombre}.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteAbsence(absence.id)}>
+                                  Eliminar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

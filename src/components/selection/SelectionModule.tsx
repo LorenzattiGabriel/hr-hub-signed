@@ -194,56 +194,109 @@ export const SelectionModule = () => {
         const data = await file.arrayBuffer();
         const workbook = XLSX.read(data);
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        
-        // Transformar datos de Excel a formato de candidato
-        console.log('Excel data structure:', jsonData[0]); // Para debug
-        
-        const candidatesToInsert = jsonData.map((row: any) => {
-          // Buscar columnas sin importar mayúsculas/minúsculas
-          const getColumnValue = (possibleNames: string[]) => {
-            for (const name of possibleNames) {
-              // Buscar coincidencia exacta
-              if (row[name]) return row[name];
-              // Buscar coincidencia insensible a mayúsculas
-              const key = Object.keys(row).find(k => 
-                k.toLowerCase().includes(name.toLowerCase()) ||
-                name.toLowerCase().includes(k.toLowerCase())
-              );
-              if (key && row[key]) return row[key];
-            }
-            return null;
-          };
 
-          return {
-            nombre_apellido: getColumnValue(['Nombre', 'nombre', 'Nombre y Apellido', 'nombre_apellido', 'Name']) || '',
-            edad: getColumnValue(['Edad', 'edad', 'Age']) || null,
-            fecha_nacimiento: getColumnValue(['Fecha de Nacimiento', 'fecha_nacimiento', 'Birth Date', 'Nacimiento']) || null,
-            sexo: getColumnValue(['Sexo', 'sexo', 'Género', 'genero', 'Gender']) || null,
-            mail: getColumnValue(['Email', 'email', 'Correo', 'correo', 'Mail']) || null,
-            numero_contacto: getColumnValue(['Teléfono', 'telefono', 'Contacto', 'contacto', 'Phone', 'Celular']) || null,
-            localidad: getColumnValue(['Localidad', 'localidad', 'Ciudad', 'ciudad', 'City']) || null,
-            vacante_postulada: getColumnValue(['Vacante', 'vacante', 'Puesto', 'puesto', 'Position']) || null,
-            experiencia_laboral: getColumnValue(['Experiencia', 'experiencia', 'Experience']) || null,
-            conocimientos_habilidades: getColumnValue(['Conocimientos', 'conocimientos', 'Habilidades', 'habilidades', 'Skills']) || null,
-            tipo_jornada_buscada: getColumnValue(['Jornada', 'jornada', 'Tipo Jornada', 'Horario']) || null,
-            disponibilidad: getColumnValue(['Disponibilidad', 'disponibilidad', 'Availability']) || null,
-            estado: 'no_entrevistado'
-          };
-        }).filter(candidate => candidate.nombre_apellido); // Solo insertar si hay nombre
+        // Leer como matriz para poder usar la primera fila como encabezados reales
+        const rows = XLSX.utils.sheet_to_json<any[]>(worksheet, { header: 1, defval: '' }) as any[];
+        if (!rows || rows.length < 2) {
+          toast({ title: 'Archivo vacío', description: 'No se encontraron filas para importar', variant: 'destructive' });
+          return;
+        }
 
-        // Insertar candidatos en la base de datos
-        const { error } = await supabase
-          .from('candidates')
-          .insert(candidatesToInsert);
+        // Normalizar texto (minusculas, sin acentos, sin signos)
+        const normalize = (s: string) => s
+          .toString()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9 ]+/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
 
+        const headersRaw: string[] = (rows[0] as any[]).map((h) => (h ? String(h) : '').replace(/:\s*$/, '').trim());
+
+        // Reglas de mapeo de encabezados -> columnas destino
+        const patterns: Array<[string, keyof Omit<Candidate, 'id' | 'created_at' | 'updated_at' | 'estado'> | 'estado']> = [
+          ['nombre y apellido', 'nombre_apellido'],
+          ['fecha de nacimiento', 'fecha_nacimiento'],
+          ['edad', 'edad'],
+          ['numero de contacto', 'numero_contacto'],
+          ['email', 'mail'],
+          ['correo', 'mail'],
+          ['localidad', 'localidad'],
+          ['ciudad', 'localidad'],
+          ['selecciona el puesto', 'vacante_postulada'],
+          ['puesto', 'vacante_postulada'],
+          ['vacante', 'vacante_postulada'],
+          ['experiencia laboral', 'experiencia_laboral'],
+          ['conocimientos', 'conocimientos_habilidades'],
+          ['habilidades', 'conocimientos_habilidades'],
+          ['jornada laboral', 'tipo_jornada_buscada'],
+          ['tipo de jornada', 'tipo_jornada_buscada'],
+          ['disponibilidad para comenzar', 'disponibilidad'],
+          ['disponibilidad', 'disponibilidad'],
+          ['sexo', 'sexo'],
+          ['genero', 'sexo'],
+        ];
+
+        // Índices de columnas -> claves destino
+        const headerMap: Record<number, string> = {};
+        headersRaw.forEach((h, idx) => {
+          const nh = normalize(h);
+          for (const [pattern, key] of patterns) {
+            if (nh.includes(pattern)) { headerMap[idx] = key; break; }
+          }
+        });
+
+        console.log('Headers detectados:', headersRaw);
+        console.log('Mapeo de encabezados:', headerMap);
+
+        const parseExcelDate = (v: any): string | null => {
+          if (v == null || v === '') return null;
+          if (typeof v === 'number') {
+            const date = new Date(Math.round((v - 25569) * 86400 * 1000));
+            return isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
+          }
+          const s = String(v).trim();
+          if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+          const parts = s.replace(/[^0-9/.-]/g, '').split(/[\/\-.]/).map((n) => parseInt(n, 10));
+          if (parts.length === 3) {
+            let [a, b, c] = parts; // dd/mm/yyyy o mm/dd/yyyy
+            let yyyy = c < 100 ? 2000 + c : c;
+            let mm = b; let dd = a;
+            if (a <= 12 && b > 12) { mm = a; dd = b; }
+            const d = new Date(yyyy, mm - 1, dd);
+            return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
+          }
+          return null;
+        };
+
+        // Construir candidatos desde filas
+        const candidatesToInsert = rows.slice(1).map((cols) => {
+          const obj: any = { estado: 'no_entrevistado' };
+          for (const [idxStr, key] of Object.entries(headerMap)) {
+            const idx = Number(idxStr);
+            let val: any = (cols as any[])[idx];
+            if (typeof val === 'string') val = val.trim();
+            if (key === 'fecha_nacimiento') val = parseExcelDate(val);
+            if (key === 'edad') val = val === '' ? null : Number(val);
+            if (val !== '' && val != null) obj[key] = val;
+          }
+          return obj;
+        }).filter((c) => c.nombre_apellido);
+
+        if (!candidatesToInsert.length) {
+          toast({ title: 'Sin datos válidos', description: 'No se detectaron columnas reconocidas o nombres.', variant: 'destructive' });
+          return;
+        }
+
+        const { error } = await supabase.from('candidates').insert(candidatesToInsert);
         if (error) throw error;
 
         toast({
-          title: "Excel procesado",
+          title: 'Excel procesado',
           description: `Se agregaron ${candidatesToInsert.length} candidatos correctamente`,
         });
-        
+
         fetchCandidates(); // Refrescar la lista
       } else {
         // Procesar como texto de CV

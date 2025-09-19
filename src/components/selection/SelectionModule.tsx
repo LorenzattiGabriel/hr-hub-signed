@@ -223,18 +223,25 @@ export const SelectionModule = () => {
           ['fecha de nacimiento', 'fecha_nacimiento'],
           ['edad', 'edad'],
           ['numero de contacto', 'numero_contacto'],
+          ['telefono', 'numero_contacto'],
+          ['mail', 'mail'],
           ['email', 'mail'],
           ['correo', 'mail'],
           ['localidad', 'localidad'],
           ['ciudad', 'localidad'],
+          ['vacante postulada', 'vacante_postulada'],
           ['selecciona el puesto', 'vacante_postulada'],
           ['puesto', 'vacante_postulada'],
           ['vacante', 'vacante_postulada'],
           ['experiencia laboral', 'experiencia_laboral'],
           ['conocimientos', 'conocimientos_habilidades'],
           ['habilidades', 'conocimientos_habilidades'],
+          ['observaciones del reclutador', 'observaciones_reclutador'],
+          ['observaciones', 'observaciones_reclutador'],
+          ['referencias laborales', 'referencias_laborales'],
           ['jornada laboral', 'tipo_jornada_buscada'],
           ['tipo de jornada', 'tipo_jornada_buscada'],
+          ['tipo de jornada buscada', 'tipo_jornada_buscada'],
           ['disponibilidad para comenzar', 'disponibilidad'],
           ['disponibilidad', 'disponibilidad'],
           ['sexo', 'sexo'],
@@ -597,60 +604,80 @@ export const SelectionModule = () => {
           <CardTitle>Candidatos ({filteredCandidates.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Edad</TableHead>
-                <TableHead>Sexo</TableHead>
-                <TableHead>Localidad</TableHead>
-                <TableHead>Vacante</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCandidates.map((candidate) => (
-                <TableRow key={candidate.id}>
-                  <TableCell className="font-medium">{candidate.nombre_apellido || 'N/A'}</TableCell>
-                  <TableCell>{candidate.edad || 'N/A'}</TableCell>
-                  <TableCell>{candidate.sexo || 'N/A'}</TableCell>
-                  <TableCell>{candidate.localidad || 'N/A'}</TableCell>
-                  <TableCell>{candidate.vacante_postulada || 'N/A'}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusBadgeVariant(candidate.estado)}>
-                      {getStatusLabel(candidate.estado)}
-                    </Badge>
-                  </TableCell>
-                   <TableCell>
-                     <div className="flex gap-2">
-                       <Button
-                         variant="outline"
-                         size="sm"
-                         onClick={() => openDetailDialog(candidate)}
-                       >
-                         <Eye className="h-4 w-4" />
-                       </Button>
-                       <Button
-                         variant="outline"
-                         size="sm"
-                         onClick={() => openStatusDialog(candidate)}
-                       >
-                         <Edit className="h-4 w-4" />
-                       </Button>
-                       <Button
-                         variant="outline"
-                         size="sm"
-                         onClick={() => confirmDeleteCandidate(candidate)}
-                       >
-                         <Trash2 className="h-4 w-4" />
-                       </Button>
-                     </div>
-                   </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre y Apellido</TableHead>
+                  <TableHead>Fecha de Nacimiento</TableHead>
+                  <TableHead>Edad</TableHead>
+                  <TableHead>Sexo</TableHead>
+                  <TableHead>Localidad</TableHead>
+                  <TableHead>Vacante Postulada</TableHead>
+                  <TableHead>Mail</TableHead>
+                  <TableHead>Número de Contacto</TableHead>
+                  <TableHead>Tipo de Jornada Buscada</TableHead>
+                  <TableHead>Disponibilidad</TableHead>
+                  <TableHead>Conocimientos y Habilidades</TableHead>
+                  <TableHead>Experiencia Laboral</TableHead>
+                  <TableHead>Observaciones del Reclutador</TableHead>
+                  <TableHead>Referencias Laborales</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredCandidates.map((candidate) => (
+                  <TableRow key={candidate.id}>
+                    <TableCell className="font-medium">{candidate.nombre_apellido || 'N/A'}</TableCell>
+                    <TableCell>{candidate.fecha_nacimiento || 'N/A'}</TableCell>
+                    <TableCell>{candidate.edad ?? 'N/A'}</TableCell>
+                    <TableCell>{candidate.sexo || 'N/A'}</TableCell>
+                    <TableCell>{candidate.localidad || 'N/A'}</TableCell>
+                    <TableCell>{candidate.vacante_postulada || 'N/A'}</TableCell>
+                    <TableCell>{candidate.mail || 'N/A'}</TableCell>
+                    <TableCell>{candidate.numero_contacto || 'N/A'}</TableCell>
+                    <TableCell>{candidate.tipo_jornada_buscada || 'N/A'}</TableCell>
+                    <TableCell>{candidate.disponibilidad || 'N/A'}</TableCell>
+                    <TableCell className="max-w-[280px] truncate">{candidate.conocimientos_habilidades || 'N/A'}</TableCell>
+                    <TableCell className="max-w-[280px] truncate">{candidate.experiencia_laboral || 'N/A'}</TableCell>
+                    <TableCell className="max-w-[280px] truncate">{candidate.observaciones_reclutador || 'N/A'}</TableCell>
+                    <TableCell className="max-w-[240px] truncate">{candidate.referencias_laborales || 'N/A'}</TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(candidate.estado)}>
+                        {getStatusLabel(candidate.estado)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openDetailDialog(candidate)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openStatusDialog(candidate)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => confirmDeleteCandidate(candidate)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 

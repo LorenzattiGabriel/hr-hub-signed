@@ -114,6 +114,104 @@ export type Database = {
           },
         ]
       }
+      candidate_history: {
+        Row: {
+          candidate_id: string
+          created_at: string
+          estado_anterior: string | null
+          estado_nuevo: string
+          id: string
+          notas: string | null
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string
+          estado_anterior?: string | null
+          estado_nuevo: string
+          id?: string
+          notas?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string
+          estado_anterior?: string | null
+          estado_nuevo?: string
+          id?: string
+          notas?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_history_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidates: {
+        Row: {
+          conocimientos_habilidades: string | null
+          created_at: string
+          disponibilidad: string | null
+          edad: number | null
+          estado: string
+          experiencia_laboral: string | null
+          fecha_nacimiento: string | null
+          id: string
+          localidad: string | null
+          mail: string | null
+          nombre_apellido: string | null
+          numero_contacto: string | null
+          observaciones_reclutador: string | null
+          referencias_laborales: string | null
+          sexo: string | null
+          tipo_jornada_buscada: string | null
+          updated_at: string
+          vacante_postulada: string | null
+        }
+        Insert: {
+          conocimientos_habilidades?: string | null
+          created_at?: string
+          disponibilidad?: string | null
+          edad?: number | null
+          estado?: string
+          experiencia_laboral?: string | null
+          fecha_nacimiento?: string | null
+          id?: string
+          localidad?: string | null
+          mail?: string | null
+          nombre_apellido?: string | null
+          numero_contacto?: string | null
+          observaciones_reclutador?: string | null
+          referencias_laborales?: string | null
+          sexo?: string | null
+          tipo_jornada_buscada?: string | null
+          updated_at?: string
+          vacante_postulada?: string | null
+        }
+        Update: {
+          conocimientos_habilidades?: string | null
+          created_at?: string
+          disponibilidad?: string | null
+          edad?: number | null
+          estado?: string
+          experiencia_laboral?: string | null
+          fecha_nacimiento?: string | null
+          id?: string
+          localidad?: string | null
+          mail?: string | null
+          nombre_apellido?: string | null
+          numero_contacto?: string | null
+          observaciones_reclutador?: string | null
+          referencias_laborales?: string | null
+          sexo?: string | null
+          tipo_jornada_buscada?: string | null
+          updated_at?: string
+          vacante_postulada?: string | null
+        }
+        Relationships: []
+      }
       declaraciones_domicilio: {
         Row: {
           apellidos: string

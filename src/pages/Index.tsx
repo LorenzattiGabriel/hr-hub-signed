@@ -7,6 +7,7 @@ import VacationsModule from "@/components/vacations/VacationsModuleV2";
 import AbsencesModule from "@/components/absences/AbsencesModule";
 import TrainingList from "@/components/training/TrainingList";
 import UniformsModule from "@/components/uniforms/UniformsModule";
+import { SelectionModule } from "@/components/selection/SelectionModule";
 import AttendanceList from "@/components/attendance/AttendanceList";
 import PerformanceList from "@/components/performance/PerformanceList";
 import CalendarList from "@/components/calendar/CalendarList";
@@ -30,6 +31,8 @@ const Index = () => {
         return <TrainingList />;
       case "uniforms":
         return <UniformsModule />;
+      case "selection":
+        return <SelectionModule />;
       case "attendance":
         return <AttendanceList />;
       case "performance":

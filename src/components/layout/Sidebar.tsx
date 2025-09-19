@@ -66,6 +66,13 @@ const modules = [
     badge: "0"
   },
   {
+    id: "selection",
+    name: "Selección de Personal",
+    icon: Users,
+    description: "Reclutamiento y Selección",
+    badge: ""
+  },
+  {
     id: "attendance",
     name: "Control de Asistencia",
     icon: ClipboardList,

@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Upload, Eye, Download, Edit, FileText, Plus } from 'lucide-react';
+import { Search, Upload, Eye, Download, Edit, FileText, Plus, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
@@ -65,6 +66,8 @@ export const SelectionModule = () => {
   const [showAddCandidateDialog, setShowAddCandidateDialog] = useState(false);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [candidateToDelete, setCandidateToDelete] = useState<Candidate | null>(null);
   const [newCandidate, setNewCandidate] = useState<Partial<Candidate>>({});
   const [newStatus, setNewStatus] = useState('');
   const [statusNotes, setStatusNotes] = useState('');
@@ -313,6 +316,40 @@ export const SelectionModule = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const deleteCandidate = async () => {
+    if (!candidateToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('candidates')
+        .delete()
+        .eq('id', candidateToDelete.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Candidato eliminado",
+        description: "El candidato ha sido eliminado correctamente",
+      });
+
+      setShowDeleteDialog(false);
+      setCandidateToDelete(null);
+      fetchCandidates();
+    } catch (error) {
+      console.error('Error deleting candidate:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar el candidato",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const confirmDeleteCandidate = (candidate: Candidate) => {
+    setCandidateToDelete(candidate);
+    setShowDeleteDialog(true);
   };
 
   const addCandidate = async () => {
@@ -585,24 +622,31 @@ export const SelectionModule = () => {
                       {getStatusLabel(candidate.estado)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openDetailDialog(candidate)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openStatusDialog(candidate)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                   <TableCell>
+                     <div className="flex gap-2">
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         onClick={() => openDetailDialog(candidate)}
+                       >
+                         <Eye className="h-4 w-4" />
+                       </Button>
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         onClick={() => openStatusDialog(candidate)}
+                       >
+                         <Edit className="h-4 w-4" />
+                       </Button>
+                       <Button
+                         variant="outline"
+                         size="sm"
+                         onClick={() => confirmDeleteCandidate(candidate)}
+                       >
+                         <Trash2 className="h-4 w-4" />
+                       </Button>
+                     </div>
+                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -850,6 +894,25 @@ export const SelectionModule = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de confirmación para eliminar */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Se eliminará permanentemente el candidato{' '}
+              <strong>{candidateToDelete?.nombre_apellido}</strong> y todos sus datos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteCandidate} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

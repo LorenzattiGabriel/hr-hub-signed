@@ -197,21 +197,40 @@ export const SelectionModule = () => {
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
         
         // Transformar datos de Excel a formato de candidato
-        const candidatesToInsert = jsonData.map((row: any) => ({
-          nombre_apellido: row['Nombre'] || row['nombre'] || row['Nombre y Apellido'] || '',
-          edad: row['Edad'] || row['edad'] || null,
-          fecha_nacimiento: row['Fecha de Nacimiento'] || row['fecha_nacimiento'] || null,
-          sexo: row['Sexo'] || row['sexo'] || row['Género'] || null,
-          mail: row['Email'] || row['email'] || row['Correo'] || null,
-          numero_contacto: row['Teléfono'] || row['telefono'] || row['Contacto'] || null,
-          localidad: row['Localidad'] || row['localidad'] || row['Ciudad'] || null,
-          vacante_postulada: row['Vacante'] || row['vacante'] || row['Puesto'] || null,
-          experiencia_laboral: row['Experiencia'] || row['experiencia'] || null,
-          conocimientos_habilidades: row['Conocimientos'] || row['conocimientos'] || row['Habilidades'] || null,
-          tipo_jornada_buscada: row['Jornada'] || row['jornada'] || null,
-          disponibilidad: row['Disponibilidad'] || row['disponibilidad'] || null,
-          estado: 'no_entrevistado'
-        }));
+        console.log('Excel data structure:', jsonData[0]); // Para debug
+        
+        const candidatesToInsert = jsonData.map((row: any) => {
+          // Buscar columnas sin importar mayúsculas/minúsculas
+          const getColumnValue = (possibleNames: string[]) => {
+            for (const name of possibleNames) {
+              // Buscar coincidencia exacta
+              if (row[name]) return row[name];
+              // Buscar coincidencia insensible a mayúsculas
+              const key = Object.keys(row).find(k => 
+                k.toLowerCase().includes(name.toLowerCase()) ||
+                name.toLowerCase().includes(k.toLowerCase())
+              );
+              if (key && row[key]) return row[key];
+            }
+            return null;
+          };
+
+          return {
+            nombre_apellido: getColumnValue(['Nombre', 'nombre', 'Nombre y Apellido', 'nombre_apellido', 'Name']) || '',
+            edad: getColumnValue(['Edad', 'edad', 'Age']) || null,
+            fecha_nacimiento: getColumnValue(['Fecha de Nacimiento', 'fecha_nacimiento', 'Birth Date', 'Nacimiento']) || null,
+            sexo: getColumnValue(['Sexo', 'sexo', 'Género', 'genero', 'Gender']) || null,
+            mail: getColumnValue(['Email', 'email', 'Correo', 'correo', 'Mail']) || null,
+            numero_contacto: getColumnValue(['Teléfono', 'telefono', 'Contacto', 'contacto', 'Phone', 'Celular']) || null,
+            localidad: getColumnValue(['Localidad', 'localidad', 'Ciudad', 'ciudad', 'City']) || null,
+            vacante_postulada: getColumnValue(['Vacante', 'vacante', 'Puesto', 'puesto', 'Position']) || null,
+            experiencia_laboral: getColumnValue(['Experiencia', 'experiencia', 'Experience']) || null,
+            conocimientos_habilidades: getColumnValue(['Conocimientos', 'conocimientos', 'Habilidades', 'habilidades', 'Skills']) || null,
+            tipo_jornada_buscada: getColumnValue(['Jornada', 'jornada', 'Tipo Jornada', 'Horario']) || null,
+            disponibilidad: getColumnValue(['Disponibilidad', 'disponibilidad', 'Availability']) || null,
+            estado: 'no_entrevistado'
+          };
+        }).filter(candidate => candidate.nombre_apellido); // Solo insertar si hay nombre
 
         // Insertar candidatos en la base de datos
         const { error } = await supabase

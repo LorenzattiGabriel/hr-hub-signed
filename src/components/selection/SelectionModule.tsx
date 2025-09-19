@@ -139,11 +139,11 @@ export const SelectionModule = () => {
       );
     }
 
-    if (genderFilter) {
+    if (genderFilter && genderFilter !== 'todos') {
       filtered = filtered.filter(candidate => candidate.sexo === genderFilter);
     }
 
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== 'todos') {
       filtered = filtered.filter(candidate => candidate.estado === statusFilter);
     }
 
@@ -431,7 +431,7 @@ export const SelectionModule = () => {
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="Masculino">Masculino</SelectItem>
                   <SelectItem value="Femenino">Femenino</SelectItem>
                   <SelectItem value="Otro">Otro</SelectItem>
@@ -445,7 +445,7 @@ export const SelectionModule = () => {
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   {ESTADOS_CANDIDATO.map(estado => (
                     <SelectItem key={estado} value={estado}>
                       {getStatusLabel(estado)}

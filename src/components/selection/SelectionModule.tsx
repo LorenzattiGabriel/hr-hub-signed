@@ -196,12 +196,36 @@ export const SelectionModule = () => {
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
         
-        // Procesar datos de Excel
-        console.log('Excel data:', jsonData);
+        // Transformar datos de Excel a formato de candidato
+        const candidatesToInsert = jsonData.map((row: any) => ({
+          nombre_apellido: row['Nombre'] || row['nombre'] || row['Nombre y Apellido'] || '',
+          edad: row['Edad'] || row['edad'] || null,
+          fecha_nacimiento: row['Fecha de Nacimiento'] || row['fecha_nacimiento'] || null,
+          sexo: row['Sexo'] || row['sexo'] || row['Género'] || null,
+          mail: row['Email'] || row['email'] || row['Correo'] || null,
+          numero_contacto: row['Teléfono'] || row['telefono'] || row['Contacto'] || null,
+          localidad: row['Localidad'] || row['localidad'] || row['Ciudad'] || null,
+          vacante_postulada: row['Vacante'] || row['vacante'] || row['Puesto'] || null,
+          experiencia_laboral: row['Experiencia'] || row['experiencia'] || null,
+          conocimientos_habilidades: row['Conocimientos'] || row['conocimientos'] || row['Habilidades'] || null,
+          tipo_jornada_buscada: row['Jornada'] || row['jornada'] || null,
+          disponibilidad: row['Disponibilidad'] || row['disponibilidad'] || null,
+          estado: 'no_entrevistado'
+        }));
+
+        // Insertar candidatos en la base de datos
+        const { error } = await supabase
+          .from('candidates')
+          .insert(candidatesToInsert);
+
+        if (error) throw error;
+
         toast({
-          title: "Archivo procesado",
-          description: `Se procesaron ${jsonData.length} registros del Excel`,
+          title: "Excel procesado",
+          description: `Se agregaron ${candidatesToInsert.length} candidatos correctamente`,
         });
+        
+        fetchCandidates(); // Refrescar la lista
       } else {
         // Procesar como texto de CV
         const text = await file.text();

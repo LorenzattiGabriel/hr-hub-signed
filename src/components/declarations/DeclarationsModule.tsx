@@ -3,28 +3,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Plus, Download } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { FileText, Plus, Download, Trash2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useEmployees } from "@/hooks/useEmployees";
-import html2pdf from "html2pdf.js";
+import html2pdf from 'html2pdf.js';
 
-interface Declaration {
+interface DeclaracionDomicilio {
   id: string;
   employee_id: string;
   nombres: string;
   apellidos: string;
   domicilio: string;
-  calle_paralela_1?: string;
-  calle_paralela_2?: string;
+  calle_paralela_1: string | null;
+  calle_paralela_2: string | null;
   fecha_declaracion: string;
+  created_at: string;
 }
 
 const DeclarationsModule = () => {
-  const [declarations, setDeclarations] = useState<Declaration[]>([]);
+  const [declarations, setDeclarations] = useState<DeclaracionDomicilio[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { employees } = useEmployees();
+  
   const [formData, setFormData] = useState({
     employee_id: "",
     nombres: "",
@@ -34,25 +40,21 @@ const DeclarationsModule = () => {
     calle_paralela_2: "",
   });
 
-  const { employees } = useEmployees();
-  const { toast } = useToast();
-
   useEffect(() => {
     fetchDeclarations();
   }, []);
 
   const fetchDeclarations = async () => {
-    setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('declaraciones_domicilio')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .from("declaraciones_domicilio")
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       setDeclarations(data || []);
     } catch (error) {
-      console.error('Error fetching declarations:', error);
+      console.error("Error fetching declarations:", error);
       toast({
         title: "Error",
         description: "No se pudieron cargar las declaraciones",
@@ -61,6 +63,31 @@ const DeclarationsModule = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEmployeeSelect = (employeeId: string) => {
+    const employee = employees.find(emp => emp.id === employeeId);
+    if (employee) {
+      setFormData({
+        ...formData,
+        employee_id: employeeId,
+        nombres: employee.nombres,
+        apellidos: employee.apellidos,
+        domicilio: employee.direccion || "",
+      });
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      employee_id: "",
+      nombres: "",
+      apellidos: "",
+      domicilio: "",
+      calle_paralela_1: "",
+      calle_paralela_2: "",
+    });
+    setShowForm(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,7 +104,7 @@ const DeclarationsModule = () => {
 
     try {
       const { error } = await supabase
-        .from('declaraciones_domicilio')
+        .from("declaraciones_domicilio")
         .insert([formData]);
 
       if (error) throw error;
@@ -87,18 +114,10 @@ const DeclarationsModule = () => {
         description: "Declaración jurada creada correctamente",
       });
 
-      setFormData({
-        employee_id: "",
-        nombres: "",
-        apellidos: "",
-        domicilio: "",
-        calle_paralela_1: "",
-        calle_paralela_2: "",
-      });
-      setShowForm(false);
+      resetForm();
       fetchDeclarations();
     } catch (error) {
-      console.error('Error creating declaration:', error);
+      console.error("Error creating declaration:", error);
       toast({
         title: "Error",
         description: "No se pudo crear la declaración",
@@ -107,60 +126,65 @@ const DeclarationsModule = () => {
     }
   };
 
-  const handleEmployeeChange = (employeeId: string) => {
-    const employee = employees.find(emp => emp.id === employeeId);
-    if (employee) {
-      setFormData(prev => ({
-        ...prev,
-        employee_id: employeeId,
-        nombres: employee.nombres,
-        apellidos: employee.apellidos,
-        domicilio: employee.direccion || "",
-      }));
-    }
-  };
-
-  const generatePDF = (declaration: Declaration) => {
+  const generatePDF = (declaration: DeclaracionDomicilio) => {
     const employee = employees.find(emp => emp.id === declaration.employee_id);
     
-    const htmlContent = `
-      <div style="padding: 40px; font-family: Arial, sans-serif; line-height: 1.6;">
-        <h1 style="text-align: center; margin-bottom: 40px; color: #333;">
-          DECLARACIÓN JURADA DE DOMICILIO
-        </h1>
+    const content = `
+      <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">
+            DECLARACIÓN JURADA DE DOMICILIO
+          </h1>
+        </div>
         
         <div style="margin-bottom: 30px;">
-          <p><strong>Fecha:</strong> ${new Date(declaration.fecha_declaracion).toLocaleDateString('es-AR')}</p>
+          <p style="text-align: justify; line-height: 1.6;">
+            Yo, <strong>${declaration.nombres} ${declaration.apellidos}</strong>, 
+            declaro bajo juramento que mi domicilio real es el siguiente:
+          </p>
+        </div>
+
+        <div style="background: #f5f5f5; padding: 20px; border-radius: 5px; margin-bottom: 30px;">
+          <h3 style="margin-top: 0; color: #333;">DATOS DEL DOMICILIO:</h3>
+          <p><strong>Dirección:</strong> ${declaration.domicilio}</p>
+          ${declaration.calle_paralela_1 ? `<p><strong>Calle Paralela 1:</strong> ${declaration.calle_paralela_1}</p>` : ''}
+          ${declaration.calle_paralela_2 ? `<p><strong>Calle Paralela 2:</strong> ${declaration.calle_paralela_2}</p>` : ''}
+          <p><strong>Fecha de Declaración:</strong> ${new Date(declaration.fecha_declaracion).toLocaleDateString('es-AR')}</p>
+          ${employee?.dni ? `<p><strong>DNI:</strong> ${employee.dni}</p>` : ''}
         </div>
 
         <div style="margin-bottom: 30px;">
-          <p>Yo, <strong>${declaration.nombres} ${declaration.apellidos}</strong>, DNI N° <strong>${employee?.dni || 'N/A'}</strong>, declaro bajo juramento que mi domicilio real es:</p>
+          <p style="text-align: justify; line-height: 1.6;">
+            Declaro que la información brindada es veraz y completa, y que asumo toda responsabilidad 
+            legal por la exactitud de los datos proporcionados en la presente declaración jurada.
+          </p>
         </div>
 
-        <div style="margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; background-color: #f9f9f9;">
-          <p><strong>Dirección:</strong> ${declaration.domicilio}</p>
-          ${declaration.calle_paralela_1 ? `<p><strong>Entre calles:</strong> ${declaration.calle_paralela_1}${declaration.calle_paralela_2 ? ` y ${declaration.calle_paralela_2}` : ''}</p>` : ''}
-        </div>
-
-        <div style="margin-bottom: 40px;">
-          <p>Declaro que la información brindada es verídica y me comprometo a comunicar cualquier cambio de domicilio dentro de los 30 días de producido.</p>
-          
-          <p>Esta declaración jurada es realizada bajo las responsabilidades y penalidades establecidas por la ley.</p>
-        </div>
-
-        <div style="margin-top: 80px; text-align: center;">
-          <div style="display: inline-block; border-top: 1px solid #333; padding-top: 10px; width: 300px;">
-            <p><strong>Firma del Declarante</strong></p>
-            <p>${declaration.nombres} ${declaration.apellidos}</p>
-            <p>DNI: ${employee?.dni || 'N/A'}</p>
+        <div style="margin-top: 50px;">
+          <div style="display: flex; justify-content: space-between;">
+            <div style="text-align: center; width: 45%;">
+              <div style="border-top: 1px solid #333; padding-top: 10px;">
+                <strong>Firma del Declarante</strong>
+              </div>
+            </div>
+            <div style="text-align: center; width: 45%;">
+              <div style="border-top: 1px solid #333; padding-top: 10px;">
+                <strong>Aclaración</strong><br>
+                ${declaration.nombres} ${declaration.apellidos}
+              </div>
+            </div>
           </div>
         </div>
 
-        <div style="margin-top: 60px; font-size: 12px; color: #666; text-align: center;">
-          <p>Documento generado el ${new Date().toLocaleDateString('es-AR')} a las ${new Date().toLocaleTimeString('es-AR')}</p>
+        <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #666;">
+          <p>Lugar y fecha: ________________, ${new Date().toLocaleDateString('es-AR')}</p>
         </div>
       </div>
     `;
+
+    const element = document.createElement('div');
+    element.innerHTML = content;
+    document.body.appendChild(element);
 
     const opt = {
       margin: 1,
@@ -170,15 +194,39 @@ const DeclarationsModule = () => {
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
 
-    html2pdf().set(opt).from(htmlContent).save();
+    html2pdf().set(opt).from(element).save().then(() => {
+      document.body.removeChild(element);
+    });
+  };
+
+  const deleteDeclaration = async (id: string) => {
+    if (!confirm("¿Está seguro de que desea eliminar esta declaración?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("declaraciones_domicilio")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Éxito",
+        description: "Declaración eliminada correctamente",
+      });
+      fetchDeclarations();
+    } catch (error) {
+      console.error("Error deleting declaration:", error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la declaración",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Cargando declaraciones...</div>
-      </div>
-    );
+    return <div className="flex justify-center p-8">Cargando...</div>;
   }
 
   return (
@@ -186,10 +234,10 @@ const DeclarationsModule = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Declaraciones Juradas de Domicilio</h1>
-          <p className="text-muted-foreground">Gestiona las declaraciones de domicilio de los empleados</p>
+          <p className="text-muted-foreground">Gestiona las declaraciones juradas de domicilio de los empleados</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
+        <Button onClick={() => setShowForm(true)}>
+          <Plus className="h-4 w-4 mr-2" />
           Nueva Declaración
         </Button>
       </div>
@@ -204,14 +252,14 @@ const DeclarationsModule = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="employee">Empleado *</Label>
-                  <Select value={formData.employee_id} onValueChange={handleEmployeeChange}>
+                  <Select value={formData.employee_id} onValueChange={handleEmployeeSelect}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar empleado" />
                     </SelectTrigger>
                     <SelectContent>
                       {employees.map((employee) => (
                         <SelectItem key={employee.id} value={employee.id}>
-                          {employee.apellidos}, {employee.nombres} - DNI: {employee.dni}
+                          {employee.nombres} {employee.apellidos} - DNI: {employee.dni}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -223,7 +271,9 @@ const DeclarationsModule = () => {
                   <Input
                     id="nombres"
                     value={formData.nombres}
-                    onChange={(e) => setFormData(prev => ({ ...prev, nombres: e.target.value }))}
+                    onChange={(e) => setFormData({ ...formData, nombres: e.target.value })}
+                    disabled={!!formData.employee_id}
+                    placeholder={formData.employee_id ? "Autocompletado desde empleado" : "Ingrese nombres"}
                     required
                   />
                 </div>
@@ -233,46 +283,50 @@ const DeclarationsModule = () => {
                   <Input
                     id="apellidos"
                     value={formData.apellidos}
-                    onChange={(e) => setFormData(prev => ({ ...prev, apellidos: e.target.value }))}
+                    onChange={(e) => setFormData({ ...formData, apellidos: e.target.value })}
+                    disabled={!!formData.employee_id}
+                    placeholder={formData.employee_id ? "Autocompletado desde empleado" : "Ingrese apellidos"}
                     required
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label htmlFor="domicilio">Domicilio *</Label>
-                  <Input
-                    id="domicilio"
-                    value={formData.domicilio}
-                    onChange={(e) => setFormData(prev => ({ ...prev, domicilio: e.target.value }))}
-                    placeholder="Dirección completa"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="calle_paralela_1">Calle Paralela 1</Label>
-                  <Input
-                    id="calle_paralela_1"
-                    value={formData.calle_paralela_1}
-                    onChange={(e) => setFormData(prev => ({ ...prev, calle_paralela_1: e.target.value }))}
-                    placeholder="Entre calle..."
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="calle_paralela_2">Calle Paralela 2</Label>
-                  <Input
-                    id="calle_paralela_2"
-                    value={formData.calle_paralela_2}
-                    onChange={(e) => setFormData(prev => ({ ...prev, calle_paralela_2: e.target.value }))}
-                    placeholder="Y calle..."
                   />
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-4">
+              <div>
+                <Label htmlFor="domicilio">Domicilio *</Label>
+                <Textarea
+                  id="domicilio"
+                  value={formData.domicilio}
+                  onChange={(e) => setFormData({ ...formData, domicilio: e.target.value })}
+                  placeholder={formData.employee_id ? "Autocompletado desde empleado (puedes modificar)" : "Dirección completa del domicilio"}
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="calle_paralela_1">Calle Paralela 1 (opcional)</Label>
+                  <Input
+                    id="calle_paralela_1"
+                    value={formData.calle_paralela_1}
+                    onChange={(e) => setFormData({ ...formData, calle_paralela_1: e.target.value })}
+                    placeholder="Primera calle de referencia"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="calle_paralela_2">Calle Paralela 2 (opcional)</Label>
+                  <Input
+                    id="calle_paralela_2"
+                    value={formData.calle_paralela_2}
+                    onChange={(e) => setFormData({ ...formData, calle_paralela_2: e.target.value })}
+                    placeholder="Segunda calle de referencia"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
                 <Button type="submit">Crear Declaración</Button>
-                <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                <Button type="button" variant="outline" onClick={resetForm}>
                   Cancelar
                 </Button>
               </div>
@@ -281,50 +335,82 @@ const DeclarationsModule = () => {
         </Card>
       )}
 
-      <div className="grid gap-4">
-        {declarations.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No hay declaraciones registradas</p>
-            </CardContent>
-          </Card>
-        ) : (
-          declarations.map((declaration) => {
-            const employee = employees.find(emp => emp.id === declaration.employee_id);
-            return (
-              <Card key={declaration.id}>
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-2">
-                      <h3 className="font-semibold text-lg">
-                        {declaration.nombres} {declaration.apellidos}
-                      </h3>
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        <p><strong>DNI:</strong> {employee?.dni || 'N/A'}</p>
-                        <p><strong>Domicilio:</strong> {declaration.domicilio}</p>
+      <Card>
+        <CardHeader>
+          <CardTitle>Declaraciones Registradas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {declarations.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">
+              No hay declaraciones registradas
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Empleado</TableHead>
+                  <TableHead>Domicilio</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {declarations.map((declaration) => {
+                  const employee = employees.find(emp => emp.id === declaration.employee_id);
+                  return (
+                    <TableRow key={declaration.id}>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">
+                            {declaration.nombres} {declaration.apellidos}
+                          </div>
+                          {employee?.dni && (
+                            <div className="text-sm text-muted-foreground">
+                              DNI: {employee.dni}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="max-w-xs truncate">{declaration.domicilio}</div>
                         {(declaration.calle_paralela_1 || declaration.calle_paralela_2) && (
-                          <p><strong>Entre calles:</strong> {declaration.calle_paralela_1}{declaration.calle_paralela_2 ? ` y ${declaration.calle_paralela_2}` : ''}</p>
+                          <div className="text-sm text-muted-foreground">
+                            {declaration.calle_paralela_1 && `Entre: ${declaration.calle_paralela_1}`}
+                            {declaration.calle_paralela_2 && ` y ${declaration.calle_paralela_2}`}
+                          </div>
                         )}
-                        <p><strong>Fecha:</strong> {new Date(declaration.fecha_declaracion).toLocaleDateString('es-AR')}</p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => generatePDF(declaration)}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                    >
-                      <Download className="h-4 w-4" />
-                      Descargar PDF
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
-      </div>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(declaration.fecha_declaracion).toLocaleDateString('es-AR')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => generatePDF(declaration)}
+                            title="Descargar PDF"
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => deleteDeclaration(declaration.id)}
+                            title="Eliminar declaración"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

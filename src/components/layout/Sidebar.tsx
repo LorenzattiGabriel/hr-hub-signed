@@ -12,7 +12,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Shirt,
-  DollarSign
+  DollarSign,
+  ScrollText,
+  UserCheck
 } from "lucide-react";
 
 interface SidebarProps {
@@ -81,6 +83,20 @@ const modules = [
     name: "Nómina de Sueldos",
     icon: DollarSign,
     description: "Sueldos y Pagos",
+    badge: ""
+  },
+  {
+    id: "declarations",
+    name: "Declaraciones Juradas",
+    icon: ScrollText,
+    description: "Declaraciones de Domicilio",
+    badge: ""
+  },
+  {
+    id: "consultations",
+    name: "Visitas Consultores",
+    icon: UserCheck,
+    description: "Registro de Consultas",
     badge: ""
   },
 ];

@@ -114,6 +114,45 @@ export type Database = {
           },
         ]
       }
+      declaraciones_domicilio: {
+        Row: {
+          apellidos: string
+          calle_paralela_1: string | null
+          calle_paralela_2: string | null
+          created_at: string
+          domicilio: string
+          employee_id: string
+          fecha_declaracion: string
+          id: string
+          nombres: string
+          updated_at: string
+        }
+        Insert: {
+          apellidos: string
+          calle_paralela_1?: string | null
+          calle_paralela_2?: string | null
+          created_at?: string
+          domicilio: string
+          employee_id: string
+          fecha_declaracion?: string
+          id?: string
+          nombres: string
+          updated_at?: string
+        }
+        Update: {
+          apellidos?: string
+          calle_paralela_1?: string | null
+          calle_paralela_2?: string | null
+          created_at?: string
+          domicilio?: string
+          employee_id?: string
+          fecha_declaracion?: string
+          id?: string
+          nombres?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           alergias: string | null
@@ -513,6 +552,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      visitas_consultores: {
+        Row: {
+          consultor: string | null
+          created_at: string
+          detalle: string
+          fecha_consulta: string
+          id: string
+          observaciones: string | null
+          updated_at: string
+        }
+        Insert: {
+          consultor?: string | null
+          created_at?: string
+          detalle: string
+          fecha_consulta: string
+          id?: string
+          observaciones?: string | null
+          updated_at?: string
+        }
+        Update: {
+          consultor?: string | null
+          created_at?: string
+          detalle?: string
+          fecha_consulta?: string
+          id?: string
+          observaciones?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

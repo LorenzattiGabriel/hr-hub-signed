@@ -11,6 +11,8 @@ import AttendanceList from "@/components/attendance/AttendanceList";
 import PerformanceList from "@/components/performance/PerformanceList";
 import CalendarList from "@/components/calendar/CalendarList";
 import PayrollModule from "@/components/payroll/PayrollModule";
+import DeclarationsModule from "@/components/declarations/DeclarationsModule";
+import ConsultationsModule from "@/components/consultations/ConsultationsModule";
 
 
 const Index = () => {
@@ -36,6 +38,10 @@ const Index = () => {
         return <CalendarList />;
       case "payroll":
         return <PayrollModule />;
+      case "declarations":
+        return <DeclarationsModule />;
+      case "consultations":
+        return <ConsultationsModule />;
       default:
         return <DashboardOverview />;
     }

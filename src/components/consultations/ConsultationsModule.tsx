@@ -4,24 +4,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar, Plus, Edit, Trash2, Users } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, Edit, Trash2, Users, Eye } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-interface Consultation {
+interface VisitaConsultor {
   id: string;
   fecha_consulta: string;
   detalle: string;
-  consultor?: string;
-  observaciones?: string;
+  consultor: string | null;
+  observaciones: string | null;
   created_at: string;
 }
 
 const ConsultationsModule = () => {
-  const [consultations, setConsultations] = useState<Consultation[]>([]);
+  const [visits, setVisits] = useState<VisitaConsultor[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [editingConsultation, setEditingConsultation] = useState<Consultation | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [editingVisit, setEditingVisit] = useState<VisitaConsultor | null>(null);
+  const [selectedVisit, setSelectedVisit] = useState<VisitaConsultor | null>(null);
+  const [loading, setLoading] = useState(true);
+  
   const [formData, setFormData] = useState({
     fecha_consulta: "",
     detalle: "",
@@ -29,27 +33,24 @@ const ConsultationsModule = () => {
     observaciones: "",
   });
 
-  const { toast } = useToast();
-
   useEffect(() => {
-    fetchConsultations();
+    fetchVisits();
   }, []);
 
-  const fetchConsultations = async () => {
-    setLoading(true);
+  const fetchVisits = async () => {
     try {
       const { data, error } = await supabase
-        .from('visitas_consultores')
-        .select('*')
-        .order('fecha_consulta', { ascending: false });
+        .from("visitas_consultores")
+        .select("*")
+        .order("fecha_consulta", { ascending: false });
 
       if (error) throw error;
-      setConsultations(data || []);
+      setVisits(data || []);
     } catch (error) {
-      console.error('Error fetching consultations:', error);
+      console.error("Error fetching visits:", error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar las consultas",
+        description: "No se pudieron cargar las visitas",
         variant: "destructive",
       });
     } finally {
@@ -64,8 +65,19 @@ const ConsultationsModule = () => {
       consultor: "",
       observaciones: "",
     });
-    setEditingConsultation(null);
+    setEditingVisit(null);
     setShowForm(false);
+  };
+
+  const handleEdit = (visit: VisitaConsultor) => {
+    setEditingVisit(visit);
+    setFormData({
+      fecha_consulta: visit.fecha_consulta,
+      detalle: visit.detalle,
+      consultor: visit.consultor || "",
+      observaciones: visit.observaciones || "",
+    });
+    setShowForm(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,108 +86,105 @@ const ConsultationsModule = () => {
     if (!formData.fecha_consulta || !formData.detalle) {
       toast({
         title: "Error",
-        description: "Por favor complete los campos obligatorios",
+        description: "Por favor complete la fecha y el detalle de la consulta",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      if (editingConsultation) {
+      if (editingVisit) {
+        // Actualizar visita existente
         const { error } = await supabase
-          .from('visitas_consultores')
-          .update(formData)
-          .eq('id', editingConsultation.id);
+          .from("visitas_consultores")
+          .update({
+            fecha_consulta: formData.fecha_consulta,
+            detalle: formData.detalle,
+            consultor: formData.consultor || null,
+            observaciones: formData.observaciones || null,
+          })
+          .eq("id", editingVisit.id);
 
         if (error) throw error;
 
         toast({
           title: "Éxito",
-          description: "Consulta actualizada correctamente",
+          description: "Visita actualizada correctamente",
         });
       } else {
+        // Crear nueva visita
         const { error } = await supabase
-          .from('visitas_consultores')
-          .insert([formData]);
+          .from("visitas_consultores")
+          .insert([{
+            fecha_consulta: formData.fecha_consulta,
+            detalle: formData.detalle,
+            consultor: formData.consultor || null,
+            observaciones: formData.observaciones || null,
+          }]);
 
         if (error) throw error;
 
         toast({
           title: "Éxito",
-          description: "Consulta registrada correctamente",
+          description: "Visita registrada correctamente",
         });
       }
 
       resetForm();
-      fetchConsultations();
+      fetchVisits();
     } catch (error) {
-      console.error('Error saving consultation:', error);
+      console.error("Error saving visit:", error);
       toast({
         title: "Error",
-        description: "No se pudo guardar la consulta",
+        description: "No se pudo guardar la visita",
         variant: "destructive",
       });
     }
   };
 
-  const handleEdit = (consultation: Consultation) => {
-    setFormData({
-      fecha_consulta: consultation.fecha_consulta,
-      detalle: consultation.detalle,
-      consultor: consultation.consultor || "",
-      observaciones: consultation.observaciones || "",
-    });
-    setEditingConsultation(consultation);
-    setShowForm(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("¿Está seguro de que desea eliminar esta consulta?")) {
-      return;
-    }
+  const deleteVisit = async (id: string) => {
+    if (!confirm("¿Está seguro de que desea eliminar esta visita?")) return;
 
     try {
       const { error } = await supabase
-        .from('visitas_consultores')
+        .from("visitas_consultores")
         .delete()
-        .eq('id', id);
+        .eq("id", id);
 
       if (error) throw error;
 
       toast({
         title: "Éxito",
-        description: "Consulta eliminada correctamente",
+        description: "Visita eliminada correctamente",
       });
-
-      fetchConsultations();
+      fetchVisits();
     } catch (error) {
-      console.error('Error deleting consultation:', error);
+      console.error("Error deleting visit:", error);
       toast({
         title: "Error",
-        description: "No se pudo eliminar la consulta",
+        description: "No se pudo eliminar la visita",
         variant: "destructive",
       });
     }
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Cargando consultas...</div>
-      </div>
-    );
+    return <div className="flex justify-center p-8">Cargando...</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Visitas de Consultores</h1>
-          <p className="text-muted-foreground">Registra y gestiona las visitas de consultores</p>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Users className="h-8 w-8" />
+            Visitas de Consultores
+          </h1>
+          <p className="text-muted-foreground">Registra y gestiona las visitas de consultores externos</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Nueva Consulta
+        <Button onClick={() => setShowForm(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nueva Visita
         </Button>
       </div>
 
@@ -183,7 +192,7 @@ const ConsultationsModule = () => {
         <Card>
           <CardHeader>
             <CardTitle>
-              {editingConsultation ? "Editar Consulta" : "Nueva Consulta"}
+              {editingVisit ? "Editar Visita" : "Nueva Visita de Consultor"}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -195,48 +204,48 @@ const ConsultationsModule = () => {
                     id="fecha_consulta"
                     type="date"
                     value={formData.fecha_consulta}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fecha_consulta: e.target.value }))}
+                    onChange={(e) => setFormData({ ...formData, fecha_consulta: e.target.value })}
                     required
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="consultor">Consultor</Label>
+                  <Label htmlFor="consultor">Nombre del Consultor</Label>
                   <Input
                     id="consultor"
                     value={formData.consultor}
-                    onChange={(e) => setFormData(prev => ({ ...prev, consultor: e.target.value }))}
-                    placeholder="Nombre del consultor"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label htmlFor="detalle">Detalle de la Consulta *</Label>
-                  <Textarea
-                    id="detalle"
-                    value={formData.detalle}
-                    onChange={(e) => setFormData(prev => ({ ...prev, detalle: e.target.value }))}
-                    placeholder="Describe el motivo y contenido de la consulta..."
-                    rows={4}
-                    required
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <Label htmlFor="observaciones">Observaciones</Label>
-                  <Textarea
-                    id="observaciones"
-                    value={formData.observaciones}
-                    onChange={(e) => setFormData(prev => ({ ...prev, observaciones: e.target.value }))}
-                    placeholder="Observaciones adicionales..."
-                    rows={3}
+                    onChange={(e) => setFormData({ ...formData, consultor: e.target.value })}
+                    placeholder="Nombre del consultor (opcional)"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-4">
+              <div>
+                <Label htmlFor="detalle">Detalle de la Consulta *</Label>
+                <Textarea
+                  id="detalle"
+                  value={formData.detalle}
+                  onChange={(e) => setFormData({ ...formData, detalle: e.target.value })}
+                  placeholder="Describe el motivo y contenido de la consulta..."
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="observaciones">Observaciones Adicionales</Label>
+                <Textarea
+                  id="observaciones"
+                  value={formData.observaciones}
+                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                  placeholder="Observaciones, resultados o acciones a seguir..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="flex gap-2">
                 <Button type="submit">
-                  {editingConsultation ? "Actualizar" : "Registrar"} Consulta
+                  {editingVisit ? "Actualizar Visita" : "Registrar Visita"}
                 </Button>
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancelar
@@ -247,76 +256,128 @@ const ConsultationsModule = () => {
         </Card>
       )}
 
-      <div className="grid gap-4">
-        {consultations.length === 0 ? (
-          <Card>
-            <CardContent className="text-center py-8">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No hay consultas registradas</p>
-            </CardContent>
-          </Card>
-        ) : (
-          consultations.map((consultation) => (
-            <Card key={consultation.id}>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(consultation.fecha_consulta).toLocaleDateString('es-AR')}
+      <Card>
+        <CardHeader>
+          <CardTitle>Historial de Visitas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {visits.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">No hay visitas registradas</p>
+              <Button 
+                variant="outline" 
+                className="mt-2"
+                onClick={() => setShowForm(true)}
+              >
+                Registrar primera visita
+              </Button>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Consultor</TableHead>
+                  <TableHead>Detalle</TableHead>
+                  <TableHead>Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visits.map((visit) => (
+                  <TableRow key={visit.id}>
+                    <TableCell>
+                      {new Date(visit.fecha_consulta).toLocaleDateString('es-AR')}
+                    </TableCell>
+                    <TableCell>
+                      {visit.consultor || "No especificado"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="max-w-xs">
+                        <p className="truncate" title="Haz clic en 'Ver detalle' para ver completo">
+                          {visit.detalle.length > 50 ? `${visit.detalle.substring(0, 50)}...` : visit.detalle}
+                        </p>
                       </div>
-                      {consultation.consultor && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Users className="h-4 w-4" />
-                          {consultation.consultor}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <h3 className="font-semibold text-lg mb-2">Detalle de la Consulta</h3>
-                      <p className="text-foreground whitespace-pre-wrap">{consultation.detalle}</p>
-                    </div>
-
-                    {consultation.observaciones && (
-                      <div>
-                        <h4 className="font-medium text-sm text-muted-foreground mb-1">Observaciones</h4>
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{consultation.observaciones}</p>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedVisit(visit)}
+                          title="Ver detalle completo"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEdit(visit)}
+                          title="Editar visita"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteVisit(visit.id)}
+                          title="Eliminar visita"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                    )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
-                    <div className="text-xs text-muted-foreground">
-                      Registrado el {new Date(consultation.created_at).toLocaleDateString('es-AR')} a las {new Date(consultation.created_at).toLocaleTimeString('es-AR')}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 ml-4">
-                    <Button
-                      onClick={() => handleEdit(consultation)}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Editar
-                    </Button>
-                    <Button
-                      onClick={() => handleDelete(consultation.id)}
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-2 text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Eliminar
-                    </Button>
+      {/* Dialog para ver detalle completo */}
+      <Dialog open={!!selectedVisit} onOpenChange={() => setSelectedVisit(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Detalle de la Visita</DialogTitle>
+          </DialogHeader>
+          {selectedVisit && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Fecha de Consulta</Label>
+                  <p className="text-sm">{new Date(selectedVisit.fecha_consulta).toLocaleDateString('es-AR')}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Consultor</Label>
+                  <p className="text-sm">{selectedVisit.consultor || "No especificado"}</p>
+                </div>
+              </div>
+              
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">Detalle de la Consulta</Label>
+                <div className="mt-2 p-3 bg-muted rounded-md">
+                  <p className="text-sm whitespace-pre-wrap">{selectedVisit.detalle}</p>
+                </div>
+              </div>
+              
+              {selectedVisit.observaciones && (
+                <div>
+                  <Label className="text-sm font-medium text-muted-foreground">Observaciones</Label>
+                  <div className="mt-2 p-3 bg-muted rounded-md">
+                    <p className="text-sm whitespace-pre-wrap">{selectedVisit.observaciones}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+              )}
+              
+              <div>
+                <Label className="text-sm font-medium text-muted-foreground">Fecha de Registro</Label>
+                <p className="text-sm">{new Date(selectedVisit.created_at).toLocaleDateString('es-AR')} a las {new Date(selectedVisit.created_at).toLocaleTimeString('es-AR')}</p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -410,7 +410,6 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="operario-mantenimiento">Operario Mantenimiento</SelectItem>
-                  <SelectItem value="operario-administracion">Operario Administración</SelectItem>
                   <SelectItem value="operario-produccion">Operario Producción</SelectItem>
                   <SelectItem value="recursos-humanos">Recursos Humanos</SelectItem>
                   <SelectItem value="administracion">Administración</SelectItem>

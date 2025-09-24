@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useUniforms } from "@/hooks/useUniforms";
-import { Shirt, Plus, Download, Calendar, User, Package, Trash2 } from "lucide-react";
+import { Shirt, Plus, Download, Calendar, User, Package, Trash2, Search, Filter } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import html2pdf from "html2pdf.js";
@@ -29,6 +29,11 @@ const UniformsModule = () => {
   const [season, setSeason] = useState("");
   const [condition, setCondition] = useState("");
   const [notes, setNotes] = useState("");
+  
+  // Filtros
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
 
   const uniformTypes = [
     "Barbijo",
@@ -75,6 +80,20 @@ const UniformsModule = () => {
       return `Próxima entrega: ${nextSixMonths.toLocaleDateString('es-AR')} (cada 6 meses)`;
     }
   };
+
+  // Función de filtrado
+  const filteredUniforms = uniforms.filter(uniform => {
+    const matchesSearch = (
+      uniform.employeeName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      uniform.employeeDni?.includes(searchTerm) ||
+      uniform.uniform_type?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    const matchesType = !filterType || filterType === "all" || uniform.uniform_type === filterType;
+    const matchesStatus = !filterStatus || filterStatus === "all" || uniform.status === filterStatus;
+    
+    return matchesSearch && matchesType && matchesStatus;
+  });
 
   const handleSubmit = async () => {
     if (!selectedEmployee || !uniformType || !size || !season || !condition || !deliveryDate) {
@@ -381,123 +400,163 @@ const UniformsModule = () => {
         </div>
       </div>
 
-      <div className="grid gap-4">
-        {loading ? (
-          <Card>
-            <CardContent className="flex items-center justify-center py-12">
+      {/* Filtros y Búsqueda */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-foreground">Filtros y Búsqueda</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-foreground/60" />
+              <Input
+                placeholder="Buscar por empleado, DNI, tipo de uniforme..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            
+            <Select onValueChange={setFilterType}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filtrar por tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los tipos</SelectItem>
+                {uniformTypes.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filtrar por estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos los estados</SelectItem>
+                <SelectItem value="entregado">Entregado</SelectItem>
+                <SelectItem value="pendiente">Pendiente</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Lista de Uniformes */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-foreground">Lista de Entregas ({filteredUniforms.length})</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-pulse" />
                 <p className="text-lg font-medium text-foreground">Cargando entregas...</p>
               </div>
-            </CardContent>
-          </Card>
-        ) : uniforms.length === 0 ? (
-          <Card>
-            <CardContent className="flex items-center justify-center py-12">
+            </div>
+          ) : filteredUniforms.length === 0 ? (
+            <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg font-medium text-foreground">No hay entregas registradas</p>
-                <p className="text-foreground/70">Comienza registrando la primera entrega de uniforme</p>
+                <p className="text-lg font-medium text-foreground">
+                  {uniforms.length === 0 ? "No hay entregas registradas" : "No se encontraron entregas"}
+                </p>
+                <p className="text-foreground/70">
+                  {uniforms.length === 0 
+                    ? "Comienza registrando la primera entrega de uniforme"
+                    : "No hay entregas que coincidan con los filtros seleccionados"
+                  }
+                </p>
               </div>
-            </CardContent>
-          </Card>
-        ) : (
-          uniforms.map((delivery) => (
-            <Card key={delivery.id}>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <User className="h-5 w-5 text-primary" />
-                    <div>
-                      <CardTitle className="text-lg">{delivery.employeeName}</CardTitle>
-                      <CardDescription>DNI: {delivery.employeeDni}</CardDescription>
-                    </div>
-                  </div>
-                  <Badge variant={delivery.status === "entregado" ? "default" : "secondary"}>
-                    {delivery.status}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Tipo de Uniforme</p>
-                    <p className="text-foreground/70">{delivery.uniform_type}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Talle y Cantidad</p>
-                    <p className="text-foreground/70">{delivery.size} - {delivery.quantity} unidad(es)</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Temporada</p>
-                    <p className="text-foreground/70">{delivery.season}</p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Estado</p>
-                    <p className="text-foreground/70">{delivery.condition}</p>
-                  </div>
-                  <div className="flex items-center text-sm text-foreground/70">
-                    <Calendar className="h-4 w-4 mr-1" />
-                    Entregado: {new Date(delivery.delivery_date).toLocaleDateString('es-AR')}
-                  </div>
-                </div>
-
-                <div className="mb-4 p-3 bg-muted/30 rounded-lg">
-                  <p className="text-sm font-medium text-foreground mb-1">
-                    {isProtectionElement(delivery.uniform_type) ? "Elemento de Protección" : "Uniforme de Trabajo"}
-                  </p>
-                  <p className="text-sm text-foreground/70">
-                    {getNextDeliveryInfo(delivery.uniform_type, delivery.delivery_date)}
-                  </p>
-                </div>
-
-                {delivery.notes && (
-                  <div className="mb-4">
-                    <p className="text-sm font-medium text-foreground">Observaciones</p>
-                    <p className="text-foreground/70">{delivery.notes}</p>
-                  </div>
-                )}
-
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => generateDeliveryReceipt(delivery)}
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Constancia PDF
-                  </Button>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Eliminar
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Esta acción no se puede deshacer. Se eliminará permanentemente el registro de entrega de uniforme de {delivery.employeeName}.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteUniform(delivery.id, delivery.employeeName)}>
-                          Eliminar
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-border">
+                  <tr className="text-left">
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Empleado</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Tipo</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Talle</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Cantidad</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Fecha</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Estado</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {filteredUniforms.map((delivery) => (
+                    <tr key={delivery.id} className="hover:bg-muted/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-foreground">
+                            {delivery.employeeName}
+                          </span>
+                          <span className="text-sm text-foreground/60">DNI: {delivery.employeeDni}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-foreground">{delivery.uniform_type}</td>
+                      <td className="px-6 py-4 text-foreground">{delivery.size}</td>
+                      <td className="px-6 py-4 text-foreground">{delivery.quantity}</td>
+                      <td className="px-6 py-4 text-foreground">
+                        {new Date(delivery.delivery_date).toLocaleDateString('es-AR')}
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant={delivery.status === "entregado" ? "default" : "secondary"}>
+                          {delivery.status}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => generateDeliveryReceipt(delivery)}
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            PDF
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>¿Eliminar entrega?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción no se puede deshacer. Se eliminará permanentemente el registro de entrega de {delivery.uniform_type} de {delivery.employeeName}.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteUniform(delivery.id, delivery.employeeName)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Eliminar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

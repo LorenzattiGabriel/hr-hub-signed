@@ -54,31 +54,54 @@ const UniformsModule = () => {
 
   const conditions = ["Nuevo", "Usado - Buen estado", "Usado - Estado regular"];
 
-  // Elementos de protección se entregan cuando se rompen (sin fecha programada)
+  // Elementos de protección se entregan a demanda
   const protectionElements = ["Barbijo", "Guantes", "Mameluco", "Sordina", "Gafas de seguridad"];
   
   // Uniformes tienen fechas programadas de entrega
-  const scheduledUniforms = ["Remera", "Pantalón cargo", "Campera", "Buzo", "Zapatos punta de acero"];
+  const uniformTypes6Months = ["Remera", "Pantalón cargo", "Campera", "Buzo"];
+  const uniformTypes1Year = ["Zapatos punta de acero"];
 
-  const isProtectionElement = (uniformType: string) => {
-    return protectionElements.includes(uniformType);
+  const getItemCategory = (uniformType: string) => {
+    if (protectionElements.includes(uniformType)) {
+      return "Elemento de protección";
+    }
+    return "Uniforme";
   };
 
-  const getNextDeliveryInfo = (uniformType: string, deliveryDate: string) => {
-    if (isProtectionElement(uniformType)) {
-      return "Se entrega cuando se rompe o deteriora";
+  const calculateNextDeliveryDate = (uniformType: string, deliveryDate: string) => {
+    if (protectionElements.includes(uniformType)) {
+      return null; // A demanda
     }
     
     const delivery = new Date(deliveryDate);
-    if (uniformType === "Zapatos punta de acero") {
-      const nextYear = new Date(delivery);
-      nextYear.setFullYear(delivery.getFullYear() + 1);
-      return `Próxima entrega: ${nextYear.toLocaleDateString('es-AR')} (cada 1 año)`;
-    } else {
-      const nextSixMonths = new Date(delivery);
-      nextSixMonths.setMonth(delivery.getMonth() + 6);
-      return `Próxima entrega: ${nextSixMonths.toLocaleDateString('es-AR')} (cada 6 meses)`;
+    if (uniformTypes1Year.includes(uniformType)) {
+      const nextDate = new Date(delivery);
+      nextDate.setFullYear(delivery.getFullYear() + 1);
+      return nextDate;
+    } else if (uniformTypes6Months.includes(uniformType)) {
+      const nextDate = new Date(delivery);
+      nextDate.setMonth(delivery.getMonth() + 6);
+      return nextDate;
     }
+    
+    return null;
+  };
+
+  const getNextDeliveryStatus = (uniformType: string, deliveryDate: string) => {
+    const nextDate = calculateNextDeliveryDate(uniformType, deliveryDate);
+    
+    if (!nextDate) {
+      return { text: "A demanda", color: "text-foreground/70", bgColor: "bg-muted" };
+    }
+    
+    const today = new Date();
+    const isOverdue = nextDate < today;
+    
+    return {
+      text: nextDate.toLocaleDateString('es-AR'),
+      color: isOverdue ? "text-red-600" : "text-green-600",
+      bgColor: isOverdue ? "bg-red-50" : "bg-green-50"
+    };
   };
 
   // Función de filtrado
@@ -480,9 +503,11 @@ const UniformsModule = () => {
                   <tr className="text-left">
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Empleado</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Tipo</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Categoría</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Talle</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Cantidad</th>
-                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Fecha</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Fecha Entrega</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Próxima Entrega</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Estado</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Acciones</th>
                   </tr>
@@ -499,10 +524,25 @@ const UniformsModule = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-foreground">{delivery.uniform_type}</td>
+                      <td className="px-6 py-4">
+                        <Badge variant="outline" className="text-xs">
+                          {getItemCategory(delivery.uniform_type)}
+                        </Badge>
+                      </td>
                       <td className="px-6 py-4 text-foreground">{delivery.size}</td>
                       <td className="px-6 py-4 text-foreground">{delivery.quantity}</td>
                       <td className="px-6 py-4 text-foreground">
                         {new Date(delivery.delivery_date).toLocaleDateString('es-AR')}
+                      </td>
+                      <td className="px-6 py-4">
+                        {(() => {
+                          const status = getNextDeliveryStatus(delivery.uniform_type, delivery.delivery_date);
+                          return (
+                            <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${status.bgColor} ${status.color}`}>
+                              {status.text}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="px-6 py-4">
                         <Badge variant={delivery.status === "entregado" ? "default" : "secondary"}>

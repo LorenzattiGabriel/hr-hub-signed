@@ -1,0 +1,1 @@
+DELETE FROM employees WHERE puesto = 'operario-administracion';

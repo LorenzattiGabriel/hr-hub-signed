@@ -77,17 +77,30 @@ const downloadPDF = async () => {
   const calculateVacationDays = (fechaIngreso: string) => {
     if (!fechaIngreso) return 0;
     
-    const antiquity = calculateAntiquity(fechaIngreso);
-    const totalYears = antiquity.years;
+    const fechaCorte = new Date(new Date().getFullYear(), 11, 31); // 31 de diciembre del año actual
+    const ingreso = new Date(fechaIngreso);
+    const antiguedadAnios = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
     
-    // Según la ley laboral argentina
-    if (totalYears < 1) return 0;
-    if (totalYears >= 1 && totalYears < 5) return 14;
-    if (totalYears >= 5 && totalYears < 10) return 21;
-    if (totalYears >= 10 && totalYears < 20) return 28;
-    if (totalYears >= 20) return 35;
+    // Si ingresó este año, verificar casos especiales
+    if (ingreso.getFullYear() === new Date().getFullYear()) {
+      const diasTrabajados = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+      const diasHabilesTrabajados = Math.round(diasTrabajados * 5 / 7); // Estimación días hábiles
+      
+      // Menos de 6 meses (130 días hábiles aproximadamente)
+      if (diasHabilesTrabajados < 130) {
+        return Math.max(Math.floor(diasHabilesTrabajados / 20), 0);
+      } else {
+        // Más de 6 meses, debe trabajar al menos mitad del año (130 días hábiles)
+        return diasHabilesTrabajados >= 130 ? 14 : Math.floor(diasHabilesTrabajados / 20);
+      }
+    }
     
-    return 14; // Por defecto
+    // Antigüedad por años completos según Ley de Contrato de Trabajo N° 20.744
+    if (antiguedadAnios < 0) return 0;
+    if (antiguedadAnios <= 5) return 14;    // Hasta 5 años: 14 días corridos
+    if (antiguedadAnios <= 10) return 21;   // Más de 5 hasta 10 años: 21 días corridos
+    if (antiguedadAnios <= 20) return 28;   // Más de 10 hasta 20 años: 28 días corridos
+    return 35;                              // Más de 20 años: 35 días corridos
   };
 
   return (

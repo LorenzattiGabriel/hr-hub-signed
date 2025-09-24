@@ -21,29 +21,34 @@ const VacationsModule = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "pendiente" | "aprobado" | "rechazado">("all");
 
-  // Calculate vacation days based on seniority
+  // Calculate vacation days based on seniority (following Argentine Labor Law N° 20.744)
   const calculateVacationDays = (fechaIngreso: string) => {
     if (!fechaIngreso) return 0;
     
-    const ingresoDate = new Date(fechaIngreso);
-    const today = new Date();
-    let years = today.getFullYear() - ingresoDate.getFullYear();
+    const fechaCorte = new Date(new Date().getFullYear(), 11, 31); // 31 de diciembre del año actual
+    const ingreso = new Date(fechaIngreso);
+    const antiguedadAnios = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
     
-    const monthDiff = today.getMonth() - ingresoDate.getMonth();
-    const dayDiff = today.getDate() - ingresoDate.getDate();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-      years--;
+    // Si ingresó este año, verificar casos especiales
+    if (ingreso.getFullYear() === new Date().getFullYear()) {
+      const diasTrabajados = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+      const diasHabilesTrabajados = Math.round(diasTrabajados * 5 / 7); // Estimación días hábiles
+      
+      // Menos de 6 meses (130 días hábiles aproximadamente)
+      if (diasHabilesTrabajados < 130) {
+        return Math.max(Math.floor(diasHabilesTrabajados / 20), 0);
+      } else {
+        // Más de 6 meses, debe trabajar al menos mitad del año (130 días hábiles)
+        return diasHabilesTrabajados >= 130 ? 14 : Math.floor(diasHabilesTrabajados / 20);
+      }
     }
     
-    // Según la ley laboral argentina
-    if (years < 1) return 0;
-    if (years >= 1 && years < 5) return 14;
-    if (years >= 5 && years < 10) return 21;
-    if (years >= 10 && years < 20) return 28;
-    if (years >= 20) return 35;
-    
-    return 14;
+    // Antigüedad por años completos según Ley de Contrato de Trabajo N° 20.744
+    if (antiguedadAnios < 0) return 0;
+    if (antiguedadAnios <= 5) return 14;    // Hasta 5 años: 14 días corridos
+    if (antiguedadAnios <= 10) return 21;   // Más de 5 hasta 10 años: 21 días corridos
+    if (antiguedadAnios <= 20) return 28;   // Más de 10 hasta 20 años: 28 días corridos
+    return 35;                              // Más de 20 años: 35 días corridos
   };
 
   // Calculate used vacation days (reset to 0)

@@ -684,9 +684,16 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                     <SelectItem value="B.2">B.2: Automóviles, utilitarios, camionetas y casas rodantes de más de 3.500 kg</SelectItem>
                     
                     {/* Clase C (Vehículos de Carga) */}
+                    <SelectItem value="C.1">C.1: Camiones hasta 12.000 kg</SelectItem>
+                    <SelectItem value="C.2">C.2: Camiones de más de 12.000 kg</SelectItem>
+                    <SelectItem value="C.3">C.3: Vehículos de carga pesada</SelectItem>
+                    
+                    {/* Clase D (Transporte de Pasajeros) */}
                     <SelectItem value="D.1">D.1: Transporte de hasta 8 pasajeros</SelectItem>
                     <SelectItem value="D.2">D.2: Transporte de más de 8 pasajeros</SelectItem>
                     <SelectItem value="D.3">D.3: Vehículos de emergencia y seguridad</SelectItem>
+                    
+                    {/* Clase E (Vehículos Articulados) */}
                     <SelectItem value="E.1">E.1: Vehículos de carga con remolque o semirremolque</SelectItem>
                     <SelectItem value="E.2">E.2: Vehículos de pasajeros con remolque o articulados</SelectItem>
                     

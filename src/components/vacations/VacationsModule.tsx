@@ -31,15 +31,18 @@ const VacationsModule = () => {
     
     // Si ingresó este año, verificar casos especiales
     if (ingreso.getFullYear() === new Date().getFullYear()) {
+      // Calcular días trabajados desde ingreso hasta 31 de diciembre (días calendario)
       const diasTrabajados = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (24 * 60 * 60 * 1000)) + 1;
-      const diasHabilesTrabajados = Math.round(diasTrabajados * 5 / 7); // Estimación días hábiles
       
-      // Menos de 6 meses (130 días hábiles aproximadamente)
-      if (diasHabilesTrabajados < 130) {
-        return Math.max(Math.floor(diasHabilesTrabajados / 20), 0);
+      // Calcular meses trabajados
+      const mesesTrabajados = (fechaCorte.getTime() - ingreso.getTime()) / (30.44 * 24 * 60 * 60 * 1000);
+      
+      // Si trabajó menos de 6 meses: 1 día de vacaciones por cada 20 días de trabajo efectivo
+      if (mesesTrabajados < 6) {
+        return Math.floor(diasTrabajados / 20);
       } else {
-        // Más de 6 meses, debe trabajar al menos mitad del año (130 días hábiles)
-        return diasHabilesTrabajados >= 130 ? 14 : Math.floor(diasHabilesTrabajados / 20);
+        // Si trabajó 6 meses o más en el año, le corresponden 14 días
+        return 14;
       }
     }
     

@@ -176,17 +176,48 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
     }
   };
 
-  // Information for selected employee with vacation days from database
+  // Information for selected employee with vacation days - calculate if no balance exists
   const selectedEmployeeInfo = employees.find(emp => emp.id === formData.employee_id);
   const currentYear = new Date().getFullYear();
   const vacationBalance = selectedEmployeeInfo ? getEmployeeVacationBalance(selectedEmployeeInfo.id, currentYear) : null;
   
-  const vacationDaysInfo = vacationBalance ? {
-    totalDays: vacationBalance.dias_totales,
-    diasAdeudados: vacationBalance.dias_adeudados,
-    usedDays: vacationBalance.dias_usados,
-    availableDays: vacationBalance.dias_totales + vacationBalance.dias_adeudados - vacationBalance.dias_usados
+  // Helper: calculate vacation days for current year using calendar days and decimals
+  const calcVacationDaysCurrentYear = (fechaIngreso?: string) => {
+    if (!fechaIngreso) return 0;
+    const ingreso = new Date(fechaIngreso);
+    const now = new Date();
+    const fechaCorte = new Date(now.getFullYear(), 11, 31);
+
+    // If joined this year, use proportional rule
+    if (ingreso.getFullYear() === now.getFullYear()) {
+      const diasTrabajados = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+      const mesesTrabajados = (fechaCorte.getTime() - ingreso.getTime()) / (30.44 * 24 * 60 * 60 * 1000);
+      if (mesesTrabajados < 6) {
+        return Math.round((diasTrabajados / 20) * 100) / 100; // 2 decimales
+      }
+      return 14;
+    }
+
+    // Full years per law
+    const antiguedadAnios = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+    if (antiguedadAnios <= 5) return 14;
+    if (antiguedadAnios <= 10) return 21;
+    if (antiguedadAnios <= 20) return 28;
+    return 35;
+  };
+  
+  const vacationDaysInfo = selectedEmployeeInfo ? {
+    totalDays: vacationBalance && vacationBalance.dias_totales > 0 
+      ? vacationBalance.dias_totales 
+      : calcVacationDaysCurrentYear(selectedEmployeeInfo.fecha_ingreso || selectedEmployeeInfo.fechaIngreso),
+    diasAdeudados: vacationBalance?.dias_adeudados || 0,
+    usedDays: vacationBalance?.dias_usados || 0,
+    availableDays: 0 // Will be calculated below
   } : null;
+  
+  if (vacationDaysInfo) {
+    vacationDaysInfo.availableDays = Math.round(((vacationDaysInfo.totalDays + vacationDaysInfo.diasAdeudados - vacationDaysInfo.usedDays) + Number.EPSILON) * 100) / 100;
+  }
 
   return (
     <div className="space-y-6">
@@ -327,14 +358,14 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
                   <h3 className="font-semibold text-foreground mb-2">
                     {selectedEmployeeInfo.nombres} {selectedEmployeeInfo.apellidos}
                   </h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-foreground/70">Cargo</p>
-                      <p className="text-foreground">{selectedEmployeeInfo.puesto || 'No especificado'}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="space-y-1">
+                      <p className="text-muted-foreground">Cargo</p>
+                      <p className="text-foreground font-medium">{selectedEmployeeInfo.puesto || selectedEmployeeInfo.cargo || 'No especificado'}</p>
                     </div>
-                    <div>
-                      <p className="text-foreground/70">Sector</p>
-                      <p className="text-foreground">{selectedEmployeeInfo.departamento || 'No especificado'}</p>
+                    <div className="space-y-1">
+                      <p className="text-muted-foreground">Sector</p>
+                      <p className="text-foreground font-medium">{selectedEmployeeInfo.departamento || selectedEmployeeInfo.sector || 'No especificado'}</p>
                     </div>
                   </div>
                 </div>
@@ -343,21 +374,21 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
                   <div className="space-y-3">
                     <h4 className="font-medium text-foreground">Balance de Vacaciones</h4>
                     
-                    <div className="grid grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Días correspondientes:</span>
-                        <p className="font-medium">{vacationDaysInfo.totalDays}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                      <div className="space-y-1">
+                        <span className="text-muted-foreground block">Días correspondientes:</span>
+                        <p className="font-medium text-foreground">{vacationDaysInfo.totalDays}</p>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Días adeudados:</span>
+                      <div className="space-y-1">
+                        <span className="text-muted-foreground block">Días adeudados:</span>
                         <p className="font-medium text-orange-600">{vacationDaysInfo.diasAdeudados}</p>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Días usados:</span>
-                        <p className="font-medium">{vacationDaysInfo.usedDays}</p>
+                      <div className="space-y-1">
+                        <span className="text-muted-foreground block">Días usados:</span>
+                        <p className="font-medium text-foreground">{vacationDaysInfo.usedDays}</p>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Días disponibles:</span>
+                      <div className="space-y-1">
+                        <span className="text-muted-foreground block">Días disponibles:</span>
                         <p className="font-medium text-green-600">{vacationDaysInfo.availableDays}</p>
                       </div>
                     </div>

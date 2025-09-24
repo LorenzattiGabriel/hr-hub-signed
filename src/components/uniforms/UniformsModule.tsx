@@ -320,16 +320,35 @@ const UniformsModule = () => {
                 
                 <div>
                   <Label htmlFor="uniformType">Tipo de Uniforme *</Label>
-                  <Select value={uniformType} onValueChange={setUniformType}>
+                  <Select value={uniformType} onValueChange={(value) => {
+                    setUniformType(value);
+                    // Auto-asignar temporada para elementos de protección
+                    if (protectionElements.includes(value)) {
+                      setSeason("Todo el año");
+                      setSize("Sin talle");
+                    } else {
+                      setSeason("");
+                      setSize("");
+                    }
+                  }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      {uniformTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
+                      <optgroup label="Elementos de Protección">
+                        {protectionElements.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Uniformes">
+                        {["Remera", "Pantalón cargo", "Zapatos punta de acero", "Campera", "Buzo"].map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </optgroup>
                     </SelectContent>
                   </Select>
                 </div>
@@ -372,8 +391,17 @@ const UniformsModule = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="season">Temporada *</Label>
-                  <Select value={season} onValueChange={setSeason}>
+                  <Label htmlFor="season">
+                    Temporada * 
+                    {protectionElements.includes(uniformType) && (
+                      <span className="text-xs text-muted-foreground ml-1">(Auto-asignado)</span>
+                    )}
+                  </Label>
+                  <Select 
+                    value={season} 
+                    onValueChange={setSeason}
+                    disabled={protectionElements.includes(uniformType)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Seleccionar temporada" />
                     </SelectTrigger>
@@ -525,7 +553,7 @@ const UniformsModule = () => {
                       </td>
                       <td className="px-6 py-4 text-foreground">{delivery.uniform_type}</td>
                       <td className="px-6 py-4">
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs whitespace-nowrap">
                           {getItemCategory(delivery.uniform_type)}
                         </Badge>
                       </td>
@@ -538,7 +566,7 @@ const UniformsModule = () => {
                         {(() => {
                           const status = getNextDeliveryStatus(delivery.uniform_type, delivery.delivery_date);
                           return (
-                            <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${status.bgColor} ${status.color}`}>
+                            <div className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium whitespace-nowrap ${status.bgColor} ${status.color}`}>
                               {status.text}
                             </div>
                           );

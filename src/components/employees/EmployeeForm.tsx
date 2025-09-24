@@ -670,12 +670,29 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   <SelectTrigger>
                     <SelectValue placeholder="Seleccionar tipo de licencia" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="clase-a">Clase A - Ciclomotores</SelectItem>
-                    <SelectItem value="clase-b">Clase B - Automóviles</SelectItem>
-                    <SelectItem value="clase-c">Clase C - Camiones</SelectItem>
-                    <SelectItem value="clase-d">Clase D - Transporte de pasajeros</SelectItem>
-                    <SelectItem value="clase-e">Clase E - Camiones articulados</SelectItem>
+                  <SelectContent className="bg-background border border-border max-h-[200px] overflow-y-auto z-50">
+                    {/* Clase A (Motos y Ciclomotores) */}
+                    <SelectItem value="A.1.1">A.1.1: Ciclomotores</SelectItem>
+                    <SelectItem value="A.1.2">A.1.2: Motocicletas de hasta 150 cc</SelectItem>
+                    <SelectItem value="A.1.3">A.1.3: Motocicletas de más de 150 cc hasta 300 cc</SelectItem>
+                    <SelectItem value="A.1.4">A.1.4: Motocicletas de más de 300 cc</SelectItem>
+                    <SelectItem value="A.2.1">A.2.1: Motocicletas, triciclos y cuatriciclos</SelectItem>
+                    <SelectItem value="A.2.2">A.2.2: Triciclos y cuatriciclos de más de 300 kg</SelectItem>
+                    
+                    {/* Clase B (Automóviles y Camionetas) */}
+                    <SelectItem value="B.1">B.1: Automóviles, utilitarios, camionetas y casas rodantes hasta 3.500 kg</SelectItem>
+                    <SelectItem value="B.2">B.2: Automóviles, utilitarios, camionetas y casas rodantes de más de 3.500 kg</SelectItem>
+                    
+                    {/* Clase C (Vehículos de Carga) */}
+                    <SelectItem value="D.1">D.1: Transporte de hasta 8 pasajeros</SelectItem>
+                    <SelectItem value="D.2">D.2: Transporte de más de 8 pasajeros</SelectItem>
+                    <SelectItem value="D.3">D.3: Vehículos de emergencia y seguridad</SelectItem>
+                    <SelectItem value="E.1">E.1: Vehículos de carga con remolque o semirremolque</SelectItem>
+                    <SelectItem value="E.2">E.2: Vehículos de pasajeros con remolque o articulados</SelectItem>
+                    
+                    {/* Clase G (Maquinaria Especial) */}
+                    <SelectItem value="G.1">G.1: Tractores</SelectItem>
+                    <SelectItem value="G.2">G.2: Maquinaria agrícola, de construcción y vial</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

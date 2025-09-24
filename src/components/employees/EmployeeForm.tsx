@@ -118,7 +118,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
       
       // Si trabajó menos de 6 meses: 1 día de vacaciones por cada 20 días de trabajo efectivo
       if (mesesTrabajados < 6) {
-        return Math.floor(diasTrabajados / 20);
+        return Math.round((diasTrabajados / 20) * 100) / 100; // Redondear a 2 decimales
       } else {
         // Si trabajó 6 meses o más en el año, le corresponden 14 días
         return 14;

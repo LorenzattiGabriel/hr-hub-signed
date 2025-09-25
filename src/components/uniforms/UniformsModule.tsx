@@ -181,7 +181,7 @@ const UniformsModule = () => {
         <!-- Encabezado -->
         <div style="text-align: center; margin-bottom: 8px; border: 2px solid #000; padding: 4px;">
           <h2 style="margin: 0; font-size: 12px; font-weight: bold;">CONSTANCIA DE ENTREGA DE ROPA DE TRABAJO Y ELEMENTOS DE PROTECCIÓN PERSONAL</h2>
-          <p style="margin: 1px 0; font-size: 9px;">(Resolución S.R.T. Nº 299/11)</p>
+          <p style="margin: 1px 0; font-size: 9px;">(Resolución 299/11, Anexo I)</p>
         </div>
         
         <!-- Datos de la empresa -->
@@ -206,9 +206,7 @@ const UniformsModule = () => {
             <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">Nombre y apellido del trabajador:</td>
             <td style="border: 1px solid #000; padding: 2px;">${delivery.employeeName}</td>
             <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">D.N.I.:</td>
-            <td style="border: 1px solid #000; padding: 2px;">${delivery.employeeDni}</td>
-            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">Legajo nº:</td>
-            <td style="border: 1px solid #000; padding: 2px;">&nbsp;</td>
+            <td colspan="3" style="border: 1px solid #000; padding: 2px;">${delivery.employeeDni}</td>
           </tr>
           <tr>
             <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">Puesto/s de trabajo:</td>

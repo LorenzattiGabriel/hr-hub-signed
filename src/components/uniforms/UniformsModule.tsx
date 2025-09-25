@@ -335,20 +335,22 @@ const UniformsModule = () => {
                       <SelectValue placeholder="Seleccionar tipo" />
                     </SelectTrigger>
                     <SelectContent>
-                      <optgroup label="Elementos de Protección">
-                        {protectionElements.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </optgroup>
-                      <optgroup label="Uniformes">
-                        {["Remera", "Pantalón cargo", "Zapatos punta de acero", "Campera", "Buzo"].map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </optgroup>
+                      <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                        Elementos de Protección
+                      </div>
+                      {protectionElements.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                      <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground border-t mt-1 pt-2">
+                        Uniformes
+                      </div>
+                      {["Remera", "Pantalón cargo", "Zapatos punta de acero", "Campera", "Buzo"].map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

@@ -172,51 +172,163 @@ const UniformsModule = () => {
   };
 
   const generateDeliveryReceipt = (delivery: any) => {
+    // Buscar el empleado para obtener el puesto
+    const employee = activeEmployees.find(emp => emp.id.toString() === delivery.employee_id.toString());
+    const puesto = employee?.puesto || '';
+    
     const content = `
-      <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #1f2937; margin-bottom: 10px;">CONSTANCIA DE ENTREGA DE UNIFORME</h1>
-          <p style="color: #6b7280;">Registro N° ${delivery.id}</p>
+      <div style="font-family: Arial, sans-serif; padding: 10px; max-width: 900px; font-size: 12px;">
+        <!-- Encabezado -->
+        <div style="text-align: center; margin-bottom: 15px; border: 2px solid #000; padding: 5px;">
+          <h2 style="margin: 0; font-size: 14px; font-weight: bold;">CONSTANCIA DE ENTREGA DE ROPA DE TRABAJO Y ELEMENTOS DE PROTECCIÓN PERSONAL</h2>
+          <p style="margin: 2px 0; font-size: 10px;">(Resolución S.R.T. Nº 299/11)</p>
         </div>
         
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Datos del Empleado</h3>
-          <p><strong>Nombre:</strong> ${delivery.employeeName}</p>
-          <p><strong>DNI:</strong> ${delivery.employeeDni}</p>
+        <!-- Datos de la empresa -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
+          <tr>
+            <td style="border: 1px solid #000; padding: 3px; font-weight: bold; width: 15%; background-color: #f0f0f0;">Razón social:</td>
+            <td style="border: 1px solid #000; padding: 3px; width: 35%;">Avícola "La Paloma"</td>
+            <td style="border: 1px solid #000; padding: 3px; font-weight: bold; width: 15%; background-color: #f0f0f0;">C.U.I.T.:</td>
+            <td style="border: 1px solid #000; padding: 3px; width: 35%;">20-24088189-7</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding: 3px; font-weight: bold; background-color: #f0f0f0;">Dirección:</td>
+            <td style="border: 1px solid #000; padding: 3px;">Avda. José Hernández 90</td>
+            <td style="border: 1px solid #000; padding: 3px; font-weight: bold; background-color: #f0f0f0;">Localidad:</td>
+            <td style="border: 1px solid #000; padding: 3px;">Río Primero</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding: 3px; font-weight: bold; background-color: #f0f0f0;">Nombre y apellido del trabajador:</td>
+            <td style="border: 1px solid #000; padding: 3px;">${delivery.employeeName}</td>
+            <td style="border: 1px solid #000; padding: 3px; font-weight: bold; background-color: #f0f0f0;">C.P.:</td>
+            <td style="border: 1px solid #000; padding: 3px;">5127</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding: 3px; font-weight: bold; background-color: #f0f0f0;">D.N.I.:</td>
+            <td style="border: 1px solid #000; padding: 3px;">${delivery.employeeDni}</td>
+            <td style="border: 1px solid #000; padding: 3px; font-weight: bold; background-color: #f0f0f0;">Provincia:</td>
+            <td style="border: 1px solid #000; padding: 3px;">Córdoba</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding: 3px; font-weight: bold; background-color: #f0f0f0;">Puesto/s de trabajo:</td>
+            <td colspan="3" style="border: 1px solid #000; padding: 3px;">${puesto}</td>
+          </tr>
+        </table>
+        
+        <!-- Elementos de protección personal -->
+        <div style="background-color: #000; color: white; text-align: center; padding: 5px; font-weight: bold; margin-bottom: 5px;">
+          ELEMENTOS DE PROTECCIÓN PERSONAL E INDUMENTARIA, NECESARIOS PARA EL TRABAJADOR SEGÚN PUESTO DE TRABAJO
         </div>
         
-        <div style="margin-bottom: 20px;">
-          <h3 style="color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 5px;">Detalle del Uniforme</h3>
-          <p><strong>Tipo:</strong> ${delivery.uniform_type}</p>
-          <p><strong>Talle:</strong> ${delivery.size}</p>
-          <p><strong>Cantidad:</strong> ${delivery.quantity}</p>
-          <p><strong>Temporada:</strong> ${delivery.season}</p>
-          <p><strong>Estado:</strong> ${delivery.condition}</p>
-          <p><strong>Fecha de entrega:</strong> ${new Date(delivery.delivery_date).toLocaleDateString('es-AR')}</p>
-          ${delivery.notes ? `<p><strong>Observaciones:</strong> ${delivery.notes}</p>` : ''}
-        </div>
+        <!-- Tabla de categorías de protección -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
+          <tr style="background-color: #f0f0f0;">
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Calzado de seguridad</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Pantalón</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Protección ocular</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Protección craneana</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Protección contra caídas</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+          </tr>
+          <tr style="background-color: #f0f0f0;">
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Campera</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Protección para manos</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Protección facial</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Protección respiratoria</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Protección auditiva</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+          </tr>
+          <tr style="background-color: #f0f0f0;">
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Camisa</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Protección lumbar</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Otro: REMERA</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Otro:</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">Otro:</td>
+          </tr>
+          <tr>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 15px;">&nbsp;</td>
+          </tr>
+        </table>
         
-        <div style="margin-top: 40px; display: flex; justify-content: space-between;">
-          <div style="text-align: center; border-top: 1px solid #000; padding-top: 5px; width: 200px;">
-            <p>Firma del Empleado</p>
+        <!-- Tabla principal de productos -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
+          <tr style="background-color: #f0f0f0;">
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; width: 5%;">Nº</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; width: 25%;">Producto</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; width: 15%;">Tipo / Modelo</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; width: 15%;">Marca</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; width: 10%;">Certificación</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; width: 10%;">Cantidad</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; width: 12%;">Fecha de entrega</td>
+            <td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold; width: 8%;">Firma del Trabajador</td>
+          </tr>
+          <!-- Fila con los datos del uniforme -->
+          <tr>
+            <td style="border: 1px solid #000; padding: 8px; text-align: center;">1</td>
+            <td style="border: 1px solid #000; padding: 8px;">${delivery.uniform_type}</td>
+            <td style="border: 1px solid #000; padding: 8px;">${delivery.condition}</td>
+            <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 8px; text-align: center;">${delivery.quantity}</td>
+            <td style="border: 1px solid #000; padding: 8px; text-align: center;">${new Date(delivery.delivery_date).toLocaleDateString('es-AR')}</td>
+            <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+          </tr>
+          <!-- Filas vacías para completar la tabla (hasta 20 filas) -->
+          ${Array.from({length: 19}, (_, i) => `
+            <tr>
+              <td style="border: 1px solid #000; padding: 8px; text-align: center;">${i + 2}</td>
+              <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 8px;">&nbsp;</td>
+            </tr>
+          `).join('')}
+        </table>
+        
+        <!-- Observaciones -->
+        <div style="border: 1px solid #000; padding: 10px;">
+          <strong>Observaciones:</strong>
+          <div style="margin-top: 5px; min-height: 50px;">
+            ${delivery.notes || ''}
           </div>
-          <div style="text-align: center; border-top: 1px solid #000; padding-top: 5px; width: 200px;">
-            <p>Firma RRHH</p>
-          </div>
-        </div>
-        
-        <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #6b7280;">
-          <p>Documento generado el ${new Date().toLocaleDateString('es-AR')} a las ${new Date().toLocaleTimeString('es-AR')}</p>
         </div>
       </div>
     `;
 
     const opt = {
-      margin: 1,
-      filename: `constancia-uniforme-${delivery.employeeName?.replace(/\s+/g, '-')}-${delivery.id}.pdf`,
+      margin: [0.3, 0.3, 0.3, 0.3],
+      filename: `constancia-entrega-${delivery.employeeName?.replace(/\s+/g, '-')}-${delivery.id}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      html2canvas: { 
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: true
+      },
+      jsPDF: { 
+        unit: 'in', 
+        format: 'a4', 
+        orientation: 'portrait' 
+      }
     };
 
     html2pdf().set(opt).from(content).save();

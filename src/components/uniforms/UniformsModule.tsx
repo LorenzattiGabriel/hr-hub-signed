@@ -177,92 +177,92 @@ const UniformsModule = () => {
     const puesto = employee?.puesto || '';
     
     const content = `
-      <div style="font-family: Arial, sans-serif; padding: 15px; max-width: 1200px; font-size: 12px;">
+      <div style="font-family: Arial, sans-serif; padding: 8px; max-width: 1100px; font-size: 10px;">
         <!-- Encabezado -->
-        <div style="text-align: center; margin-bottom: 15px; border: 2px solid #000; padding: 8px;">
-          <h2 style="margin: 0; font-size: 16px; font-weight: bold;">CONSTANCIA DE ENTREGA DE ROPA DE TRABAJO Y ELEMENTOS DE PROTECCIÓN PERSONAL</h2>
-          <p style="margin: 2px 0; font-size: 11px;">(Resolución S.R.T. Nº 299/11)</p>
+        <div style="text-align: center; margin-bottom: 8px; border: 2px solid #000; padding: 4px;">
+          <h2 style="margin: 0; font-size: 12px; font-weight: bold;">CONSTANCIA DE ENTREGA DE ROPA DE TRABAJO Y ELEMENTOS DE PROTECCIÓN PERSONAL</h2>
+          <p style="margin: 1px 0; font-size: 9px;">(Resolución S.R.T. Nº 299/11)</p>
         </div>
         
         <!-- Datos de la empresa -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #000;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; border: 1px solid #000; font-size: 9px;">
           <tr>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; width: 12%; background-color: #f0f0f0;">Razón social:</td>
-            <td style="border: 1px solid #000; padding: 5px; width: 28%;">Avícola "La Paloma"</td>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; width: 10%; background-color: #f0f0f0;">C.U.I.T.:</td>
-            <td style="border: 1px solid #000; padding: 5px; width: 20%;">20-24088189-7</td>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; width: 10%; background-color: #f0f0f0;">C.P.:</td>
-            <td style="border: 1px solid #000; padding: 5px; width: 20%;">5127</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; width: 12%; background-color: #f0f0f0;">Razón social:</td>
+            <td style="border: 1px solid #000; padding: 2px; width: 28%;">Avícola "La Paloma"</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; width: 10%; background-color: #f0f0f0;">C.U.I.T.:</td>
+            <td style="border: 1px solid #000; padding: 2px; width: 20%;">20-24088189-7</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; width: 10%; background-color: #f0f0f0;">C.P.:</td>
+            <td style="border: 1px solid #000; padding: 2px; width: 20%;">5127</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; background-color: #f0f0f0;">Dirección:</td>
-            <td style="border: 1px solid #000; padding: 5px;">Avda. José Hernández 90</td>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; background-color: #f0f0f0;">Localidad:</td>
-            <td style="border: 1px solid #000; padding: 5px;">Río Primero</td>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; background-color: #f0f0f0;">Provincia:</td>
-            <td style="border: 1px solid #000; padding: 5px;">Córdoba</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">Dirección:</td>
+            <td style="border: 1px solid #000; padding: 2px;">Avda. José Hernández 90</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">Localidad:</td>
+            <td style="border: 1px solid #000; padding: 2px;">Río Primero</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">Provincia:</td>
+            <td style="border: 1px solid #000; padding: 2px;">Córdoba</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; background-color: #f0f0f0;">Nombre y apellido del trabajador:</td>
-            <td style="border: 1px solid #000; padding: 5px;">${delivery.employeeName}</td>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; background-color: #f0f0f0;">D.N.I.:</td>
-            <td style="border: 1px solid #000; padding: 5px;">${delivery.employeeDni}</td>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; background-color: #f0f0f0;">Legajo nº:</td>
-            <td style="border: 1px solid #000; padding: 5px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">Nombre y apellido del trabajador:</td>
+            <td style="border: 1px solid #000; padding: 2px;">${delivery.employeeName}</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">D.N.I.:</td>
+            <td style="border: 1px solid #000; padding: 2px;">${delivery.employeeDni}</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">Legajo nº:</td>
+            <td style="border: 1px solid #000; padding: 2px;">&nbsp;</td>
           </tr>
           <tr>
-            <td style="border: 1px solid #000; padding: 5px; font-weight: bold; background-color: #f0f0f0;">Puesto/s de trabajo:</td>
-            <td colspan="5" style="border: 1px solid #000; padding: 5px;">${puesto}</td>
+            <td style="border: 1px solid #000; padding: 2px; font-weight: bold; background-color: #f0f0f0;">Puesto/s de trabajo:</td>
+            <td colspan="5" style="border: 1px solid #000; padding: 2px;">${puesto}</td>
           </tr>
         </table>
         
         <!-- Solo título de elementos de protección -->
-        <div style="background-color: #000; color: white; text-align: center; padding: 8px; font-weight: bold; margin-bottom: 15px; font-size: 14px;">
+        <div style="background-color: #000; color: white; text-align: center; padding: 4px; font-weight: bold; margin-bottom: 8px; font-size: 10px;">
           ELEMENTOS DE PROTECCIÓN PERSONAL E INDUMENTARIA, NECESARIOS PARA EL TRABAJADOR SEGÚN PUESTO DE TRABAJO
         </div>
         
         <!-- Tabla principal de productos entregados -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #000;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; border: 1px solid #000; font-size: 9px;">
           <tr style="background-color: #f0f0f0;">
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 6%;">Nº</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 22%;">Producto</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 16%;">Tipo / Modelo</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 14%;">Marca</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 12%;">Certificación</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 8%;">Cantidad</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 12%;">Fecha de entrega</td>
-            <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; width: 10%;">Firma del Trabajador</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; width: 6%;">Nº</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; width: 22%;">Producto</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; width: 16%;">Tipo / Modelo</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; width: 14%;">Marca</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; width: 12%;">Certificación</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; width: 8%;">Cantidad</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; width: 12%;">Fecha de entrega</td>
+            <td style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; width: 10%;">Firma del Trabajador</td>
           </tr>
           <!-- Fila con los datos del uniforme entregado -->
           <tr>
-            <td style="border: 1px solid #000; padding: 12px; text-align: center;">1</td>
-            <td style="border: 1px solid #000; padding: 12px;">${delivery.uniform_type}</td>
-            <td style="border: 1px solid #000; padding: 12px;">${delivery.condition}</td>
-            <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
-            <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
-            <td style="border: 1px solid #000; padding: 12px; text-align: center;">${delivery.quantity}</td>
-            <td style="border: 1px solid #000; padding: 12px; text-align: center;">${new Date(delivery.delivery_date).toLocaleDateString('es-AR')}</td>
-            <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 6px; text-align: center;">1</td>
+            <td style="border: 1px solid #000; padding: 6px;">${delivery.uniform_type}</td>
+            <td style="border: 1px solid #000; padding: 6px;">${delivery.condition}</td>
+            <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
+            <td style="border: 1px solid #000; padding: 6px; text-align: center;">${delivery.quantity}</td>
+            <td style="border: 1px solid #000; padding: 6px; text-align: center;">${new Date(delivery.delivery_date).toLocaleDateString('es-AR')}</td>
+            <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
           </tr>
-          <!-- Filas vacías para completar -->
-          ${Array.from({length: 9}, (_, i) => `
+          <!-- Filas vacías reducidas para que quepa en una página -->
+          ${Array.from({length: 6}, (_, i) => `
             <tr>
-              <td style="border: 1px solid #000; padding: 12px; text-align: center;">${i + 2}</td>
-              <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
-              <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
-              <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
-              <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
-              <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
-              <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
-              <td style="border: 1px solid #000; padding: 12px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 6px; text-align: center;">${i + 2}</td>
+              <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
+              <td style="border: 1px solid #000; padding: 6px;">&nbsp;</td>
             </tr>
           `).join('')}
         </table>
         
         <!-- Observaciones -->
-        <div style="border: 1px solid #000; padding: 15px;">
+        <div style="border: 1px solid #000; padding: 8px; font-size: 9px;">
           <strong>Observaciones:</strong>
-          <div style="margin-top: 8px; min-height: 50px;">
+          <div style="margin-top: 4px; min-height: 30px;">
             ${delivery.notes || ''}
           </div>
         </div>
@@ -270,11 +270,11 @@ const UniformsModule = () => {
     `;
 
     const opt = {
-      margin: [0.3, 0.3, 0.3, 0.3],
+      margin: [0.2, 0.2, 0.2, 0.2],
       filename: `constancia-entrega-${delivery.employeeName?.replace(/\s+/g, '-')}-${delivery.id}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { 
-        scale: 1.5,
+        scale: 1.2,
         useCORS: true,
         allowTaint: true
       },

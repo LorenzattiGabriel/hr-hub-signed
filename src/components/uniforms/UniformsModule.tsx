@@ -236,8 +236,8 @@ const UniformsModule = () => {
             <td style="border: 2px solid #000; padding: 12px; text-align: center; font-size: 12px;">1</td>
             <td style="border: 2px solid #000; padding: 12px; font-size: 12px;">${delivery.uniform_type}</td>
             <td style="border: 2px solid #000; padding: 12px; font-size: 12px;">${delivery.condition}</td>
-            <td style="border: 2px solid #000; padding: 12px;">&nbsp;</td>
-            <td style="border: 2px solid #000; padding: 12px;">&nbsp;</td>
+            <td style="border: 2px solid #000; padding: 12px; font-size: 12px;">GENERICO</td>
+            <td style="border: 2px solid #000; padding: 12px; font-size: 12px;">SI</td>
             <td style="border: 2px solid #000; padding: 12px; text-align: center; font-size: 12px;">${delivery.quantity}</td>
             <td style="border: 2px solid #000; padding: 12px; text-align: center; font-size: 12px;">${new Date(delivery.delivery_date).toLocaleDateString('es-AR')}</td>
             <td style="border: 2px solid #000; padding: 12px;">&nbsp;</td>

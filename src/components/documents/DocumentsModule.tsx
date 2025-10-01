@@ -73,6 +73,7 @@ const DocumentsModule = () => {
       const tempDiv = window.document.createElement('div');
       tempDiv.style.position = 'absolute';
       tempDiv.style.left = '-9999px';
+      tempDiv.style.width = '210mm';
       window.document.body.appendChild(tempDiv);
 
       // Renderizar el componente según el tipo de documento
@@ -288,6 +289,9 @@ const DocumentsModule = () => {
         `;
       }
 
+      // Esperar un momento para que el HTML se renderice completamente
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const options = {
         margin: 0,
         filename: `${docRecord.document_type}_${employee.dni}_${docRecord.generated_date}.pdf`,
@@ -295,7 +299,8 @@ const DocumentsModule = () => {
         html2canvas: {
           scale: 2,
           useCORS: true,
-          letterRendering: true
+          letterRendering: true,
+          logging: false
         },
         jsPDF: {
           unit: 'mm',

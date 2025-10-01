@@ -14,7 +14,8 @@ import {
   Shirt,
   DollarSign,
   ScrollText,
-  UserCheck
+  UserCheck,
+  FileText
 } from "lucide-react";
 
 interface SidebarProps {
@@ -104,6 +105,13 @@ const modules = [
     name: "Visitas Consultores",
     icon: UserCheck,
     description: "Registro de Consultas",
+    badge: ""
+  },
+  {
+    id: "documents",
+    name: "Documentos",
+    icon: FileText,
+    description: "Gestión de Documentos",
     badge: ""
   },
 ];

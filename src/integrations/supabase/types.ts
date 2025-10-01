@@ -251,6 +251,45 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          created_at: string
+          document_content: string | null
+          document_type: string
+          employee_id: string
+          generated_date: string
+          id: string
+          observations: string | null
+          signed_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          document_content?: string | null
+          document_type: string
+          employee_id: string
+          generated_date: string
+          id?: string
+          observations?: string | null
+          signed_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          document_content?: string | null
+          document_type?: string
+          employee_id?: string
+          generated_date?: string
+          id?: string
+          observations?: string | null
+          signed_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       employees: {
         Row: {
           alergias: string | null

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import html2pdf from "html2pdf.js";
+import ConsentimientoDatosBiometricos from "./templates/ConsentimientoDatosBiometricos";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +26,7 @@ const DocumentsModule = () => {
 
   const documentTypes = [
     { value: "reglamento_interno", label: "Reglamento Interno" },
-    { value: "consentimiento_datos_biometricos", label: "Consentimiento de Datos Biométricos" },
+    { value: "consentimiento_datos_biometricos", label: "Constancia de Consentimiento para Uso de Cámaras de Vigilancia y Datos Biométricos" },
   ];
 
   const filteredDocuments = documents.filter(doc => {
@@ -51,11 +53,139 @@ const DocumentsModule = () => {
     await deleteDocument(documentId);
   };
 
-  const handleDownloadDocument = (document: any) => {
-    toast({
-      title: "Descarga de documento",
-      description: "La funcionalidad de descarga estará disponible cuando se carguen las plantillas",
-    });
+  const handleDownloadDocument = async (document: any) => {
+    try {
+      // Buscar el empleado para obtener sus datos completos
+      const employee = activeEmployees.find(e => e.id === document.employee_id);
+      if (!employee) {
+        toast({
+          title: "Error",
+          description: "No se encontraron los datos del empleado",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Crear un div temporal para renderizar el documento
+      const tempDiv = document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      document.body.appendChild(tempDiv);
+
+      // Renderizar el componente según el tipo de documento
+      const employeeName = `${employee.nombres} ${employee.apellidos}`;
+      const formattedDate = new Date(document.generated_date).toLocaleDateString('es-AR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+
+      if (document.document_type === 'consentimiento_datos_biometricos') {
+        tempDiv.innerHTML = `
+          <div style="width: 210mm; min-height: 297mm; margin: 0 auto; font-family: Arial, sans-serif; background: white; color: black; padding: 48px;">
+            <h1 style="text-align: center; font-size: 20px; font-weight: bold; text-transform: uppercase; margin-bottom: 32px;">
+              CONSTANCIA DE CONSENTIMIENTO PARA USO DE CÁMARAS DE VIGILANCIA Y DATOS BIOMÉTRICOS
+            </h1>
+            <p style="margin-bottom: 16px;"><strong>Fecha:</strong> ${formattedDate}</p>
+            <p style="text-align: justify; line-height: 1.6; margin-bottom: 24px;">
+              En la ciudad de Córdoba Capital, comparece el/la trabajador/a <strong>${employeeName}</strong>, 
+              DNI Nº <strong>${employee.dni}</strong>, con domicilio en <strong>${employee.direccion || 'Sin dirección registrada'}</strong>, 
+              quien manifiesta prestar su consentimiento expreso en los términos de la Ley de Protección de Datos Personales N° 25.326 
+              y normativa laboral aplicable.
+            </p>
+            <h2 style="font-size: 18px; font-weight: bold; margin-top: 32px; margin-bottom: 16px;">1. Cámaras de Vigilancia</h2>
+            <p style="text-align: justify; line-height: 1.6; margin-bottom: 16px;">
+              El/la trabajador/a declara haber sido informado/a de la existencia de cámaras de seguridad instaladas en las instalaciones 
+              de la empresa Avícola La Paloma (en adelante "la Empresa"), cuya finalidad exclusiva es la prevención de riesgos, 
+              seguridad de las personas, resguardo de bienes materiales y control del cumplimiento de normas laborales.
+            </p>
+            <ul style="margin-left: 32px; margin-bottom: 24px;">
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Las cámaras se encuentran ubicadas en espacios comunes y áreas de trabajo, sin invadir espacios privados.
+              </li>
+              <li style="text-align: justify; line-height: 1.6;">
+                Las imágenes captadas podrán ser utilizadas como medio de prueba en caso de ser necesario y se almacenarán 
+                por un período limitado conforme a la política interna de la Empresa.
+              </li>
+            </ul>
+            <h2 style="font-size: 18px; font-weight: bold; margin-top: 32px; margin-bottom: 16px;">2. Datos Biométricos – Registro de Huella Digital</h2>
+            <p style="text-align: justify; line-height: 1.6; margin-bottom: 16px;">
+              El/la trabajador/a presta consentimiento para la recolección y tratamiento de su dato biométrico (huella digital) con la finalidad de:
+            </p>
+            <ul style="margin-left: 32px; margin-bottom: 24px;">
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Registrar su asistencia y puntualidad mediante el reloj biométrico implementado por la Empresa.
+              </li>
+              <li style="text-align: justify; line-height: 1.6;">
+                Garantizar la correcta administración de la jornada laboral.
+              </li>
+            </ul>
+            <p style="text-align: justify; line-height: 1.6; margin-bottom: 24px;">
+              Los datos biométricos serán tratados con carácter estrictamente confidencial, almacenados en soportes digitales seguros 
+              y utilizados únicamente para la finalidad descripta. No serán cedidos a terceros, salvo obligación legal.
+            </p>
+            <h2 style="font-size: 18px; font-weight: bold; margin-top: 32px; margin-bottom: 16px;">3. Derechos del Trabajador/a</h2>
+            <p style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">El/la trabajador/a reconoce que:</p>
+            <div style="page-break-after: always;"></div>
+            <ul style="margin-left: 32px; margin-top: 24px; margin-bottom: 32px;">
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Puede ejercer en cualquier momento sus derechos de acceso, rectificación, actualización o supresión de los datos 
+                conforme lo establece la Ley N° 25.326.
+              </li>
+              <li style="text-align: justify; line-height: 1.6;">
+                Su consentimiento puede ser revocado mediante notificación fehaciente a la Empresa, sin efectos retroactivos 
+                sobre el tratamiento ya realizado.
+              </li>
+            </ul>
+            <div style="margin-top: 64px;">
+              <div style="margin-bottom: 48px;">
+                <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 24px;">Firma del Trabajador/a</h3>
+                <p style="margin-bottom: 16px;">Nombre y Apellido: _________________________________</p>
+                <p>DNI: _________________________________</p>
+              </div>
+              <div>
+                <h3 style="font-size: 16px; font-weight: bold; margin-bottom: 24px;">Firma de la Empresa</h3>
+                <p style="margin-bottom: 16px;">Representante: _________________________________</p>
+                <p>Cargo: _________________________________</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      const options = {
+        margin: 0,
+        filename: `${document.document_type}_${employee.dni}_${document.generated_date}.pdf`,
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true
+        },
+        jsPDF: {
+          unit: 'mm',
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      };
+
+      await html2pdf().set(options).from(tempDiv).save();
+      
+      // Limpiar
+      document.body.removeChild(tempDiv);
+
+      toast({
+        title: "PDF descargado",
+        description: "El documento se ha descargado exitosamente",
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo generar el PDF",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewDocument = (document: any) => {

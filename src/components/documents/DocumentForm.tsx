@@ -5,8 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, FileText, Download } from "lucide-react";
+import { ArrowLeft, FileText, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import DocumentPreview from "./DocumentPreview";
 
 interface DocumentFormProps {
   onBack: () => void;
@@ -24,10 +25,11 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
   });
 
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const documentTypes = [
     { value: "reglamento_interno", label: "Reglamento Interno" },
-    { value: "consentimiento_datos_biometricos", label: "Constancia de Consentimiento de Vigilancia y Tratamiento de Datos Biométricos" },
+    { value: "consentimiento_datos_biometricos", label: "Constancia de Consentimiento para Uso de Cámaras de Vigilancia y Datos Biométricos" },
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -84,14 +86,26 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
       return;
     }
 
-    toast({
-      title: "Vista previa",
-      description: "Funcionalidad de vista previa en desarrollo. Las plantillas se cargarán próximamente.",
-    });
+    setShowPreview(true);
+  };
+
+  const handleConfirmDocument = async () => {
+    await handleSubmit();
+    setShowPreview(false);
   };
 
   return (
-    <div className="space-y-6">
+    <>
+      {showPreview && selectedEmployee && (
+        <DocumentPreview
+          documentType={formData.document_type}
+          employeeData={selectedEmployee}
+          generatedDate={formData.generated_date}
+          onClose={() => setShowPreview(false)}
+          onConfirm={handleConfirmDocument}
+        />
+      )}
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <Button variant="ghost" size="icon" onClick={onBack}>
@@ -103,13 +117,13 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
           </div>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline" onClick={generatePreview}>
-            <FileText className="h-4 w-4 mr-2" />
-            Vista Previa
-          </Button>
-          <Button onClick={handleSubmit}>
-            <Download className="h-4 w-4 mr-2" />
-            Generar Documento
+          <Button 
+            variant="outline" 
+            onClick={generatePreview}
+            disabled={!selectedEmployee || !formData.document_type}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            Vista Previa y Generar
           </Button>
         </div>
       </div>
@@ -208,6 +222,7 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 };
 

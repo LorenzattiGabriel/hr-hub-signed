@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { createRoot } from "react-dom/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, X } from "lucide-react";
@@ -38,26 +39,77 @@ const DocumentPreview = ({
   });
 
   const handleDownloadPDF = async () => {
-    if (!documentRef.current) return;
-
     try {
+      // Crear div temporal con el documento
+      const tempDiv = window.document.createElement('div');
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.width = '210mm';
+      window.document.body.appendChild(tempDiv);
+
+      const root = createRoot(tempDiv);
+
+      // Renderizar el template correspondiente
+      if (documentType === 'consentimiento_datos_biometricos') {
+        root.render(
+          <ConsentimientoDatosBiometricos
+            employeeName={employeeName}
+            employeeDni={employeeData.dni}
+            employeeAddress={employeeData.direccion || 'Sin dirección registrada'}
+            date={formattedDate}
+          />
+        );
+      } else if (documentType === 'reglamento_interno') {
+        root.render(
+          <ReglamentoInterno
+            employeeName={employeeName}
+            date={formattedDate}
+          />
+        );
+      }
+
+      // Esperar renderizado completo
+      await new Promise(res => requestAnimationFrame(() => setTimeout(res, 100)));
+
       const options = {
-        margin: 0,
+        margin: [10, 10, 10, 10],
         filename: `${documentType}_${employeeData.dni}_${generatedDate}.pdf`,
-        image: { type: "jpeg", quality: 1 },
+        image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
           scale: 2,
           useCORS: true,
           letterRendering: true,
+          logging: false,
+          scrollY: 0,
+          scrollX: 0,
+          width: 794,
+          windowWidth: 794,
         },
         jsPDF: {
-          unit: "mm",
-          format: "a4",
-          orientation: "portrait",
+          unit: 'mm',
+          format: 'a4',
+          orientation: 'portrait',
+          compress: true,
         },
+        pagebreak: { mode: ['css', 'legacy'] },
       };
 
-      await html2pdf().set(options).from(documentRef.current).save();
+      // Generar PDF y forzar descarga
+      const worker = (html2pdf as any)().from(tempDiv).set(options).toPdf();
+      const pdf = await worker.get('pdf');
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = options.filename;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      // Limpiar
+      root.unmount();
+      if (window.document.body.contains(tempDiv)) {
+        window.document.body.removeChild(tempDiv);
+      }
 
       toast({
         title: "PDF descargado",

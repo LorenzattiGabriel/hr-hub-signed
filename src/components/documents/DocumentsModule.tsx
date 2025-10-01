@@ -20,7 +20,7 @@ const DocumentsModule = () => {
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
-  const { documents, loading, addDocument, deleteDocument } = useDocuments();
+  const { documents, loading, addDocument, updateDocument, deleteDocument } = useDocuments();
   const [previewDoc, setPreviewDoc] = useState<any | null>(null);
 
   const [view, setView] = useState<"list" | "form">("list");
@@ -55,6 +55,17 @@ const DocumentsModule = () => {
 
   const handleDeleteDocument = async (documentId: string) => {
     await deleteDocument(documentId);
+  };
+
+  const handleToggleDocumentStatus = async (document: any) => {
+    const newStatus = document.status === 'generado' ? 'firmado' : 'generado';
+    const updateData: any = { status: newStatus };
+    
+    if (newStatus === 'firmado' && !document.signed_date) {
+      updateData.signed_date = new Date().toISOString().split('T')[0];
+    }
+    
+    await updateDocument(document.id, updateData);
   };
 
   const handleDownloadDocument = async (docRecord: any) => {
@@ -340,11 +351,21 @@ const DocumentsModule = () => {
                         </span>
                       </td>
                       <td className="py-4 px-4">
-                        <Badge 
-                          variant={document.status === "firmado" ? "default" : "secondary"}
+                        <button
+                          onClick={() => handleToggleDocumentStatus(document)}
+                          className="cursor-pointer"
                         >
-                          {document.status === "firmado" ? "Firmado" : "Generado"}
-                        </Badge>
+                          <Badge 
+                            variant={document.status === "firmado" ? "default" : "secondary"}
+                            className="hover:opacity-80 transition-opacity"
+                          >
+                            {document.status === "firmado" ? (
+                              <><CheckCircle className="h-3 w-3 mr-1 inline" />Firmado</>
+                            ) : (
+                              <><Clock className="h-3 w-3 mr-1 inline" />Generado</>
+                            )}
+                          </Badge>
+                        </button>
                       </td>
                       <td className="py-4 px-4">
                         <span className="text-sm text-foreground">

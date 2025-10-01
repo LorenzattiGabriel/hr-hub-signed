@@ -226,57 +226,6 @@ const DocumentsModule = () => {
         </Button>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Total Generados</p>
-                <p className="text-3xl font-bold text-foreground">
-                  {documents.length}
-                </p>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Pendientes de Firma</p>
-                <p className="text-3xl font-bold text-foreground">
-                  {documents.filter(d => d.status === "generado").length}
-                </p>
-              </div>
-              <div className="p-3 bg-warning/10 rounded-lg">
-                <Clock className="h-6 w-6 text-warning" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-foreground/70">Firmados</p>
-                <p className="text-3xl font-bold text-foreground">
-                  {documents.filter(d => d.status === "firmado").length}
-                </p>
-              </div>
-              <div className="p-3 bg-success/10 rounded-lg">
-                <CheckCircle className="h-6 w-6 text-success" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Search and Filters */}
       <Card>
         <CardHeader>

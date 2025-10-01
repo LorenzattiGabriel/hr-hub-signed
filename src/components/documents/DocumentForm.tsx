@@ -21,7 +21,6 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
     employee_id: "",
     generated_date: new Date().toISOString().split('T')[0],
     document_type: "",
-    observations: "",
   });
 
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
@@ -180,17 +179,6 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="observations">Observaciones</Label>
-              <Textarea
-                id="observations"
-                placeholder="Observaciones adicionales..."
-                value={formData.observations}
-                onChange={(e) => handleInputChange("observations", e.target.value)}
-                rows={4}
-              />
             </div>
           </div>
 

@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import html2pdf from "html2pdf.js";
 import ConsentimientoDatosBiometricos from "./templates/ConsentimientoDatosBiometricos";
+import ReglamentoInterno from "./templates/ReglamentoInterno";
 import DocumentPreview from "./DocumentPreview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -150,6 +151,138 @@ const DocumentsModule = () => {
                 <p style="margin-bottom: 16px;">Representante: _________________________________</p>
                 <p>Cargo: _________________________________</p>
               </div>
+            </div>
+          </div>
+        `;
+      } else if (docRecord.document_type === 'reglamento_interno') {
+        tempDiv.innerHTML = `
+          <div style="width: 210mm; min-height: 297mm; margin: 0 auto; font-family: Arial, sans-serif; background: white; color: black; padding: 48px;">
+            <h1 style="text-align: center; font-size: 24px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;">
+              REGLAMENTO INTERNO
+            </h1>
+            <h2 style="text-align: center; font-size: 20px; font-weight: bold; text-transform: uppercase; margin-bottom: 32px;">
+              AVÍCOLA LA PALOMA
+            </h2>
+            <p style="margin-bottom: 8px;"><strong>Fecha:</strong> ${formattedDate}</p>
+            <p style="margin-bottom: 24px;"><strong>Nombre del empleado:</strong> ${employeeName}</p>
+            <p style="text-align: justify; line-height: 1.6; margin-bottom: 24px;">
+              Este reglamento tiene por objetivo establecer normas claras de convivencia, obligaciones, derechos y procedimientos 
+              que garanticen un ambiente de trabajo ordenado, seguro y respetuoso para todos.
+            </p>
+            <h3 style="font-size: 18px; font-weight: bold; margin-top: 24px; margin-bottom: 16px;">1. Obligaciones y deberes de los empleados</h3>
+            <ul style="margin-left: 32px; margin-bottom: 24px;">
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Cumplir con las obligaciones propias del puesto de trabajo, conforme a los principios de buena fe, diligencia y responsabilidad.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Mantener el orden y aseo de los lugares de acceso común y convivencia con compañeros de trabajo.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Cuidar y conservar en condiciones óptimas las herramientas, maquinarias, elementos de limpieza y demás materiales de trabajo.
+              </li>
+              <li style="text-align: justify; line-height: 1.6;">
+                Cumplir y respetar las medidas de seguridad e higiene establecidas por la empresa.
+              </li>
+            </ul>
+            <h3 style="font-size: 18px; font-weight: bold; margin-top: 24px; margin-bottom: 16px;">2. Derechos de los empleados</h3>
+            <ul style="margin-left: 32px; margin-bottom: 24px;">
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Desempeñarse en un ambiente sano, seguro y libre de riesgos innecesarios.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Conocer los riesgos inherentes a su puesto de trabajo.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Percibir una retribución justa acorde a las tareas realizadas.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Recibir los elementos de trabajo y de protección personal necesarios según la tarea a realizar.
+              </li>
+              <li style="text-align: justify; line-height: 1.6;">
+                Acceder al descanso vacacional anual conforme a la normativa vigente.
+              </li>
+            </ul>
+            <h3 style="font-size: 18px; font-weight: bold; margin-top: 24px; margin-bottom: 16px;">3. Normas de trabajo dentro de la granja</h3>
+            <ul style="margin-left: 32px; margin-bottom: 24px;">
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Queda prohibido fumar en las zonas de trabajo.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                No se podrá utilizar el teléfono celular en horario laboral, salvo para fines estrictamente laborales.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Mantener en todo momento un trato de respeto y educación hacia compañeros, superiores y público en general.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Presentarse al trabajo con higiene personal adecuada y con el uniforme limpio y en buen estado.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Queda prohibido jugar con herramientas de trabajo o darles un uso indebido.
+              </li>
+              <li style="text-align: justify; line-height: 1.6;">
+                Es obligatorio el uso de gafas de seguridad cuando la tarea lo requiera.
+              </li>
+            </ul>
+            <div style="page-break-after: always;"></div>
+            <h3 style="font-size: 18px; font-weight: bold; margin-top: 24px; margin-bottom: 16px;">4. Prohibiciones</h3>
+            <ul style="margin-left: 32px; margin-bottom: 24px;">
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Faltar al trabajo sin causa justificada o sin autorización previa.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Sustraer de la empresa herramientas, insumos, materia prima o productos elaborados.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Presentarse al trabajo en estado de embriaguez.
+              </li>
+              <li style="text-align: justify; line-height: 1.6;">
+                Presentarse bajo los efectos de narcóticos o drogas enervantes, salvo prescripción médica debidamente acreditada.
+              </li>
+            </ul>
+            <h3 style="font-size: 18px; font-weight: bold; margin-top: 24px; margin-bottom: 16px;">5. Certificados y ausencias</h3>
+            <ul style="margin-left: 32px; margin-bottom: 24px;">
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                En caso de enfermedad, el trabajador deberá avisar con al menos 2 horas de anticipación sobre su ausencia, 
+                salvo situaciones de urgencia.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                El certificado médico deberá ser cargado en el formulario de ausencias dentro de las 24 horas de producida la falta.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Las vacaciones deberán solicitarse en el mes de octubre indicando las fechas de preferencia. La empresa, en base 
+                a la demanda productiva y organización interna, asignará los períodos entre noviembre y abril.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                La falta de presentación del certificado en tiempo y forma dará lugar al descuento del día no trabajado. 
+                En caso de reincidencia, el trabajador podrá recibir un apercibimiento y, si la conducta persiste, suspensión.
+              </li>
+              <li style="text-align: justify; line-height: 1.6;">
+                El incumplimiento reiterado de este reglamento podrá derivar en sanciones disciplinarias según la gravedad del caso.
+              </li>
+            </ul>
+            <h3 style="font-size: 18px; font-weight: bold; margin-top: 24px; margin-bottom: 16px;">6. Sanciones</h3>
+            <ul style="margin-left: 32px; margin-bottom: 24px;">
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Apercibimiento verbal o escrito.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Descuento de haberes en los casos que corresponda.
+              </li>
+              <li style="text-align: justify; line-height: 1.6; margin-bottom: 8px;">
+                Suspensión según la gravedad y reiteración de las faltas.
+              </li>
+              <li style="text-align: justify; line-height: 1.6;">
+                En casos extremos y de gravedad, la empresa podrá evaluar la extinción de la relación laboral conforme 
+                a la legislación vigente.
+              </li>
+            </ul>
+            <p style="text-align: justify; line-height: 1.6; margin-bottom: 32px;">
+              Este Reglamento Interno entra en vigencia a partir de su comunicación a los empleados y deberá ser conocido, 
+              respetado y cumplido por todos los integrantes de Avícola La Paloma.
+            </p>
+            <div style="margin-top: 48px;">
+              <p style="margin-bottom: 32px;"><strong>Firma Empleado</strong></p>
+              <p>Aclaración: _________________________________</p>
             </div>
           </div>
         `;

@@ -5,6 +5,7 @@ import { Download, X } from "lucide-react";
 import html2pdf from "html2pdf.js";
 import { useToast } from "@/hooks/use-toast";
 import ConsentimientoDatosBiometricos from "./templates/ConsentimientoDatosBiometricos";
+import ReglamentoInterno from "./templates/ReglamentoInterno";
 
 interface DocumentPreviewProps {
   documentType: string;
@@ -80,6 +81,14 @@ const DocumentPreview = ({
           employeeName={employeeName}
           employeeDni={employeeData.dni}
           employeeAddress={employeeData.direccion || "Sin dirección registrada"}
+          date={formattedDate}
+        />
+      );
+    } else if (documentType === "reglamento_interno") {
+      return (
+        <ReglamentoInterno
+          ref={documentRef}
+          employeeName={employeeName}
           date={formattedDate}
         />
       );

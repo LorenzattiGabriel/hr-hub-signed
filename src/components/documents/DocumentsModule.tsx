@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import html2pdf from "html2pdf.js";
 import ConsentimientoDatosBiometricos from "./templates/ConsentimientoDatosBiometricos";
+import DocumentPreview from "./DocumentPreview";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,7 @@ const DocumentsModule = () => {
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
   const { documents, loading, addDocument, deleteDocument } = useDocuments();
+  const [previewDoc, setPreviewDoc] = useState<any | null>(null);
 
   const [view, setView] = useState<"list" | "form">("list");
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,10 +55,10 @@ const DocumentsModule = () => {
     await deleteDocument(documentId);
   };
 
-  const handleDownloadDocument = async (document: any) => {
+  const handleDownloadDocument = async (docRecord: any) => {
     try {
       // Buscar el empleado para obtener sus datos completos
-      const employee = activeEmployees.find(e => e.id === document.employee_id);
+      const employee = activeEmployees.find(e => e.id === docRecord.employee_id);
       if (!employee) {
         toast({
           title: "Error",
@@ -67,20 +69,20 @@ const DocumentsModule = () => {
       }
 
       // Crear un div temporal para renderizar el documento
-      const tempDiv = document.createElement('div');
+      const tempDiv = window.document.createElement('div');
       tempDiv.style.position = 'absolute';
       tempDiv.style.left = '-9999px';
-      document.body.appendChild(tempDiv);
+      window.document.body.appendChild(tempDiv);
 
       // Renderizar el componente según el tipo de documento
       const employeeName = `${employee.nombres} ${employee.apellidos}`;
-      const formattedDate = new Date(document.generated_date).toLocaleDateString('es-AR', {
+      const formattedDate = new Date(docRecord.generated_date).toLocaleDateString('es-AR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
       });
 
-      if (document.document_type === 'consentimiento_datos_biometricos') {
+      if (docRecord.document_type === 'consentimiento_datos_biometricos') {
         tempDiv.innerHTML = `
           <div style="width: 210mm; min-height: 297mm; margin: 0 auto; font-family: Arial, sans-serif; background: white; color: black; padding: 48px;">
             <h1 style="text-align: center; font-size: 20px; font-weight: bold; text-transform: uppercase; margin-bottom: 32px;">
@@ -155,7 +157,7 @@ const DocumentsModule = () => {
 
       const options = {
         margin: 0,
-        filename: `${document.document_type}_${employee.dni}_${document.generated_date}.pdf`,
+        filename: `${docRecord.document_type}_${employee.dni}_${docRecord.generated_date}.pdf`,
         image: { type: 'jpeg', quality: 1 },
         html2canvas: {
           scale: 2,
@@ -172,7 +174,7 @@ const DocumentsModule = () => {
       await html2pdf().set(options).from(tempDiv).save();
       
       // Limpiar
-      document.body.removeChild(tempDiv);
+      window.document.body.removeChild(tempDiv);
 
       toast({
         title: "PDF descargado",
@@ -188,10 +190,27 @@ const DocumentsModule = () => {
     }
   };
 
-  const handleViewDocument = (document: any) => {
-    toast({
-      title: "Vista de documento",
-      description: "La vista detallada estará disponible cuando se carguen las plantillas",
+  const handleViewDocument = (docRecord: any) => {
+    // Encontrar los datos completos del empleado para la vista previa
+    const employee = activeEmployees.find(e => e.id === docRecord.employee_id);
+    if (!employee) {
+      toast({
+        title: "Error",
+        description: "No se encontraron los datos del empleado",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPreviewDoc({
+      documentType: docRecord.document_type,
+      employeeData: {
+        nombres: employee.nombres,
+        apellidos: employee.apellidos,
+        dni: employee.dni,
+        direccion: employee.direccion || "",
+      },
+      generatedDate: docRecord.generated_date,
     });
   };
 
@@ -394,6 +413,15 @@ const DocumentsModule = () => {
           )}
         </CardContent>
       </Card>
+      {previewDoc && (
+        <DocumentPreview
+          documentType={previewDoc.documentType}
+          employeeData={previewDoc.employeeData}
+          generatedDate={previewDoc.generatedDate}
+          onClose={() => setPreviewDoc(null)}
+          onConfirm={() => setPreviewDoc(null)}
+        />
+      )}
     </div>
   );
 };

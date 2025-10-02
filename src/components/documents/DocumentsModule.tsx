@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import html2pdf from "html2pdf.js";
 import { createRoot } from "react-dom/client";
+import { supabase } from "@/integrations/supabase/client";
 import ConsentimientoDatosBiometricos from "./templates/ConsentimientoDatosBiometricos";
 import ReglamentoInterno from "./templates/ReglamentoInterno";
 import DocumentPreview from "./DocumentPreview";
@@ -50,7 +51,11 @@ const DocumentsModule = () => {
   };
 
   const handleSaveDocument = async (documentData: any) => {
-    await addDocument(documentData);
+    const newDoc = await addDocument(documentData);
+    if (newDoc) {
+      // Generar y guardar el PDF inmediatamente
+      await generateAndUploadPDF(newDoc);
+    }
   };
 
   const handleDeleteDocument = async (documentId: string) => {
@@ -66,29 +71,26 @@ const DocumentsModule = () => {
     }
     
     await updateDocument(document.id, updateData);
+    
+    // Regenerar y actualizar el PDF cuando se firma
+    if (newStatus === 'firmado') {
+      await generateAndUploadPDF(document);
+    }
   };
 
-  const handleDownloadDocument = async (docRecord: any) => {
+  const generateAndUploadPDF = async (docRecord: any) => {
     try {
-      // Buscar el empleado para obtener sus datos completos
       const employee = activeEmployees.find(e => e.id === docRecord.employee_id);
       if (!employee) {
-        toast({
-          title: "Error",
-          description: "No se encontraron los datos del empleado",
-          variant: "destructive",
-        });
-        return;
+        throw new Error("Empleado no encontrado");
       }
 
-      // Crear un div temporal para renderizar el documento
       const tempDiv = window.document.createElement('div');
       tempDiv.style.position = 'absolute';
       tempDiv.style.left = '-9999px';
       tempDiv.style.width = '210mm';
       window.document.body.appendChild(tempDiv);
 
-      // Renderizar el componente según el tipo de documento
       const employeeName = `${employee.nombres} ${employee.apellidos}`;
       const formattedDate = new Date(docRecord.generated_date).toLocaleDateString('es-AR', {
         day: '2-digit',
@@ -96,7 +98,6 @@ const DocumentsModule = () => {
         year: 'numeric'
       });
 
-      // Renderizar con componentes React y descargar como PDF (fiable en iframes)
       const root = createRoot(tempDiv);
 
       if (docRecord.document_type === 'consentimiento_datos_biometricos') {
@@ -118,28 +119,19 @@ const DocumentsModule = () => {
       } else {
         root.unmount();
         window.document.body.removeChild(tempDiv);
-        toast({
-          title: "Tipo no soportado",
-          description: "No se pudo renderizar este documento",
-          variant: "destructive",
-        });
-        return;
+        throw new Error("Tipo de documento no soportado");
       }
 
-      // Esperar a que React renderice completamente el contenido
       await new Promise(resolve => {
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
-            setTimeout(resolve, 500); // Más tiempo para asegurar renderizado completo
+            setTimeout(resolve, 500);
           });
         });
       });
 
-      console.log('Documento renderizado, iniciando generación de PDF...');
-
       const options = {
         margin: [10, 10, 10, 10],
-        filename: `${docRecord.document_type}_${employee.dni}_${docRecord.generated_date}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
           scale: 2,
@@ -163,28 +155,89 @@ const DocumentsModule = () => {
       const worker = (html2pdf as any)().from(tempDiv).set(options).toPdf();
       const pdf = await worker.get('pdf');
       const blob = pdf.output('blob');
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = options.filename;
-      a.click();
-      URL.revokeObjectURL(url);
 
-      // Limpieza
+      // Subir a Supabase Storage
+      const fileName = `${docRecord.document_type}_${employee.dni}_${docRecord.generated_date}_${docRecord.id}.pdf`;
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(fileName, blob, {
+          contentType: 'application/pdf',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Actualizar el registro con la URL del PDF
+      await updateDocument(docRecord.id, { pdf_url: fileName });
+
       root.unmount();
       if (window.document.body.contains(tempDiv)) {
         window.document.body.removeChild(tempDiv);
       }
 
+      return fileName;
+    } catch (error) {
+      console.error('Error generating and uploading PDF:', error);
       toast({
-        title: "PDF descargado",
-        description: "El documento se ha descargado exitosamente",
+        title: "Error",
+        description: "No se pudo generar y guardar el PDF",
+        variant: "destructive",
       });
+      throw error;
+    }
+  };
 
-      return;
+  const handleDownloadDocument = async (docRecord: any) => {
+    try {
+      // Si existe pdf_url, descargar desde el bucket
+      if (docRecord.pdf_url) {
+        const { data, error } = await supabase.storage
+          .from('documents')
+          .download(docRecord.pdf_url);
+
+        if (error) throw error;
+
+        const url = URL.createObjectURL(data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = docRecord.pdf_url;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        toast({
+          title: "PDF descargado",
+          description: "El documento se ha descargado exitosamente",
+        });
+        return;
+      }
+
+      // Si no existe, generar y subir el PDF primero
+      const employee = activeEmployees.find(e => e.id === docRecord.employee_id);
+      if (!employee) {
+        toast({
+          title: "Error",
+          description: "No se encontraron los datos del empleado",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Generar el PDF y subirlo
+      const fileName = await generateAndUploadPDF(docRecord);
       
-      // Limpiar
-      window.document.body.removeChild(tempDiv);
+      // Descargar el archivo recién subido
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .download(fileName);
+
+      if (error) throw error;
+
+      const url = URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      a.click();
+      URL.revokeObjectURL(url);
 
       toast({
         title: "PDF descargado",

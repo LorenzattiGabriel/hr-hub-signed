@@ -260,6 +260,7 @@ export type Database = {
           generated_date: string
           id: string
           observations: string | null
+          pdf_url: string | null
           signed_date: string | null
           status: string
           updated_at: string
@@ -272,6 +273,7 @@ export type Database = {
           generated_date: string
           id?: string
           observations?: string | null
+          pdf_url?: string | null
           signed_date?: string | null
           status?: string
           updated_at?: string
@@ -284,6 +286,7 @@ export type Database = {
           generated_date?: string
           id?: string
           observations?: string | null
+          pdf_url?: string | null
           signed_date?: string | null
           status?: string
           updated_at?: string

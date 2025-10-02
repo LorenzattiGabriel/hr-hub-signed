@@ -11,6 +11,7 @@ export interface Document {
   document_content?: string;
   signed_date?: string;
   observations?: string;
+  pdf_url?: string;
   created_at: string;
   updated_at: string;
   // Datos del empleado

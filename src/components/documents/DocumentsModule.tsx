@@ -126,8 +126,16 @@ const DocumentsModule = () => {
         return;
       }
 
-      // Esperar al siguiente frame para asegurar renderizado completo
-      await new Promise(res => requestAnimationFrame(() => setTimeout(res, 100)));
+      // Esperar a que React renderice completamente el contenido
+      await new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setTimeout(resolve, 500); // Más tiempo para asegurar renderizado completo
+          });
+        });
+      });
+
+      console.log('Documento renderizado, iniciando generación de PDF...');
 
       const options = {
         margin: [10, 10, 10, 10],

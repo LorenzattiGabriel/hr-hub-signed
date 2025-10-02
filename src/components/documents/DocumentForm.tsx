@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, FileText, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DocumentPreview from "./DocumentPreview";
+import { generateAndUploadPDF } from "@/utils/pdfGenerator";
 
 interface DocumentFormProps {
   onBack: () => void;
@@ -50,17 +51,63 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
       return;
     }
 
-    const documentData = {
-      ...formData,
-      status: "generado",
-      document_content: generateDocumentContent(),
-    };
-
     try {
-      await onSave(documentData);
+      console.log('🚀 Creando documento y generando PDF...');
+      
+      // Primero crear el documento en la base de datos
+      const documentData = {
+        ...formData,
+        status: "generado",
+        document_content: generateDocumentContent(),
+      };
+
+      const savedDocument = await onSave(documentData);
+      console.log('✅ Documento guardado en BD');
+
+      // Si el documento se guardó exitosamente, generar el PDF
+      if (savedDocument?.id && selectedEmployee) {
+        console.log('🔄 Generando PDF para el documento:', savedDocument.id);
+        
+        const pdfResult = await generateAndUploadPDF({
+          documentType: formData.document_type,
+          employeeData: {
+            nombres: selectedEmployee.nombres,
+            apellidos: selectedEmployee.apellidos,
+            dni: selectedEmployee.dni,
+            direccion: selectedEmployee.direccion || '',
+          },
+          generatedDate: formData.generated_date,
+          documentId: savedDocument.id,
+        });
+
+        if (pdfResult.success && pdfResult.pdfUrl) {
+          console.log('✅ PDF generado y subido:', pdfResult.pdfUrl);
+          
+          // Actualizar el documento con la URL del PDF
+          // Nota: Esto requiere que onSave permita actualizar documentos existentes
+          // O que tengamos acceso directo a updateDocument desde useDocuments
+          
+          toast({
+            title: "Documento creado",
+            description: "El documento y su PDF se han generado exitosamente",
+          });
+        } else {
+          console.warn('⚠️ Error generando PDF:', pdfResult.error);
+          toast({
+            title: "Documento creado",
+            description: "El documento se creó pero el PDF se generará cuando se descargue",
+          });
+        }
+      }
+
       onBack();
     } catch (error) {
-      console.error('Error saving document:', error);
+      console.error('❌ Error saving document:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo crear el documento",
+        variant: "destructive",
+      });
     }
   };
 

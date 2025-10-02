@@ -16,6 +16,7 @@ import DocumentForm from "./DocumentForm";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useDocuments } from "@/hooks/useDocuments";
+import { generateAndUploadPDF, downloadPDFFromStorage, deletePDFFromStorage } from "@/utils/pdfGenerator";
 
 const DocumentsModule = () => {
   const { toast } = useToast();

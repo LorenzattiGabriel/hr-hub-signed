@@ -82,7 +82,7 @@ export const useDocuments = () => {
       });
 
       await fetchDocuments();
-      return data;
+      return data; // Retornar el documento creado
     } catch (error) {
       console.error('Error adding document:', error);
       toast({

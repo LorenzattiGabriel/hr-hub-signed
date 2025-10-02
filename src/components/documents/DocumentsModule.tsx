@@ -447,6 +447,17 @@ const DocumentsModule = () => {
                             <Eye className="h-3 w-3 mr-1" />
                             Ver
                           </Button>
+                          {!document.pdf_url && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => generateAndUploadPDF(document)}
+                              className="text-xs"
+                            >
+                              <FileText className="h-3 w-3 mr-1" />
+                              Generar
+                            </Button>
+                          )}
                           <Button 
                             variant="outline" 
                             size="sm"

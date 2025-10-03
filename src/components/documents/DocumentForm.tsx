@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, FileText, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DocumentPreview from "./DocumentPreview";
-import { generateAndUploadPDF } from "@/utils/pdfGenerator";
 
 interface DocumentFormProps {
   onBack: () => void;
@@ -18,9 +17,17 @@ interface DocumentFormProps {
 
 const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
   const { toast } = useToast();
+  // Obtener fecha actual en zona horaria de Argentina (UTC-3)
+  const getCurrentDateInArgentina = () => {
+    const now = new Date();
+    // Ajustar a zona horaria de Argentina (UTC-3)
+    const argentinaTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000) + (-3 * 60 * 60 * 1000));
+    return argentinaTime.toISOString().split('T')[0];
+  };
+
   const [formData, setFormData] = useState({
     employee_id: "",
-    generated_date: new Date().toISOString().split('T')[0],
+    generated_date: getCurrentDateInArgentina(), // Fecha actual en Argentina
     document_type: "",
   });
 
@@ -52,7 +59,9 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
     }
 
     try {
-      console.log('🚀 Creando documento y generando PDF...');
+      console.log('🚀 INICIANDO: Creación de documento...');
+      console.log('📋 Datos del formulario:', formData);
+      console.log('👤 Empleado seleccionado:', selectedEmployee);
       
       // Primero crear el documento en la base de datos
       const documentData = {
@@ -61,51 +70,37 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
         document_content: generateDocumentContent(),
       };
 
+      console.log('💾 GUARDANDO: Documento en base de datos...');
       const savedDocument = await onSave(documentData);
-      console.log('✅ Documento guardado en BD');
+      console.log('✅ GUARDADO: Documento en BD:', savedDocument);
+      console.log('🔍 DEBUG: savedDocument?.id =', savedDocument?.id);
+      console.log('🔍 DEBUG: selectedEmployee =', selectedEmployee);
 
-      // Si el documento se guardó exitosamente, generar el PDF
-      if (savedDocument?.id && selectedEmployee) {
-        console.log('🔄 Generando PDF para el documento:', savedDocument.id);
-        
-        const pdfResult = await generateAndUploadPDF({
-          documentType: formData.document_type,
-          employeeData: {
-            nombres: selectedEmployee.nombres,
-            apellidos: selectedEmployee.apellidos,
-            dni: selectedEmployee.dni,
-            direccion: selectedEmployee.direccion || '',
-          },
-          generatedDate: formData.generated_date,
-          documentId: savedDocument.id,
+      // El PDF se genera automáticamente en DocumentsModule.handleSaveDocument
+      // Ya no necesitamos duplicar la lógica aquí
+      
+      if (savedDocument?.id) {
+        console.log('✅ DOCUMENTO CREADO EXITOSAMENTE con ID:', savedDocument.id);
+        toast({
+          title: "Documento creado",
+          description: "El documento se ha creado exitosamente. El PDF se está generando...",
         });
-
-        if (pdfResult.success && pdfResult.pdfUrl) {
-          console.log('✅ PDF generado y subido:', pdfResult.pdfUrl);
-          
-          // Actualizar el documento con la URL del PDF
-          // Nota: Esto requiere que onSave permita actualizar documentos existentes
-          // O que tengamos acceso directo a updateDocument desde useDocuments
-          
-          toast({
-            title: "Documento creado",
-            description: "El documento y su PDF se han generado exitosamente",
-          });
-        } else {
-          console.warn('⚠️ Error generando PDF:', pdfResult.error);
-          toast({
-            title: "Documento creado",
-            description: "El documento se creó pero el PDF se generará cuando se descargue",
-          });
-        }
+      } else {
+        console.error('❌ PROBLEMA: No se pudo obtener ID del documento guardado');
+        console.log('   savedDocument:', savedDocument);
+        toast({
+          title: "Advertencia",
+          description: "El documento se creó pero puede haber problemas. Verifica la lista de documentos.",
+          variant: "destructive",
+        });
       }
 
       onBack();
     } catch (error) {
-      console.error('❌ Error saving document:', error);
+      console.error('❌ ERROR GENERAL:', error);
       toast({
         title: "Error",
-        description: "No se pudo crear el documento",
+        description: "No se pudo crear el documento: " + (error instanceof Error ? error.message : 'Error desconocido'),
         variant: "destructive",
       });
     }
@@ -116,7 +111,14 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
 
     const employeeName = `${selectedEmployee.nombres} ${selectedEmployee.apellidos}`;
     const employeeDni = selectedEmployee.dni;
-    const date = new Date(formData.generated_date).toLocaleDateString('es-AR');
+    
+    // Formatear fecha correctamente para Argentina
+    const dateObj = new Date(formData.generated_date + 'T12:00:00'); // Agregar hora para evitar problemas de zona horaria
+    const date = dateObj.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit', 
+      year: 'numeric'
+    });
 
     // Esta es una plantilla básica, se reemplazará con las plantillas reales
     return `Documento generado para: ${employeeName}\nDNI: ${employeeDni}\nFecha: ${date}\nTipo: ${formData.document_type}`;

@@ -52,11 +52,50 @@ const DocumentsModule = () => {
   };
 
   const handleSaveDocument = async (documentData: any) => {
+    console.log('📝 [DOCUMENTS MODULE] Guardando documento:', documentData);
+    
     const newDoc = await addDocument(documentData);
+    console.log('✅ [DOCUMENTS MODULE] Documento guardado:', newDoc);
+    
     if (newDoc) {
-      // Generar y guardar el PDF inmediatamente
-      await generateAndUploadPDF(newDoc);
+      console.log('🚀 [DOCUMENTS MODULE] Iniciando generación de PDF para documento:', newDoc.id);
+      
+      // Buscar empleado para obtener datos completos
+      const employee = activeEmployees.find(e => e.id === newDoc.employee_id);
+      if (!employee) {
+        console.error('❌ [DOCUMENTS MODULE] Empleado no encontrado:', newDoc.employee_id);
+        return newDoc;
+      }
+      
+      console.log('👤 [DOCUMENTS MODULE] Empleado encontrado:', employee.nombres, employee.apellidos);
+      
+      // Usar la utilidad centralizada de generación de PDF
+      const pdfResult = await generateAndUploadPDF({
+        documentType: newDoc.document_type,
+        employeeData: {
+          nombres: employee.nombres,
+          apellidos: employee.apellidos,
+          dni: employee.dni,
+          direccion: employee.direccion || '',
+        },
+        generatedDate: newDoc.generated_date,
+        documentId: newDoc.id,
+      });
+      
+      console.log('📊 [DOCUMENTS MODULE] Resultado PDF:', pdfResult);
+      
+      if (pdfResult.success && pdfResult.pdfUrl) {
+        console.log('✅ [DOCUMENTS MODULE] PDF generado, actualizando documento con URL...');
+        
+        // Actualizar el documento con la URL del PDF
+        await updateDocument(newDoc.id, { pdf_url: pdfResult.pdfUrl });
+        console.log('🔗 [DOCUMENTS MODULE] Documento actualizado con PDF URL:', pdfResult.pdfUrl);
+      } else {
+        console.error('❌ [DOCUMENTS MODULE] Error generando PDF:', pdfResult.error);
+      }
     }
+    
+    return newDoc;
   };
 
   const handleDeleteDocument = async (documentId: string) => {
@@ -72,120 +111,6 @@ const DocumentsModule = () => {
     }
     
     await updateDocument(document.id, updateData);
-    
-    // Regenerar y actualizar el PDF cuando se firma
-    if (newStatus === 'firmado') {
-      await generateAndUploadPDF(document);
-    }
-  };
-
-  const generateAndUploadPDF = async (docRecord: any) => {
-    try {
-      const employee = activeEmployees.find(e => e.id === docRecord.employee_id);
-      if (!employee) {
-        throw new Error("Empleado no encontrado");
-      }
-
-      const tempDiv = window.document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm';
-      window.document.body.appendChild(tempDiv);
-
-      const employeeName = `${employee.nombres} ${employee.apellidos}`;
-      const formattedDate = new Date(docRecord.generated_date).toLocaleDateString('es-AR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-
-      const root = createRoot(tempDiv);
-
-      if (docRecord.document_type === 'consentimiento_datos_biometricos') {
-        root.render(
-          <ConsentimientoDatosBiometricos
-            employeeName={employeeName}
-            employeeDni={employee.dni}
-            employeeAddress={employee.direccion || 'Sin dirección registrada'}
-            date={formattedDate}
-          />
-        );
-      } else if (docRecord.document_type === 'reglamento_interno') {
-        root.render(
-          <ReglamentoInterno
-            employeeName={employeeName}
-            date={formattedDate}
-          />
-        );
-      } else {
-        root.unmount();
-        window.document.body.removeChild(tempDiv);
-        throw new Error("Tipo de documento no soportado");
-      }
-
-      await new Promise(resolve => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setTimeout(resolve, 500);
-          });
-        });
-      });
-
-      const options = {
-        margin: [10, 10, 10, 10],
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          logging: false,
-          scrollY: 0,
-          scrollX: 0,
-          width: 794,
-          windowWidth: 794,
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait',
-          compress: true,
-        },
-        pagebreak: { mode: ['css', 'legacy'] },
-      };
-
-      const worker = (html2pdf as any)().from(tempDiv).set(options).toPdf();
-      const pdf = await worker.get('pdf');
-      const blob = pdf.output('blob');
-
-      // Subir a Supabase Storage
-      const fileName = `${docRecord.document_type}_${employee.dni}_${docRecord.generated_date}_${docRecord.id}.pdf`;
-      const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(fileName, blob, {
-          contentType: 'application/pdf',
-          upsert: true
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Actualizar el registro con la URL del PDF
-      await updateDocument(docRecord.id, { pdf_url: fileName });
-
-      root.unmount();
-      if (window.document.body.contains(tempDiv)) {
-        window.document.body.removeChild(tempDiv);
-      }
-
-      return fileName;
-    } catch (error) {
-      console.error('Error generating and uploading PDF:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo generar y guardar el PDF",
-        variant: "destructive",
-      });
-      throw error;
-    }
   };
 
   const handleDownloadDocument = async (docRecord: any) => {

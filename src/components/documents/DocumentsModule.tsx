@@ -10,13 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Plus, Search, Download, Eye, Trash2, CheckCircle, Clock } from "lucide-react";
+import { FileText, Plus, Search, Download, Eye, Trash2, CheckCircle, Clock, PenTool } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import DocumentForm from "./DocumentForm";
 import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useDocuments } from "@/hooks/useDocuments";
-import { generateAndUploadPDF, downloadPDFFromStorage, deletePDFFromStorage } from "@/utils/pdfGenerator";
+import { generateAndUploadPDF, downloadPDFFromStorage, deletePDFFromStorage, signPDF } from "@/utils/pdfGenerator";
 
 const DocumentsModule = () => {
   const { toast } = useToast();
@@ -102,6 +102,38 @@ const DocumentsModule = () => {
     await deleteDocument(documentId);
   };
 
+  const handleSignDocument = async (documentId: string) => {
+    try {
+      console.log('✍️ [DOCUMENTS MODULE] Iniciando firma de documento:', documentId);
+      
+      const signResult = await signPDF({
+        documentId: documentId,
+        signedDate: new Date().toISOString().split('T')[0],
+        signatureCode: `SIGN_${Date.now()}` // Código único de firma
+      });
+      
+      if (signResult.success) {
+        toast({
+          title: "Documento firmado",
+          description: "El documento ha sido firmado exitosamente",
+        });
+        
+        // Los documentos se actualizarán automáticamente por el hook
+        console.log('✅ [DOCUMENTS MODULE] Documento firmado, estado actualizado');
+      } else {
+        throw new Error(signResult.error || 'Error desconocido');
+      }
+      
+    } catch (error) {
+      console.error('❌ [DOCUMENTS MODULE] Error firmando documento:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo firmar el documento: " + (error instanceof Error ? error.message : 'Error desconocido'),
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleToggleDocumentStatus = async (document: any) => {
     const newStatus = document.status === 'generado' ? 'firmado' : 'generado';
     const updateData: any = { status: newStatus };
@@ -115,18 +147,30 @@ const DocumentsModule = () => {
 
   const handleDownloadDocument = async (docRecord: any) => {
     try {
+      console.log('📥 [DOWNLOAD] Iniciando descarga para documento:', docRecord.id);
+      console.log('🔗 [DOWNLOAD] PDF URL:', docRecord.pdf_url);
+      
       // Si existe pdf_url, descargar desde el bucket
       if (docRecord.pdf_url) {
+        // Extraer solo el nombre del archivo de la URL completa
+        const fileName = docRecord.pdf_url.split('/').pop();
+        console.log('📁 [DOWNLOAD] Nombre de archivo extraído:', fileName);
+        
         const { data, error } = await supabase.storage
           .from('documents')
-          .download(docRecord.pdf_url);
+          .download(fileName);
 
-        if (error) throw error;
+        if (error) {
+          console.error('❌ [DOWNLOAD] Error descargando:', error);
+          throw error;
+        }
 
+        console.log('✅ [DOWNLOAD] Archivo descargado exitosamente');
+        
         const url = URL.createObjectURL(data);
         const a = document.createElement('a');
         a.href = url;
-        a.download = docRecord.pdf_url;
+        a.download = fileName;
         a.click();
         URL.revokeObjectURL(url);
 
@@ -381,6 +425,17 @@ const DocumentsModule = () => {
                           >
                             <Download className="h-3 w-3" />
                           </Button>
+                          {document.status === 'generado' && (
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleSignDocument(document.id)}
+                              className="text-xs text-green-600 hover:text-green-700"
+                              title="Firmar documento"
+                            >
+                              <PenTool className="h-3 w-3" />
+                            </Button>
+                          )}
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="outline" size="sm" className="text-xs text-destructive">

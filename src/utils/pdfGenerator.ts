@@ -1,124 +1,5 @@
-import React from "react";
-import html2pdf from "html2pdf.js";
-import { createRoot } from "react-dom/client";
+import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
-import ConsentimientoDatosBiometricos from "@/components/documents/templates/ConsentimientoDatosBiometricos";
-import ReglamentoInterno from "@/components/documents/templates/ReglamentoInterno";
-
-// Función para generar HTML del Reglamento Interno
-const generateReglamentoHTML = (employeeName: string, date: string): string => {
-  return `
-    <div style="width: 210mm; min-height: 297mm; background: white; color: black; padding: 20mm; font-family: Arial, sans-serif; line-height: 1.4;">
-      <h1 style="text-align: center; font-size: 24px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;">REGLAMENTO INTERNO</h1>
-      <h2 style="text-align: center; font-size: 20px; font-weight: bold; text-transform: uppercase; margin-bottom: 30px;">AVÍCOLA LA PALOMA</h2>
-      
-      <p style="margin: 8px 0;"><strong>Fecha:</strong> ${date}</p>
-      <p style="margin: 8px 0 20px 0;"><strong>Nombre del empleado:</strong> ${employeeName}</p>
-      
-      <p style="margin: 15px 0; text-align: justify;">
-        Este reglamento tiene por objetivo establecer normas claras de convivencia, obligaciones, derechos y procedimientos que garanticen un ambiente de trabajo ordenado, seguro y respetuoso para todos.
-      </p>
-      
-      <h3 style="font-size: 18px; font-weight: bold; margin: 20px 0 10px 0;">1. Obligaciones y deberes de los empleados</h3>
-      <ul style="margin: 10px 0; padding-left: 25px;">
-        <li style="margin: 8px 0; text-align: justify;">Cumplir con las obligaciones propias del puesto de trabajo, conforme a las reglas de la buena fe y diligencia.</li>
-        <li style="margin: 8px 0; text-align: justify;">Observar las órdenes e instrucciones que se le impartan sobre el modo de ejecución del trabajo.</li>
-        <li style="margin: 8px 0; text-align: justify;">No ejecutar negociaciones por cuenta propia o de terceros, que pudieran afectar los intereses del empleador.</li>
-        <li style="margin: 8px 0; text-align: justify;">Guardar secreto de las informaciones que tenga carácter reservado y cuya divulgación pueda ocasionar perjuicios al empleador.</li>
-        <li style="margin: 8px 0; text-align: justify;">Conservar los instrumentos de trabajo y no utilizarlos para otros fines que los de su trabajo.</li>
-      </ul>
-      
-      <h3 style="font-size: 18px; font-weight: bold; margin: 20px 0 10px 0;">2. Horarios de trabajo</h3>
-      <ul style="margin: 10px 0; padding-left: 25px;">
-        <li style="margin: 8px 0; text-align: justify;">Respetar estrictamente los horarios de entrada y salida establecidos.</li>
-        <li style="margin: 8px 0; text-align: justify;">Registrar correctamente el ingreso y egreso en el sistema de control horario.</li>
-        <li style="margin: 8px 0; text-align: justify;">Solicitar autorización previa para cualquier modificación de horario.</li>
-      </ul>
-      
-      <h3 style="font-size: 18px; font-weight: bold; margin: 20px 0 10px 0;">3. Normas de seguridad e higiene</h3>
-      <ul style="margin: 10px 0; padding-left: 25px;">
-        <li style="margin: 8px 0; text-align: justify;">Utilizar obligatoriamente los elementos de protección personal proporcionados.</li>
-        <li style="margin: 8px 0; text-align: justify;">Mantener el lugar de trabajo limpio y ordenado.</li>
-        <li style="margin: 8px 0; text-align: justify;">Reportar inmediatamente cualquier accidente o situación de riesgo.</li>
-        <li style="margin: 8px 0; text-align: justify;">Cumplir con las normas de higiene personal y alimentaria.</li>
-      </ul>
-      
-      <div style="margin-top: 50px;">
-        <p style="margin: 30px 0 10px 0;">Firma del empleado:</p>
-        <div style="border-bottom: 1px solid black; width: 300px; height: 50px; display: inline-block;"></div>
-        <p style="margin: 10px 0;">Aclaración: ${employeeName}</p>
-        <p style="margin: 10px 0;">Fecha: ${date}</p>
-      </div>
-    </div>
-  `;
-};
-
-// Función para generar HTML del Consentimiento de Datos Biométricos
-const generateConsentimientoHTML = (employeeName: string, employeeDni: string, employeeAddress: string, date: string): string => {
-  return `
-    <div style="width: 210mm; min-height: 297mm; background: white; color: black; padding: 20mm; font-family: Arial, sans-serif; line-height: 1.4;">
-      <h1 style="text-align: center; font-size: 20px; font-weight: bold; text-transform: uppercase; margin-bottom: 30px;">
-        CONSTANCIA DE CONSENTIMIENTO PARA USO DE CÁMARAS DE VIGILANCIA Y DATOS BIOMÉTRICOS
-      </h1>
-      
-      <p style="margin: 15px 0;"><strong>Fecha:</strong> ${date}</p>
-      
-      <p style="margin: 15px 0; text-align: justify;">
-        En la ciudad de Córdoba Capital, comparece el/la trabajador/a <strong>${employeeName}</strong>, DNI Nº <strong>${employeeDni}</strong>, 
-        con domicilio en <strong>${employeeAddress}</strong>, quien manifiesta prestar su consentimiento expreso en los términos de la 
-        Ley de Protección de Datos Personales N° 25.326 y normativa laboral aplicable.
-      </p>
-      
-      <h2 style="font-size: 18px; font-weight: bold; margin: 25px 0 15px 0;">1. Cámaras de Vigilancia</h2>
-      
-      <p style="margin: 12px 0; text-align: justify;">
-        El/la trabajador/a declara haber sido informado/a de la existencia de cámaras de seguridad instaladas en las instalaciones 
-        de la empresa Avícola La Paloma (en adelante "la Empresa"), cuya finalidad exclusiva es la prevención de riesgos, 
-        seguridad de las personas, resguardo de bienes y control de acceso a las instalaciones.
-      </p>
-      
-      <p style="margin: 12px 0; text-align: justify;">
-        <strong>PRESTA SU CONSENTIMIENTO</strong> para ser filmado/a durante el desarrollo de sus tareas laborales, 
-        entendiendo que las imágenes captadas serán utilizadas únicamente para los fines mencionados y bajo estricta 
-        confidencialidad, conforme a la legislación vigente.
-      </p>
-      
-      <h2 style="font-size: 18px; font-weight: bold; margin: 25px 0 15px 0;">2. Datos Biométricos</h2>
-      
-      <p style="margin: 12px 0; text-align: justify;">
-        El/la trabajador/a ha sido informado/a que la Empresa utiliza sistemas de control de acceso y horario mediante 
-        tecnología biométrica (huella dactilar), con el fin de garantizar la seguridad de las instalaciones y el 
-        correcto registro de la jornada laboral.
-      </p>
-      
-      <p style="margin: 12px 0; text-align: justify;">
-        <strong>PRESTA SU CONSENTIMIENTO</strong> para el tratamiento de sus datos biométricos (huella dactilar) 
-        exclusivamente para los fines mencionados, entendiendo que dichos datos serán almacenados de forma segura 
-        y no serán compartidos con terceros ajenos a la empresa.
-      </p>
-      
-      <h2 style="font-size: 18px; font-weight: bold; margin: 25px 0 15px 0;">3. Derechos del titular</h2>
-      
-      <p style="margin: 12px 0; text-align: justify;">
-        El/la trabajador/a conoce sus derechos de acceso, rectificación, actualización y supresión de sus datos personales, 
-        los cuales podrá ejercer dirigiéndose a la empresa en cualquier momento, conforme a la Ley 25.326.
-      </p>
-      
-      <p style="margin: 12px 0; text-align: justify;">
-        Este consentimiento es revocable en cualquier momento, sin que ello afecte la licitud del tratamiento basado 
-        en el consentimiento previo a su retirada.
-      </p>
-      
-      <div style="margin-top: 50px;">
-        <p style="margin: 30px 0 10px 0;">Firma del empleado:</p>
-        <div style="border-bottom: 1px solid black; width: 300px; height: 50px; display: inline-block;"></div>
-        <p style="margin: 10px 0;">Aclaración: ${employeeName}</p>
-        <p style="margin: 10px 0;">DNI: ${employeeDni}</p>
-        <p style="margin: 10px 0;">Fecha: ${date}</p>
-      </div>
-    </div>
-  `;
-};
 
 export interface GeneratePDFParams {
   documentType: string;
@@ -139,229 +20,248 @@ export interface PDFGenerationResult {
   blob?: Blob;
 }
 
-/**
- * Genera un PDF a partir de un template React y lo sube a Supabase Storage
- */
+export interface SignPDFParams {
+  documentId: string;
+  signature?: string;
+  signatureCode?: string;
+  signedDate: string;
+}
+
+// Función para generar contenido del Reglamento Interno
+const generateReglamentoContent = (employeeName: string, employeeDni: string, date: string) => {
+  return [
+    { text: "REGLAMENTO INTERNO", fontSize: 20, align: "center", bold: true },
+    { text: "AVÍCOLA LA PALOMA", fontSize: 16, align: "center", bold: true },
+    { text: "", fontSize: 12 },
+    { text: `Fecha: ${date}`, fontSize: 12, bold: true },
+    { text: `Nombre del empleado: ${employeeName}`, fontSize: 12, bold: true },
+    { text: `DNI: ${employeeDni}`, fontSize: 12, bold: true },
+    { text: "", fontSize: 12 },
+    { 
+      text: "Este reglamento tiene por objetivo establecer normas claras de convivencia, obligaciones, derechos y procedimientos que garanticen un ambiente de trabajo ordenado, seguro y respetuoso para todos.",
+      fontSize: 12
+    },
+    { text: "", fontSize: 12 },
+    { text: "1. OBLIGACIONES Y DEBERES DE LOS EMPLEADOS", fontSize: 14, bold: true },
+    { text: "• Cumplir con las obligaciones propias del puesto de trabajo, conforme a las reglas de la buena fe y diligencia.", fontSize: 11 },
+    { text: "• Observar las órdenes e instrucciones que se le impartan sobre el modo de ejecución del trabajo.", fontSize: 11 },
+    { text: "• No ejecutar negociaciones por cuenta propia o de terceros, que pudieran afectar los intereses del empleador.", fontSize: 11 },
+    { text: "• Guardar secreto de las informaciones que tenga carácter reservado y cuya divulgación pueda ocasionar perjuicios al empleador.", fontSize: 11 },
+    { text: "• Conservar los instrumentos de trabajo y no utilizarlos para otros fines que los de su trabajo.", fontSize: 11 },
+    { text: "", fontSize: 12 },
+    { text: "2. HORARIOS DE TRABAJO", fontSize: 14, bold: true },
+    { text: "• Respetar estrictamente los horarios de entrada y salida establecidos.", fontSize: 11 },
+    { text: "• Registrar correctamente el ingreso y egreso en el sistema de control horario.", fontSize: 11 },
+    { text: "• Solicitar autorización previa para cualquier modificación de horario.", fontSize: 11 },
+    { text: "", fontSize: 12 },
+    { text: "3. NORMAS DE SEGURIDAD E HIGIENE", fontSize: 14, bold: true },
+    { text: "• Utilizar obligatoriamente los elementos de protección personal proporcionados.", fontSize: 11 },
+    { text: "• Mantener el lugar de trabajo limpio y ordenado.", fontSize: 11 },
+    { text: "• Reportar inmediatamente cualquier accidente o situación de riesgo.", fontSize: 11 },
+    { text: "• Cumplir con las normas de higiene personal y alimentaria.", fontSize: 11 },
+    { text: "", fontSize: 12 },
+    { text: "4. PROHIBICIONES", fontSize: 14, bold: true },
+    { text: "• Está prohibido el consumo de alcohol y drogas en el lugar de trabajo.", fontSize: 11 },
+    { text: "• No se permite fumar en las instalaciones de la empresa.", fontSize: 11 },
+    { text: "• Queda prohibido el uso de teléfonos celulares durante el horario de trabajo.", fontSize: 11 },
+    { text: "", fontSize: 12 },
+    { text: "5. SANCIONES", fontSize: 14, bold: true },
+    { text: "El incumplimiento de este reglamento será sancionado según la gravedad de la falta, pudiendo aplicarse desde llamados de atención hasta la suspensión o despido.", fontSize: 11 },
+    { text: "", fontSize: 20 },
+    { text: "FIRMA DEL EMPLEADO:", fontSize: 12, bold: true },
+    { text: "", fontSize: 15 },
+    { text: "_".repeat(40), fontSize: 12 },
+    { text: `Aclaración: ${employeeName}`, fontSize: 12 },
+    { text: `DNI: ${employeeDni}`, fontSize: 12 },
+    { text: `Fecha: ${date}`, fontSize: 12 }
+  ];
+};
+
+// Función para generar contenido del Consentimiento
+const generateConsentimientoContent = (employeeName: string, employeeDni: string, employeeAddress: string, date: string) => {
+  return [
+    { text: "CONSTANCIA DE CONSENTIMIENTO PARA USO DE", fontSize: 16, align: "center", bold: true },
+    { text: "CÁMARAS DE VIGILANCIA Y DATOS BIOMÉTRICOS", fontSize: 16, align: "center", bold: true },
+    { text: "", fontSize: 12 },
+    { text: `Fecha: ${date}`, fontSize: 12, bold: true },
+    { text: "", fontSize: 12 },
+    { 
+      text: `En la ciudad de Córdoba Capital, comparece el/la trabajador/a ${employeeName}, DNI Nº ${employeeDni}, con domicilio en ${employeeAddress}, quien manifiesta prestar su consentimiento expreso en los términos de la Ley de Protección de Datos Personales N° 25.326 y normativa laboral aplicable.`,
+      fontSize: 12
+    },
+    { text: "", fontSize: 12 },
+    { text: "1. CÁMARAS DE VIGILANCIA", fontSize: 14, bold: true },
+    { 
+      text: "El/la trabajador/a declara haber sido informado/a de la existencia de cámaras de seguridad instaladas en las instalaciones de la empresa Avícola La Paloma (en adelante \"la Empresa\"), cuya finalidad exclusiva es la prevención de riesgos, seguridad de las personas, resguardo de bienes y control de acceso a las instalaciones.",
+      fontSize: 11
+    },
+    { text: "", fontSize: 8 },
+    { 
+      text: "PRESTA SU CONSENTIMIENTO para ser filmado/a durante el desarrollo de sus tareas laborales, entendiendo que las imágenes captadas serán utilizadas únicamente para los fines mencionados y bajo estricta confidencialidad, conforme a la legislación vigente.",
+      fontSize: 11,
+      bold: true
+    },
+    { text: "", fontSize: 12 },
+    { text: "2. DATOS BIOMÉTRICOS", fontSize: 14, bold: true },
+    { 
+      text: "El/la trabajador/a ha sido informado/a que la Empresa utiliza sistemas de control de acceso y horario mediante tecnología biométrica (huella dactilar), con el fin de garantizar la seguridad de las instalaciones y el correcto registro de la jornada laboral.",
+      fontSize: 11
+    },
+    { text: "", fontSize: 8 },
+    { 
+      text: "PRESTA SU CONSENTIMIENTO para el tratamiento de sus datos biométricos (huella dactilar) exclusivamente para los fines mencionados, entendiendo que dichos datos serán almacenados de forma segura y no serán compartidos con terceros ajenos a la empresa.",
+      fontSize: 11,
+      bold: true
+    },
+    { text: "", fontSize: 12 },
+    { text: "3. DERECHOS DEL TITULAR", fontSize: 14, bold: true },
+    { 
+      text: "El/la trabajador/a conoce sus derechos de acceso, rectificación, actualización y supresión de sus datos personales, los cuales podrá ejercer dirigiéndose a la empresa en cualquier momento, conforme a la Ley 25.326.",
+      fontSize: 11
+    },
+    { text: "", fontSize: 8 },
+    { 
+      text: "Este consentimiento es revocable en cualquier momento, sin que ello afecte la licitud del tratamiento basado en el consentimiento previo a su retirada.",
+      fontSize: 11
+    },
+    { text: "", fontSize: 20 },
+    { text: "FIRMA DEL EMPLEADO:", fontSize: 12, bold: true },
+    { text: "", fontSize: 15 },
+    { text: "_".repeat(40), fontSize: 12 },
+    { text: `Aclaración: ${employeeName}`, fontSize: 12 },
+    { text: `DNI: ${employeeDni}`, fontSize: 12 },
+    { text: `Fecha: ${date}`, fontSize: 12 }
+  ];
+};
+
 export const generateAndUploadPDF = async (params: GeneratePDFParams): Promise<PDFGenerationResult> => {
   const { documentType, employeeData, generatedDate, documentId } = params;
   
-  try {
-    console.log('🚀 [PDF GENERATOR] Iniciando generación de PDF:', documentType);
-    console.log('📋 [PDF GENERATOR] Parámetros recibidos:', params);
-    
-    // 1. Crear elemento temporal para renderizado
-    console.log('🔧 [PDF GENERATOR] Creando elemento temporal...');
-    const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.width = '210mm';
-    tempDiv.style.backgroundColor = 'white';
-    tempDiv.style.color = 'black';
-    tempDiv.style.fontFamily = 'Arial, sans-serif';
-    
-    // Copiar estilos globales al div temporal (simplificado)
-    try {
-      const stylesheets = Array.from(document.styleSheets);
-      const cssText = stylesheets.map(sheet => {
-        try {
-          return Array.from(sheet.cssRules).map(rule => rule.cssText).join('');
-        } catch (e) {
-          console.warn('No se pudieron copiar algunos estilos CSS:', e);
-          return '';
-        }
-      }).join('');
-      
-      if (cssText.length > 0) {
-        const style = document.createElement('style');
-        style.textContent = cssText;
-        tempDiv.appendChild(style);
-      }
-    } catch (cssError) {
-      console.warn('Error copiando estilos CSS, continuando sin estilos globales:', cssError);
-    }
-    
-    document.body.appendChild(tempDiv);
+  const isPreview = documentId.startsWith('preview_');
+  console.log('🚀 [PDF GENERATOR] Iniciando generación con jsPDF - VERSIÓN SIMPLE', isPreview ? '(PREVIEW)' : '(GUARDAR)');
 
-    // 2. Renderizar el componente React correspondiente
-    const root = createRoot(tempDiv);
-    const employeeName = `${employeeData.nombres} ${employeeData.apellidos}`;
+  try {
+    // Crear nuevo documento PDF
+    const doc = new jsPDF();
     
-    // Formatear fecha correctamente evitando problemas de zona horaria
-    const dateObj = new Date(generatedDate + 'T12:00:00'); // Agregar hora para evitar problemas de zona horaria
-    const formattedDate = dateObj.toLocaleDateString('es-AR', {
+    const employeeName = `${employeeData.nombres} ${employeeData.apellidos}`;
+    const formattedDate = new Date(generatedDate + 'T12:00:00').toLocaleDateString('es-AR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     });
-    
-    console.log('📅 [PDF GENERATOR] Fecha original:', generatedDate);
-    console.log('📅 [PDF GENERATOR] Fecha formateada:', formattedDate);
 
-    console.log('📄 [PDF GENERATOR] Renderizando template para:', employeeName);
-    console.log('🔍 [PDF GENERATOR] ANTES DE RENDERIZAR - Tipo:', documentType);
+    console.log('📄 [PDF GENERATOR] Generando para:', employeeName, 'Fecha:', formattedDate);
 
-    // Generar HTML directo según el tipo de documento
-    console.log('📄 [PDF GENERATOR] Generando HTML directo para:', documentType);
-    
-    if (documentType === 'consentimiento_datos_biometricos') {
-      tempDiv.innerHTML = generateConsentimientoHTML(employeeName, employeeData.dni, employeeData.direccion || 'Sin dirección registrada', formattedDate);
-    } else if (documentType === 'reglamento_interno') {
-      tempDiv.innerHTML = generateReglamentoHTML(employeeName, formattedDate);
+    // Obtener contenido según el tipo de documento
+    let content: any[] = [];
+    if (documentType === 'reglamento_interno') {
+      content = generateReglamentoContent(employeeName, employeeData.dni, formattedDate);
+    } else if (documentType === 'consentimiento_datos_biometricos') {
+      content = generateConsentimientoContent(employeeName, employeeData.dni, employeeData.direccion || 'Sin dirección registrada', formattedDate);
     } else {
       throw new Error(`Tipo de documento no soportado: ${documentType}`);
     }
-    
-    console.log('✅ [PDF GENERATOR] HTML generado correctamente');
 
-    console.log('✅ [PDF GENERATOR] Componente React renderizado, esperando DOM...');
+    // Configurar fuente y márgenes
+    doc.setFont("helvetica");
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const maxWidth = pageWidth - (margin * 2);
+    let yPosition = margin;
 
-    // 3. Esperar renderizado completo
-    console.log('⏱️ [PDF GENERATOR] Esperando renderizado completo...');
-    await new Promise(resolve => requestAnimationFrame(() => 
-      requestAnimationFrame(() => setTimeout(resolve, 500))
-    ));
+    console.log('📝 [PDF GENERATOR] Agregando contenido al PDF...');
 
-    // 4. Validar contenido renderizado
-    console.log('🔍 [PDF GENERATOR] ===== VALIDACIÓN DE CONTENIDO =====');
-    const contentCheck = tempDiv.textContent || tempDiv.innerText || '';
-    console.log('📏 [PDF GENERATOR] Contenido renderizado:', contentCheck.length, 'caracteres');
-    console.log('📄 [PDF GENERATOR] Primeros 200 chars:', JSON.stringify(contentCheck.substring(0, 200)));
-    console.log('🏷️ [PDF GENERATOR] HTML completo (500 chars):', tempDiv.innerHTML.substring(0, 500));
-    console.log('🔍 [PDF GENERATOR] Empleado:', employeeName);
-    console.log('🔍 [PDF GENERATOR] Tipo documento:', documentType);
-    console.log('🔍 [PDF GENERATOR] Fecha:', formattedDate);
-    
-    // Diagnóstico adicional
-    const allElements = tempDiv.querySelectorAll('*');
-    console.log('🏗️ [PDF GENERATOR] Elementos HTML encontrados:', allElements.length);
-    
-    if (contentCheck.length < 50) {
-      console.error('❌ [PDF GENERATOR] CONTENIDO CRÍTICO - MUY POCO TEXTO');
-      console.error('🔍 [PDF GENERATOR] HTML completo del div:', tempDiv.innerHTML);
-      console.error('🔍 [PDF GENERATOR] OuterHTML del div:', tempDiv.outerHTML.substring(0, 1000));
+    // Agregar contenido al PDF
+    content.forEach((item, index) => {
+      // Verificar si necesitamos nueva página
+      if (yPosition > pageHeight - 30) {
+        doc.addPage();
+        yPosition = margin;
+      }
+
+      // Configurar estilo
+      if (item.bold) {
+        doc.setFont("helvetica", "bold");
+      } else {
+        doc.setFont("helvetica", "normal");
+      }
       
-      // No lanzar error, continuar para ver qué pasa
-      console.warn('⚠️ [PDF GENERATOR] Continuando a pesar del contenido insuficiente...');
-    }
+      doc.setFontSize(item.fontSize || 12);
 
-    // 5. Generar PDF con html2pdf
-    console.log('🔄 [PDF GENERATOR] Generando archivo PDF con html2pdf...');
-    console.log('📐 [PDF GENERATOR] Dimensiones del div:', {
-      scrollWidth: tempDiv.scrollWidth,
-      scrollHeight: tempDiv.scrollHeight,
-      offsetWidth: tempDiv.offsetWidth,
-      offsetHeight: tempDiv.offsetHeight
+      if (item.text === "") {
+        // Espacio en blanco
+        yPosition += item.fontSize || 12;
+      } else if (item.align === "center") {
+        // Texto centrado
+        const textWidth = doc.getTextWidth(item.text);
+        const xPosition = (pageWidth - textWidth) / 2;
+        doc.text(item.text, xPosition, yPosition);
+        yPosition += (item.fontSize || 12) + 5;
+      } else {
+        // Texto normal
+        const lines = doc.splitTextToSize(item.text, maxWidth);
+        doc.text(lines, margin, yPosition);
+        yPosition += (lines.length * (item.fontSize || 12)) + 5;
+      }
     });
-    
-    const options = {
-      margin: [10, 10, 10, 10],
-      filename: `${documentType}_${employeeData.dni}_${generatedDate}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        letterRendering: true,
-        logging: false,
-        scrollY: 0,
-        scrollX: 0,
-        width: 794,
-        windowWidth: 794,
-        backgroundColor: '#ffffff',
-      },
-      jsPDF: {
-        unit: 'mm',
-        format: 'a4',
-        orientation: 'portrait',
-        compress: true,
-      },
-      pagebreak: { mode: ['css', 'legacy'] },
-    };
 
-    const worker = (html2pdf as any)().from(tempDiv).set(options).toPdf();
-    console.log('🏗️ [PDF GENERATOR] Worker de html2pdf creado, ejecutando...');
-    
-    const pdf = await worker.get('pdf');
-    console.log('📄 [PDF GENERATOR] PDF objeto obtenido');
-    
-    const blob = pdf.output('blob') as Blob;
-    console.log('📦 [PDF GENERATOR] Blob generado, tamaño:', blob.size, 'bytes');
-    console.log('🔍 [PDF GENERATOR] Tipo de blob:', blob.type);
-    
-    // Diagnóstico adicional del blob
+    // Generar blob
+    const blob = doc.output('blob');
+    console.log('📦 [PDF GENERATOR] PDF generado con jsPDF, tamaño:', blob.size, 'bytes');
+
     if (blob.size === 0) {
-      console.error('❌ [PDF GENERATOR] El PDF generado está completamente vacío (0 bytes)');
-      console.error('🔍 [PDF GENERATOR] Contenido del div antes de limpiar:', tempDiv.innerHTML.substring(0, 1000));
       throw new Error('El PDF generado está vacío');
     }
-    
-    if (blob.size < 1000) {
-      console.warn('⚠️ [PDF GENERATOR] El PDF generado es muy pequeño:', blob.size, 'bytes');
-      console.warn('🔍 [PDF GENERATOR] Esto podría indicar contenido incompleto');
-      
-      // Intentar leer una muestra del blob para debug
-      try {
-        const arrayBuffer = await blob.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        const firstBytes = Array.from(uint8Array.slice(0, 50)).map(b => String.fromCharCode(b)).join('');
-        console.log('🔍 [PDF GENERATOR] Primeros bytes del PDF:', firstBytes);
-      } catch (err) {
-        console.error('❌ [PDF GENERATOR] Error leyendo blob:', err);
+
+    // Solo subir a Supabase si NO es preview
+    if (!isPreview) {
+      const fileName = `${documentId}_${documentType}_${employeeData.dni}_${Date.now()}.pdf`;
+      console.log('☁️ [PDF GENERATOR] Subiendo a Supabase:', fileName);
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(fileName, blob, {
+          contentType: 'application/pdf',
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('❌ [PDF GENERATOR] Error subiendo:', uploadError);
+        throw new Error(`Error subiendo archivo: ${uploadError.message}`);
       }
+
+      console.log('✅ [PDF GENERATOR] Archivo subido exitosamente');
+
+      // Obtener URL pública
+      const { data: urlData } = supabase.storage
+        .from('documents')
+        .getPublicUrl(fileName);
+
+      if (!urlData?.publicUrl) {
+        throw new Error('No se pudo obtener la URL del archivo');
+      }
+
+      console.log('🎉 [PDF GENERATOR] Proceso completado exitosamente con jsPDF');
+
+      return {
+        success: true,
+        pdfUrl: urlData.publicUrl,
+        blob: blob
+      };
+    } else {
+      console.log('📥 [PDF GENERATOR] Preview generado - NO se sube a Supabase');
+      
+      return {
+        success: true,
+        blob: blob
+      };
     }
-
-    // Limpiar DOM
-    console.log('🧹 [PDF GENERATOR] Limpiando DOM...');
-    root.unmount();
-    if (document.body.contains(tempDiv)) {
-      document.body.removeChild(tempDiv);
-    }
-
-    // 6. Subir a Supabase Storage
-    const fileName = `${documentId}_${documentType}_${employeeData.dni}_${Date.now()}.pdf`;
-    console.log('☁️ [PDF GENERATOR] Subiendo a Supabase Storage...');
-    console.log('📁 [PDF GENERATOR] Nombre de archivo:', fileName);
-    console.log('🗄️ [PDF GENERATOR] Bucket de destino: documents');
-
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('documents')
-      .upload(fileName, blob, {
-        contentType: 'application/pdf',
-        cacheControl: '3600',
-        upsert: false
-      });
-
-    console.log('📊 [PDF GENERATOR] Resultado del upload:', { uploadData, uploadError });
-
-    if (uploadError) {
-      console.error('❌ [PDF GENERATOR] Error subiendo archivo:', uploadError);
-      throw new Error(`Error subiendo archivo: ${uploadError.message}`);
-    }
-
-    console.log('✅ [PDF GENERATOR] Archivo subido exitosamente:', uploadData);
-
-    // 7. Obtener URL pública del archivo
-    console.log('🔗 [PDF GENERATOR] Obteniendo URL pública...');
-    const { data: urlData } = supabase.storage
-      .from('documents')
-      .getPublicUrl(fileName);
-
-    console.log('📎 [PDF GENERATOR] URL data:', urlData);
-
-    if (!urlData?.publicUrl) {
-      console.error('❌ [PDF GENERATOR] No se pudo obtener la URL del archivo');
-      throw new Error('No se pudo obtener la URL del archivo');
-    }
-
-    console.log('🎉 [PDF GENERATOR] PDF subido exitosamente:', urlData.publicUrl);
-
-    return {
-      success: true,
-      pdfUrl: urlData.publicUrl,
-      blob
-    };
 
   } catch (error) {
-    console.error('❌ [PDF GENERATOR] Error en el proceso:', error);
+    console.error('❌ [PDF GENERATOR] Error:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Error desconocido'
@@ -369,63 +269,60 @@ export const generateAndUploadPDF = async (params: GeneratePDFParams): Promise<P
   }
 };
 
-/**
- * Descarga un PDF desde Supabase Storage
- */
-export const downloadPDFFromStorage = async (pdfUrl: string, fileName: string): Promise<void> => {
+// Función simple para firmar (actualizar estado)
+export const signPDF = async (params: SignPDFParams): Promise<PDFGenerationResult> => {
+  console.log('✍️ [PDF GENERATOR] Firmando documento:', params.documentId);
+  
   try {
-    console.log('⬇️ Descargando PDF desde storage:', pdfUrl);
+    // Actualizar documento en la base de datos
+    const { error: updateError } = await supabase
+      .from('documents')
+      .update({
+        status: 'firmado',
+        signed_date: params.signedDate,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', params.documentId);
     
-    const response = await fetch(pdfUrl);
-    if (!response.ok) {
-      throw new Error(`Error descargando archivo: ${response.statusText}`);
+    if (updateError) {
+      throw new Error(`Error actualizando documento: ${updateError.message}`);
     }
-
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    console.log('✅ Descarga completada');
+    
+    console.log('✅ [PDF GENERATOR] Documento firmado exitosamente');
+    
+    return {
+      success: true
+    };
+    
   } catch (error) {
-    console.error('❌ Error descargando PDF:', error);
-    throw error;
+    console.error('❌ [PDF GENERATOR] Error firmando documento:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    };
   }
 };
 
-/**
- * Elimina un PDF de Supabase Storage
- */
-export const deletePDFFromStorage = async (pdfUrl: string): Promise<boolean> => {
-  try {
-    // Extraer el nombre del archivo de la URL
-    const urlParts = pdfUrl.split('/');
-    const fileName = urlParts[urlParts.length - 1];
-    
-    if (!fileName) {
-      throw new Error('No se pudo extraer el nombre del archivo de la URL');
-    }
+// Función para descargar PDF desde Supabase Storage
+export const downloadPDFFromStorage = async (fileName: string): Promise<Blob> => {
+  const { data, error } = await supabase.storage
+    .from('documents')
+    .download(fileName);
 
-    console.log('🗑️ Eliminando PDF del storage:', fileName);
+  if (error) {
+    throw new Error(`Error descargando archivo: ${error.message}`);
+  }
 
-    const { error } = await supabase.storage
-      .from('documents')
-      .remove([fileName]);
+  return data;
+};
 
-    if (error) {
-      console.error('❌ Error eliminando archivo:', error);
-      return false;
-    }
+// Función para eliminar PDF de Supabase Storage
+export const deletePDFFromStorage = async (fileName: string): Promise<void> => {
+  const { error } = await supabase.storage
+    .from('documents')
+    .remove([fileName]);
 
-    console.log('✅ Archivo eliminado del storage');
-    return true;
-  } catch (error) {
-    console.error('❌ Error eliminando PDF:', error);
-    return false;
+  if (error) {
+    throw new Error(`Error eliminando archivo: ${error.message}`);
   }
 };

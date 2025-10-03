@@ -40,89 +40,40 @@ const DocumentPreview = ({
 
   const handleDownloadPDF = async () => {
     try {
-      // Crear div temporal con el documento
-      const tempDiv = window.document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '210mm';
-      window.document.body.appendChild(tempDiv);
-
-      const root = createRoot(tempDiv);
-
-      // Renderizar el template correspondiente
-      if (documentType === 'consentimiento_datos_biometricos') {
-        root.render(
-          <ConsentimientoDatosBiometricos
-            employeeName={employeeName}
-            employeeDni={employeeData.dni}
-            employeeAddress={employeeData.direccion || 'Sin dirección registrada'}
-            date={formattedDate}
-          />
-        );
-      } else if (documentType === 'reglamento_interno') {
-        root.render(
-          <ReglamentoInterno
-            employeeName={employeeName}
-            date={formattedDate}
-          />
-        );
-      }
-
-      // Esperar a que React renderice completamente el contenido
-      await new Promise(resolve => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setTimeout(resolve, 500); // Más tiempo para asegurar renderizado completo
-          });
+      console.log('📥 [PREVIEW] Descargando PDF usando el mismo sistema que Confirmar y Guardar');
+      
+      // Usar el mismo generador que usa "Confirmar y Guardar"
+      const { generateAndUploadPDF } = await import("@/utils/pdfGenerator");
+      
+      const result = await generateAndUploadPDF({
+        documentType,
+        employeeData: {
+          nombres: employeeData.nombres,
+          apellidos: employeeData.apellidos,
+          dni: employeeData.dni,
+          direccion: employeeData.direccion
+        },
+        generatedDate,
+        documentId: `preview_${Date.now()}` // ID temporal para preview
+      });
+      
+      if (result.success && result.blob) {
+        // Descargar el blob directamente
+        const url = URL.createObjectURL(result.blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `preview_${documentType}_${employeeData.dni}_${generatedDate}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        toast({
+          title: "PDF descargado",
+          description: "El documento se ha descargado exitosamente",
         });
-      });
-
-      console.log('Documento renderizado en preview, iniciando generación de PDF...');
-
-      const options = {
-        margin: [10, 10, 10, 10],
-        filename: `${documentType}_${employeeData.dni}_${generatedDate}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          logging: false,
-          scrollY: 0,
-          scrollX: 0,
-          width: 794,
-          windowWidth: 794,
-        },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait',
-          compress: true,
-        },
-        pagebreak: { mode: ['css', 'legacy'] },
-      };
-
-      // Generar PDF y forzar descarga
-      const worker = (html2pdf as any)().from(tempDiv).set(options).toPdf();
-      const pdf = await worker.get('pdf');
-      const blob = pdf.output('blob');
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = options.filename;
-      a.click();
-      URL.revokeObjectURL(url);
-
-      // Limpiar
-      root.unmount();
-      if (window.document.body.contains(tempDiv)) {
-        window.document.body.removeChild(tempDiv);
+      } else {
+        throw new Error(result.error || 'Error generando PDF');
       }
-
-      toast({
-        title: "PDF descargado",
-        description: "El documento se ha descargado exitosamente",
-      });
+      
     } catch (error) {
       console.error("Error generating PDF:", error);
       toast({

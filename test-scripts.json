@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "test:documents": "vitest run src/tests/manual-document-test.test.ts --reporter=verbose",
+    "test:documents:integration": "vitest run src/tests/document-storage-integration.test.ts --reporter=verbose", 
+    "test:documents:all": "vitest run src/tests/*document*.test.ts --reporter=verbose",
+    "test:documents:watch": "vitest watch src/tests/manual-document-test.test.ts"
+  }
+}

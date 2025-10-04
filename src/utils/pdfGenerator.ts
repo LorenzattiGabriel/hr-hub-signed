@@ -1,8 +1,5 @@
+import { jsPDF } from "jspdf";
 import { supabase } from "@/integrations/supabase/client";
-import html2pdf from "html2pdf.js";
-import { createRoot } from "react-dom/client";
-import ConsentimientoDatosBiometricos from "@/components/documents/templates/ConsentimientoDatosBiometricos";
-import ReglamentoInterno from "@/components/documents/templates/ReglamentoInterno";
 
 export interface GeneratePDFParams {
   documentType: string;
@@ -141,20 +138,11 @@ export const generateAndUploadPDF = async (params: GeneratePDFParams): Promise<P
   const { documentType, employeeData, generatedDate, documentId } = params;
   
   const isPreview = documentId.startsWith('preview_');
-  console.log('🚀 [PDF GENERATOR] Iniciando generación con html2pdf y componentes React', isPreview ? '(PREVIEW)' : '(GUARDAR)');
+  console.log('🚀 [PDF GENERATOR] Iniciando generación con jsPDF - VERSIÓN SIMPLE', isPreview ? '(PREVIEW)' : '(GUARDAR)');
 
   try {
-    // Crear un div temporal para renderizar el componente
-    const tempDiv = document.createElement('div');
-    tempDiv.style.position = 'absolute';
-    tempDiv.style.left = '-9999px';
-    tempDiv.style.top = '-9999px';
-    tempDiv.style.width = '210mm'; // A4 width
-    tempDiv.style.background = 'white';
-    document.body.appendChild(tempDiv);
-
-    // Renderizar el componente React apropiado
-    const root = createRoot(tempDiv);
+    // Crear nuevo documento PDF
+    const doc = new jsPDF();
     
     const employeeName = `${employeeData.nombres} ${employeeData.apellidos}`;
     const formattedDate = new Date(generatedDate + 'T12:00:00').toLocaleDateString('es-AR', {
@@ -165,70 +153,67 @@ export const generateAndUploadPDF = async (params: GeneratePDFParams): Promise<P
 
     console.log('📄 [PDF GENERATOR] Generando para:', employeeName, 'Fecha:', formattedDate);
 
-    // Renderizar según tipo de documento
+    // Obtener contenido según el tipo de documento
+    let content: any[] = [];
     if (documentType === 'reglamento_interno') {
-      root.render(
-        <ReglamentoInterno
-          employeeName={employeeName}
-          date={formattedDate}
-        />
-      );
+      content = generateReglamentoContent(employeeName, employeeData.dni, formattedDate);
     } else if (documentType === 'consentimiento_datos_biometricos') {
-      root.render(
-        <ConsentimientoDatosBiometricos
-          employeeName={employeeName}
-          employeeDni={employeeData.dni}
-          employeeAddress={employeeData.direccion || 'Sin dirección registrada'}
-          date={formattedDate}
-        />
-      );
+      content = generateConsentimientoContent(employeeName, employeeData.dni, employeeData.direccion || 'Sin dirección registrada', formattedDate);
     } else {
       throw new Error(`Tipo de documento no soportado: ${documentType}`);
     }
 
-    // Esperar a que React renderice
-    await new Promise(resolve => setTimeout(resolve, 500));
+    // Configurar fuente y márgenes
+    doc.setFont("helvetica");
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const maxWidth = pageWidth - (margin * 2);
+    let yPosition = margin;
 
-    console.log('📝 [PDF GENERATOR] Convirtiendo HTML a PDF...');
+    console.log('📝 [PDF GENERATOR] Agregando contenido al PDF...');
 
-    // Configurar html2pdf con opciones optimizadas
-    const opt = {
-      margin: [10, 10, 10, 10],
-      filename: `documento_${documentId}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        letterRendering: true,
-        scrollY: 0,
-        scrollX: 0
-      },
-      jsPDF: { 
-        unit: 'mm', 
-        format: 'a4', 
-        orientation: 'portrait',
-        compress: true
-      },
-      pagebreak: { 
-        mode: ['avoid-all', 'css', 'legacy']
+    // Agregar contenido al PDF
+    content.forEach((item, index) => {
+      // Verificar si necesitamos nueva página
+      if (yPosition > pageHeight - 30) {
+        doc.addPage();
+        yPosition = margin;
       }
-    };
 
-    // Generar el PDF
-    const pdfBlob = await html2pdf().set(opt).from(tempDiv).outputPdf('blob');
+      // Configurar estilo
+      if (item.bold) {
+        doc.setFont("helvetica", "bold");
+      } else {
+        doc.setFont("helvetica", "normal");
+      }
+      
+      doc.setFontSize(item.fontSize || 12);
 
-    console.log('📦 [PDF GENERATOR] PDF generado, tamaño:', pdfBlob.size, 'bytes');
+      if (item.text === "") {
+        // Espacio en blanco
+        yPosition += item.fontSize || 12;
+      } else if (item.align === "center") {
+        // Texto centrado
+        const textWidth = doc.getTextWidth(item.text);
+        const xPosition = (pageWidth - textWidth) / 2;
+        doc.text(item.text, xPosition, yPosition);
+        yPosition += (item.fontSize || 12) + 5;
+      } else {
+        // Texto normal
+        const lines = doc.splitTextToSize(item.text, maxWidth);
+        doc.text(lines, margin, yPosition);
+        yPosition += (lines.length * (item.fontSize || 12)) + 5;
+      }
+    });
 
-    // Limpiar
-    root.unmount();
-    document.body.removeChild(tempDiv);
+    // Generar blob
+    const blob = doc.output('blob');
+    console.log('📦 [PDF GENERATOR] PDF generado con jsPDF, tamaño:', blob.size, 'bytes');
 
-    if (pdfBlob.size === 0) {
+    if (blob.size === 0) {
       throw new Error('El PDF generado está vacío');
     }
-
-    const blob = new Blob([pdfBlob], { type: 'application/pdf' });
 
     // Solo subir a Supabase si NO es preview
     if (!isPreview) {
@@ -259,7 +244,7 @@ export const generateAndUploadPDF = async (params: GeneratePDFParams): Promise<P
         throw new Error('No se pudo obtener la URL del archivo');
       }
 
-      console.log('🎉 [PDF GENERATOR] Proceso completado exitosamente');
+      console.log('🎉 [PDF GENERATOR] Proceso completado exitosamente con jsPDF');
 
       return {
         success: true,

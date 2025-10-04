@@ -193,27 +193,7 @@ const DocumentsModule = () => {
       }
 
       // Generar el PDF y subirlo
-      const pdfResult = await generateAndUploadPDF({
-        documentType: docRecord.document_type,
-        employeeData: {
-          nombres: employee.nombres,
-          apellidos: employee.apellidos,
-          dni: employee.dni,
-          direccion: employee.direccion || '',
-        },
-        generatedDate: docRecord.generated_date,
-        documentId: docRecord.id,
-      });
-
-      if (!pdfResult.success || !pdfResult.pdfUrl) {
-        throw new Error(pdfResult.error || 'Error generando PDF');
-      }
-
-      // Actualizar documento con la URL del PDF
-      await updateDocument(docRecord.id, { pdf_url: pdfResult.pdfUrl });
-
-      // Extraer nombre del archivo de la URL
-      const fileName = pdfResult.pdfUrl.split('/').pop();
+      const fileName = await generateAndUploadPDF(docRecord);
       
       // Descargar el archivo recién subido
       const { data, error } = await supabase.storage

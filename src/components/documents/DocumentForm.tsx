@@ -17,17 +17,15 @@ interface DocumentFormProps {
 
 const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
   const { toast } = useToast();
-  // Obtener fecha actual en zona horaria de Argentina (UTC-3)
-  const getCurrentDateInArgentina = () => {
+  // Obtener fecha actual en formato correcto
+  const getCurrentDate = () => {
     const now = new Date();
-    // Ajustar a zona horaria de Argentina (UTC-3)
-    const argentinaTime = new Date(now.getTime() - (now.getTimezoneOffset() * 60000) + (-3 * 60 * 60 * 1000));
-    return argentinaTime.toISOString().split('T')[0];
+    return now.toISOString().split('T')[0];
   };
 
   const [formData, setFormData] = useState({
     employee_id: "",
-    generated_date: getCurrentDateInArgentina(), // Fecha actual en Argentina
+    generated_date: getCurrentDate(), // Fecha actual
     document_type: "",
   });
 

@@ -12,31 +12,49 @@ const ReglamentoInterno = React.forwardRef<
   return (
     <div
       ref={ref}
-      className="bg-white text-black p-12"
       style={{
         width: "210mm",
         minHeight: "297mm",
         margin: "0 auto",
         fontFamily: "Arial, sans-serif",
+        backgroundColor: "white",
+        color: "black",
+        padding: "48px", // p-12 = 48px
+        lineHeight: "1.5"
       }}
     >
-      {/* Page 1 */}
-      <div className="space-y-6">
-        <h1 className="text-center text-2xl font-bold uppercase mb-2">
+      <div style={{ marginBottom: "24px" }}>
+        <h1 style={{
+          textAlign: "center",
+          fontSize: "24px",
+          fontWeight: "bold",
+          textTransform: "uppercase",
+          marginBottom: "8px"
+        }}>
           REGLAMENTO INTERNO
         </h1>
-        <h2 className="text-center text-xl font-bold uppercase mb-8">
+        <h2 style={{
+          textAlign: "center",
+          fontSize: "20px",
+          fontWeight: "bold",
+          textTransform: "uppercase",
+          marginBottom: "32px"
+        }}>
           AVÍCOLA LA PALOMA
         </h2>
 
-        <p className="mb-2">
+        <p style={{ marginBottom: "8px" }}>
           <strong>Fecha:</strong> {date}
         </p>
-        <p className="mb-6">
+        <p style={{ marginBottom: "24px" }}>
           <strong>Nombre del empleado:</strong> {employeeName}
         </p>
 
-        <p className="text-justify leading-relaxed mb-6">
+        <p style={{
+          textAlign: "justify",
+          lineHeight: "1.6",
+          marginBottom: "24px"
+        }}>
           Este reglamento tiene por objetivo establecer normas claras de
           convivencia, obligaciones, derechos y procedimientos que garanticen un
           ambiente de trabajo ordenado, seguro y respetuoso para todos.

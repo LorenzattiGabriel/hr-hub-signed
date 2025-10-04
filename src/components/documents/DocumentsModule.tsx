@@ -68,9 +68,17 @@ const DocumentsModule = () => {
       }
       
       console.log('👤 [DOCUMENTS MODULE] Empleado encontrado:', employee.nombres, employee.apellidos);
+      console.log('🔍 [DOCUMENTS MODULE] Datos completos del empleado:', {
+        id: employee.id,
+        nombres: employee.nombres,
+        apellidos: employee.apellidos,
+        dni: employee.dni,
+        direccion: employee.direccion,
+        email: employee.email
+      });
       
-      // Usar la utilidad centralizada de generación de PDF
-      const pdfResult = await generateAndUploadPDF({
+      // Preparar datos para PDF
+      const pdfParams = {
         documentType: newDoc.document_type,
         employeeData: {
           nombres: employee.nombres,
@@ -80,7 +88,12 @@ const DocumentsModule = () => {
         },
         generatedDate: newDoc.generated_date,
         documentId: newDoc.id,
-      });
+      };
+      
+      console.log('📤 [DOCUMENTS MODULE] Enviando parámetros a generateAndUploadPDF:', pdfParams);
+      
+      // Usar la utilidad centralizada de generación de PDF
+      const pdfResult = await generateAndUploadPDF(pdfParams);
       
       console.log('📊 [DOCUMENTS MODULE] Resultado PDF:', pdfResult);
       
@@ -385,7 +398,7 @@ const DocumentsModule = () => {
                       </td>
                       <td className="py-4 px-4">
                         <span className="text-sm text-foreground">
-                          {new Date(document.generated_date).toLocaleDateString('es-AR')}
+                          {new Date(document.generated_date + 'T12:00:00').toLocaleDateString('es-AR')}
                         </span>
                       </td>
                       <td className="py-4 px-4">

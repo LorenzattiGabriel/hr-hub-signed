@@ -1,0 +1,478 @@
+import { jsPDF } from 'jspdf';
+import { supabase } from "@/integrations/supabase/client";
+
+export interface GeneratePDFParams {
+  documentType: string;
+  employeeData: {
+    nombres: string;
+    apellidos: string;
+    dni: string;
+    direccion?: string;
+  };
+  generatedDate: string;
+  documentId: string;
+}
+
+export interface PDFGenerationResult {
+  success: boolean;
+  pdfUrl?: string;
+  error?: string;
+  blob?: Blob;
+}
+
+export interface SignPDFParams {
+  documentId: string;
+  signature?: string;
+  signatureCode?: string;
+  signedDate: string;
+}
+
+// Función que genera PDF directamente con jsPDF - SIN html2pdf
+export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PDFGenerationResult> => {
+  const { documentType, employeeData, generatedDate, documentId } = params;
+  
+  const isPreview = documentId.startsWith('preview_');
+  console.log('🚀 [DIRECT PDF] Generando PDF DIRECTAMENTE con jsPDF', isPreview ? '(PREVIEW)' : '(GUARDAR)');
+
+  try {
+    // Validar que los datos necesarios estén presentes
+    if (!employeeData || !employeeData.nombres || !employeeData.apellidos) {
+      throw new Error(`Datos del empleado incompletos: ${JSON.stringify(employeeData)}`);
+    }
+    
+    if (!generatedDate) {
+      throw new Error(`Fecha de generación no proporcionada: ${generatedDate}`);
+    }
+    
+    if (!documentType) {
+      throw new Error(`Tipo de documento no proporcionado: ${documentType}`);
+    }
+    
+    const doc = new jsPDF();
+    
+    const employeeName = `${employeeData.nombres} ${employeeData.apellidos}`;
+    // Formatear fecha correctamente evitando problemas de zona horaria
+    const dateObj = new Date(generatedDate + 'T12:00:00');
+    const formattedDate = dateObj.toLocaleDateString("es-AR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    console.log('📄 [DIRECT PDF] Generando para:', employeeName, 'Fecha:', formattedDate);
+    console.log('🔍 [DIRECT PDF] Datos completos del empleado:', {
+      nombres: employeeData.nombres,
+      apellidos: employeeData.apellidos,
+      dni: employeeData.dni,
+      direccion: employeeData.direccion,
+      employeeName: employeeName,
+      documentType: documentType,
+      generatedDate: generatedDate,
+      formattedDate: formattedDate
+    });
+
+    if (documentType === 'consentimiento_datos_biometricos') {
+      // Consentimiento de Datos Biométricos - VERSIÓN COMPLETA CON MÚLTIPLES PÁGINAS
+      let yPos = 25;
+      
+      // ENCABEZADO
+      doc.setFontSize(14);
+      doc.text('CONSTANCIA DE CONSENTIMIENTO PARA USO DE', 105, yPos, { align: 'center' });
+      yPos += 10;
+      doc.text('CÁMARAS DE VIGILANCIA Y DATOS BIOMÉTRICOS', 105, yPos, { align: 'center' });
+      yPos += 25;
+      
+      doc.setFontSize(12);
+      doc.text(`Fecha: ${formattedDate}`, 20, yPos);
+      yPos += 20;
+      
+      // PÁRRAFO PRINCIPAL
+      const mainText = `En la ciudad de Córdoba Capital, comparece el/la trabajador/a ${employeeName}, DNI Nº ${employeeData.dni}, con domicilio en ${employeeData.direccion || 'Sin dirección registrada'}, quien manifiesta prestar su consentimiento expreso en los términos de la Ley de Protección de Datos Personales N° 25.326 y normativa laboral aplicable.`;
+      
+      const splitMainText = doc.splitTextToSize(mainText, 170);
+      doc.text(splitMainText, 20, yPos);
+      yPos += splitMainText.length * 7 + 20;
+      
+      // SECCIÓN 1: CÁMARAS DE VIGILANCIA
+      doc.setFontSize(14);
+      doc.text('1. CÁMARAS DE VIGILANCIA', 20, yPos);
+      yPos += 15;
+      
+      doc.setFontSize(12);
+      const camarasIntro = 'El/la trabajador/a declara haber sido informado/a de la existencia de cámaras de seguridad instaladas en las instalaciones de la empresa Avícola La Paloma (en adelante "la Empresa"), cuya finalidad exclusiva es la prevención de riesgos, seguridad de las personas, resguardo de bienes materiales y control del cumplimiento de normas laborales.';
+      const splitCamarasIntro = doc.splitTextToSize(camarasIntro, 170);
+      doc.text(splitCamarasIntro, 20, yPos);
+      yPos += splitCamarasIntro.length * 7 + 10;
+      
+      // Lista de cámaras
+      const camarasItems = [
+        'Las cámaras se encuentran ubicadas en espacios comunes y áreas de trabajo, sin invadir espacios privados.',
+        'Las imágenes captadas podrán ser utilizadas como medio de prueba en caso de ser necesario y se almacenarán por un período limitado conforme a la política interna de la Empresa.'
+      ];
+      
+      camarasItems.forEach(item => {
+        const splitItem = doc.splitTextToSize(`• ${item}`, 165);
+        doc.text(splitItem, 25, yPos);
+        yPos += splitItem.length * 7 + 8;
+      });
+      yPos += 10;
+      
+      // SECCIÓN 2: DATOS BIOMÉTRICOS
+      doc.setFontSize(14);
+      doc.text('2. DATOS BIOMÉTRICOS – REGISTRO DE HUELLA DIGITAL', 20, yPos);
+      yPos += 15;
+      
+      doc.setFontSize(12);
+      const bioIntro = 'El/la trabajador/a presta consentimiento para la recolección y tratamiento de su dato biométrico (huella digital) con la finalidad de:';
+      const splitBioIntro = doc.splitTextToSize(bioIntro, 170);
+      doc.text(splitBioIntro, 20, yPos);
+      yPos += splitBioIntro.length * 7 + 10;
+      
+      // Lista de finalidades biométricas
+      const bioItems = [
+        'Registrar su asistencia y puntualidad mediante el reloj biométrico implementado por la Empresa.',
+        'Garantizar la correcta administración de la jornada laboral.'
+      ];
+      
+      bioItems.forEach(item => {
+        const splitItem = doc.splitTextToSize(`• ${item}`, 165);
+        doc.text(splitItem, 25, yPos);
+        yPos += splitItem.length * 7 + 8;
+      });
+      yPos += 10;
+      
+      // Párrafo sobre confidencialidad
+      const confidencialidadText = 'Los datos biométricos serán tratados con carácter estrictamente confidencial, almacenados en soportes digitales seguros y utilizados únicamente para la finalidad descripta. No serán cedidos a terceros, salvo obligación legal.';
+      const splitConfidencialidad = doc.splitTextToSize(confidencialidadText, 170);
+      doc.text(splitConfidencialidad, 20, yPos);
+      yPos += splitConfidencialidad.length * 7 + 15;
+      
+      // NUEVA PÁGINA
+      doc.addPage();
+      yPos = 30;
+      
+      // SECCIÓN 3: DERECHOS DEL TRABAJADOR
+      doc.setFontSize(14);
+      doc.text('3. DERECHOS DEL TRABAJADOR/A', 20, yPos);
+      yPos += 15;
+      
+      doc.setFontSize(12);
+      doc.text('El/la trabajador/a reconoce que:', 20, yPos);
+      yPos += 15;
+      
+      // Lista de derechos
+      const derechosItems = [
+        'Puede ejercer en cualquier momento sus derechos de acceso, rectificación, actualización o supresión de los datos conforme lo establece la Ley N° 25.326.',
+        'Su consentimiento puede ser revocado mediante notificación fehaciente a la Empresa, sin efectos retroactivos sobre el tratamiento ya realizado.'
+      ];
+      
+      derechosItems.forEach(item => {
+        const splitItem = doc.splitTextToSize(`• ${item}`, 165);
+        doc.text(splitItem, 25, yPos);
+        yPos += splitItem.length * 7 + 10;
+      });
+      yPos += 20;
+      
+      // SECCIÓN DE FIRMAS
+      doc.setFontSize(12);
+      doc.text('FIRMA DEL TRABAJADOR/A', 20, yPos);
+      yPos += 20;
+      
+      doc.text(`Nombre y Apellido: ${employeeName}`, 20, yPos);
+      yPos += 20;
+      
+      doc.text(`DNI: ${employeeData.dni}`, 20, yPos);
+      yPos += 20;
+      
+      doc.text(`Fecha: ${formattedDate}`, 20, yPos);
+      yPos += 30;
+      
+      doc.text('Firma: _________________________________', 20, yPos);
+      yPos += 40;
+      
+      // FIRMA DE LA EMPRESA
+      doc.text('FIRMA DE LA EMPRESA', 20, yPos);
+      yPos += 20;
+      
+      doc.text('Representante: _________________________________', 20, yPos);
+      yPos += 20;
+      
+      doc.text('Cargo: _________________________________', 20, yPos);
+      yPos += 20;
+      
+      doc.text(`Fecha: ${formattedDate}`, 20, yPos);
+      yPos += 20;
+      
+      doc.text('Firma: _________________________________', 20, yPos);
+      
+    } else if (documentType === 'reglamento_interno') {
+      // Reglamento Interno - VERSIÓN COMPLETA CON MÚLTIPLES PÁGINAS
+      let yPos = 30;
+      
+      // PÁGINA 1 - ENCABEZADO
+      doc.setFontSize(18);
+      doc.text('REGLAMENTO INTERNO', 105, yPos, { align: 'center' });
+      yPos += 20;
+      doc.setFontSize(16);
+      doc.text('AVÍCOLA LA PALOMA', 105, yPos, { align: 'center' });
+      yPos += 30;
+      
+      doc.setFontSize(12);
+      doc.text(`Fecha: ${formattedDate}`, 20, yPos);
+      yPos += 15;
+      doc.text(`Nombre del empleado: ${employeeName}`, 20, yPos);
+      yPos += 25;
+      
+      const introText = 'Este reglamento tiene por objetivo establecer normas claras de convivencia, obligaciones, derechos y procedimientos que garanticen un ambiente de trabajo ordenado, seguro y respetuoso para todos.';
+      const splitIntroText = doc.splitTextToSize(introText, 170);
+      doc.text(splitIntroText, 20, yPos);
+      yPos += splitIntroText.length * 7 + 15;
+      
+      // SECCIÓN 1: OBLIGACIONES Y DEBERES
+      doc.setFontSize(14);
+      doc.text('1. OBLIGACIONES Y DEBERES DE LOS EMPLEADOS', 20, yPos);
+      yPos += 15;
+      
+      doc.setFontSize(12);
+      const obligaciones = [
+        'Cumplir con las obligaciones propias del puesto de trabajo, conforme a los principios de buena fe, diligencia y responsabilidad.',
+        'Mantener el orden y aseo de los lugares de acceso común y convivencia con compañeros de trabajo.',
+        'Cuidar y conservar en condiciones óptimas las herramientas, maquinarias, elementos de limpieza y demás materiales de trabajo.',
+        'Cumplir y respetar las medidas de seguridad e higiene establecidas por la empresa.'
+      ];
+      
+      obligaciones.forEach(item => {
+        const splitItem = doc.splitTextToSize(`• ${item}`, 165);
+        doc.text(splitItem, 25, yPos);
+        yPos += splitItem.length * 7 + 5;
+      });
+      yPos += 10;
+      
+      // SECCIÓN 2: DERECHOS DE LOS EMPLEADOS
+      doc.setFontSize(14);
+      doc.text('2. DERECHOS DE LOS EMPLEADOS', 20, yPos);
+      yPos += 15;
+      
+      doc.setFontSize(12);
+      const derechos = [
+        'Desempeñarse en un ambiente sano, seguro y libre de riesgos innecesarios.',
+        'Conocer los riesgos inherentes a su puesto de trabajo.',
+        'Percibir una retribución justa acorde a las tareas realizadas.',
+        'Recibir los elementos de trabajo y de protección personal necesarios según la tarea a realizar.',
+        'Acceder al descanso vacacional anual conforme a la normativa vigente.'
+      ];
+      
+      derechos.forEach(item => {
+        const splitItem = doc.splitTextToSize(`• ${item}`, 165);
+        doc.text(splitItem, 25, yPos);
+        yPos += splitItem.length * 7 + 5;
+      });
+      
+      // NUEVA PÁGINA
+      doc.addPage();
+      yPos = 30;
+      
+      // SECCIÓN 3: NORMAS DE TRABAJO
+      doc.setFontSize(14);
+      doc.text('3. NORMAS DE TRABAJO DENTRO DE LA GRANJA', 20, yPos);
+      yPos += 15;
+      
+      doc.setFontSize(12);
+      const normas = [
+        'Queda prohibido fumar en las zonas de trabajo.',
+        'No se podrá utilizar el teléfono celular en horario laboral, salvo para fines estrictamente laborales.',
+        'Mantener en todo momento un trato de respeto y educación hacia compañeros, superiores y público en general.',
+        'Presentarse al trabajo con higiene personal adecuada y con el uniforme limpio y en buen estado.',
+        'Queda prohibido jugar con herramientas de trabajo o darles un uso indebido.',
+        'Es obligatorio el uso de gafas de seguridad cuando la tarea lo requiera.'
+      ];
+      
+      normas.forEach(item => {
+        const splitItem = doc.splitTextToSize(`• ${item}`, 165);
+        doc.text(splitItem, 25, yPos);
+        yPos += splitItem.length * 7 + 5;
+      });
+      yPos += 10;
+      
+      // SECCIÓN 4: PROHIBICIONES
+      doc.setFontSize(14);
+      doc.text('4. PROHIBICIONES', 20, yPos);
+      yPos += 15;
+      
+      doc.setFontSize(12);
+      const prohibiciones = [
+        'Faltar al trabajo sin causa justificada o sin autorización previa.',
+        'Sustraer de la empresa herramientas, insumos, materia prima o productos elaborados.',
+        'Presentarse al trabajo en estado de embriaguez.',
+        'Presentarse bajo los efectos de narcóticos o drogas enervantes, salvo prescripción médica debidamente acreditada.'
+      ];
+      
+      prohibiciones.forEach(item => {
+        const splitItem = doc.splitTextToSize(`• ${item}`, 165);
+        doc.text(splitItem, 25, yPos);
+        yPos += splitItem.length * 7 + 5;
+      });
+      yPos += 10;
+      
+      // SECCIÓN 5: CERTIFICADOS Y AUSENCIAS
+      doc.setFontSize(14);
+      doc.text('5. CERTIFICADOS Y AUSENCIAS', 20, yPos);
+      yPos += 15;
+      
+      doc.setFontSize(12);
+      const ausencias = [
+        'En caso de enfermedad, el trabajador deberá avisar con al menos 2 horas de anticipación sobre su ausencia, salvo situaciones de urgencia.',
+        'El certificado médico deberá ser cargado en el formulario de ausencias dentro de las 24 horas de producida la falta.',
+        'Las vacaciones deberán solicitarse en el mes de octubre indicando las fechas de preferencia. La empresa, en base a la demanda productiva y organización interna, asignará los períodos entre noviembre y abril.',
+        'La falta de presentación del certificado en tiempo y forma dará lugar al descuento del día no trabajado.'
+      ];
+      
+      ausencias.forEach(item => {
+        if (yPos > 250) { // Si no hay espacio, nueva página
+          doc.addPage();
+          yPos = 30;
+        }
+        const splitItem = doc.splitTextToSize(`• ${item}`, 165);
+        doc.text(splitItem, 25, yPos);
+        yPos += splitItem.length * 7 + 5;
+      });
+      
+      // FIRMA
+      yPos += 20;
+      if (yPos > 230) { // Si no hay espacio para firma, nueva página
+        doc.addPage();
+        yPos = 30;
+      }
+      
+      doc.setFontSize(12);
+      doc.text('Firma del empleado:', 20, yPos);
+      yPos += 20;
+      doc.text('_________________________', 20, yPos);
+      yPos += 15;
+      doc.text(`Aclaración: ${employeeName}`, 20, yPos);
+      yPos += 10;
+      doc.text(`Fecha: ${formattedDate}`, 20, yPos);
+      
+    } else {
+      throw new Error(`Tipo de documento no soportado: ${documentType}`);
+    }
+
+    // Generar blob
+    const blob = doc.output('blob');
+    console.log('📦 [DIRECT PDF] PDF generado con jsPDF directo, tamaño:', blob.size, 'bytes');
+
+    if (blob.size === 0) {
+      throw new Error('El PDF generado está vacío');
+    }
+
+    // Solo subir a Supabase si NO es preview
+    if (!isPreview) {
+      const fileName = `${documentId}_${documentType}_${employeeData.dni}_${Date.now()}.pdf`;
+      console.log('☁️ [DIRECT PDF] Subiendo a Supabase:', fileName);
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(fileName, blob, {
+          contentType: 'application/pdf',
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('❌ [DIRECT PDF] Error subiendo:', uploadError);
+        throw new Error(`Error subiendo archivo: ${uploadError.message}`);
+      }
+
+      console.log('✅ [DIRECT PDF] Archivo subido exitosamente');
+
+      // Obtener URL pública
+      const { data: urlData } = supabase.storage
+        .from('documents')
+        .getPublicUrl(fileName);
+
+      if (!urlData?.publicUrl) {
+        throw new Error('No se pudo obtener la URL del archivo');
+      }
+
+      console.log('🎉 [DIRECT PDF] Proceso completado exitosamente');
+
+      return {
+        success: true,
+        pdfUrl: urlData.publicUrl,
+        blob: blob
+      };
+    } else {
+      console.log('📥 [DIRECT PDF] Preview generado - NO se sube a Supabase');
+      
+      return {
+        success: true,
+        blob: blob
+      };
+    }
+
+  } catch (error) {
+    console.error('❌ [DIRECT PDF] Error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    };
+  }
+};
+
+// Función simple para firmar (actualizar estado)
+export const signPDF = async (params: SignPDFParams): Promise<PDFGenerationResult> => {
+  console.log('✍️ [DIRECT PDF] Firmando documento:', params.documentId);
+  
+  try {
+    // Actualizar documento en la base de datos
+    const { error: updateError } = await supabase
+      .from('documents')
+      .update({
+        status: 'firmado',
+        signed_date: params.signedDate,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', params.documentId);
+    
+    if (updateError) {
+      throw new Error(`Error actualizando documento: ${updateError.message}`);
+    }
+    
+    console.log('✅ [DIRECT PDF] Documento firmado exitosamente');
+    
+    return {
+      success: true
+    };
+    
+  } catch (error) {
+    console.error('❌ [DIRECT PDF] Error firmando documento:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    };
+  }
+};
+
+// Función para descargar PDF desde Supabase Storage
+export const downloadPDFFromStorage = async (fileName: string): Promise<Blob> => {
+  const { data, error } = await supabase.storage
+    .from('documents')
+    .download(fileName);
+
+  if (error) {
+    throw new Error(`Error descargando archivo: ${error.message}`);
+  }
+
+  return data;
+};
+
+// Función para eliminar PDF de Supabase Storage
+export const deletePDFFromStorage = async (fileName: string): Promise<void> => {
+  const { error } = await supabase.storage
+    .from('documents')
+    .remove([fileName]);
+
+  if (error) {
+    throw new Error(`Error eliminando archivo: ${error.message}`);
+  }
+};

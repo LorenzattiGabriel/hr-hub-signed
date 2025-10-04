@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, X } from "lucide-react";
 import html2pdf from "html2pdf.js";
 import { useToast } from "@/hooks/use-toast";
-import ConsentimientoDatosBiometricos from "./templates/ConsentimientoDatosBiometricos";
-import ReglamentoInterno from "./templates/ReglamentoInterno";
+import ConsentimientoSimple from "./templates/ConsentimientoSimple";
+import ReglamentoInternoSimple from "./templates/ReglamentoInternoSimple";
 
 interface DocumentPreviewProps {
   documentType: string;
@@ -32,7 +32,9 @@ const DocumentPreview = ({
   const documentRef = useRef<HTMLDivElement>(null);
 
   const employeeName = `${employeeData.nombres} ${employeeData.apellidos}`;
-  const formattedDate = new Date(generatedDate).toLocaleDateString("es-AR", {
+  // Formatear fecha correctamente evitando problemas de zona horaria
+  const dateObj = new Date(generatedDate + 'T12:00:00');
+  const formattedDate = dateObj.toLocaleDateString("es-AR", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -40,12 +42,12 @@ const DocumentPreview = ({
 
   const handleDownloadPDF = async () => {
     try {
-      console.log('📥 [PREVIEW] Descargando PDF usando el mismo sistema que Confirmar y Guardar');
+      console.log('📥 [PREVIEW] Descargando PDF usando función compartida');
       
-      // Usar el mismo generador que usa "Confirmar y Guardar"
-      const { generateAndUploadPDF } = await import("@/utils/pdfGenerator");
+      // Usar el generador directo que funciona sin html2pdf
+      const { generatePDFDirectly } = await import("@/utils/directPdfGenerator");
       
-      const result = await generateAndUploadPDF({
+      const result = await generatePDFDirectly({
         documentType,
         employeeData: {
           nombres: employeeData.nombres,
@@ -87,7 +89,7 @@ const DocumentPreview = ({
   const renderTemplate = () => {
     if (documentType === "consentimiento_datos_biometricos") {
       return (
-        <ConsentimientoDatosBiometricos
+        <ConsentimientoSimple
           ref={documentRef}
           employeeName={employeeName}
           employeeDni={employeeData.dni}
@@ -97,7 +99,7 @@ const DocumentPreview = ({
       );
     } else if (documentType === "reglamento_interno") {
       return (
-        <ReglamentoInterno
+        <ReglamentoInternoSimple
           ref={documentRef}
           employeeName={employeeName}
           date={formattedDate}

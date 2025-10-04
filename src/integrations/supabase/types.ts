@@ -409,6 +409,42 @@ export type Database = {
         }
         Relationships: []
       }
+      payroll: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          employee_id: string
+          id: string
+          payment_date: string
+          period: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          employee_id: string
+          id?: string
+          payment_date: string
+          period: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          employee_id?: string
+          id?: string
+          payment_date?: string
+          period?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       performance_evaluations: {
         Row: {
           areas_desarrollo: string[] | null

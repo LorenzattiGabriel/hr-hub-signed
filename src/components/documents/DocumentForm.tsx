@@ -11,7 +11,7 @@ import DocumentPreview from "./DocumentPreview";
 
 interface DocumentFormProps {
   onBack: () => void;
-  onSave: (documentData: any) => Promise<void>;
+  onSave: (documentData: any) => Promise<any>;
   employees: any[];
 }
 

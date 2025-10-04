@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEmployees } from "@/hooks/useEmployees";
-import { toast } from "sonner";
+import { usePayroll } from "@/hooks/usePayroll";
 import { CalendarIcon, DollarSign } from "lucide-react";
 
 const payrollSchema = z.object({
@@ -27,6 +27,7 @@ type PayrollFormValues = z.infer<typeof payrollSchema>;
 
 const PayrollForm = () => {
   const { employees } = useEmployees();
+  const { createPayroll } = usePayroll();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<PayrollFormValues>({
@@ -44,12 +45,17 @@ const PayrollForm = () => {
   const onSubmit = async (data: PayrollFormValues) => {
     setIsSubmitting(true);
     try {
-      // Aquí se integrará con Supabase
-      console.log("Payroll data:", data);
-      toast.success("Registro de pago guardado correctamente");
+      await createPayroll.mutateAsync({
+        employee_id: data.employeeId,
+        type: data.type,
+        amount: parseFloat(data.amount),
+        period: data.period,
+        payment_date: data.paymentDate,
+        description: data.description || undefined,
+      });
       form.reset();
     } catch (error) {
-      toast.error("Error al guardar el registro de pago");
+      // Error already handled by the hook
     } finally {
       setIsSubmitting(false);
     }

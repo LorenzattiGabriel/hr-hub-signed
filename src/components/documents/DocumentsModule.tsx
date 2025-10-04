@@ -191,9 +191,16 @@ const DocumentsModule = () => {
         });
         return;
       }
-
+      
       // Generar el PDF y subirlo
-      const fileName = await generateAndUploadPDF(docRecord);
+      const pdfResult = await generateAndUploadPDF(docRecord);
+      
+      if (!pdfResult.success || !pdfResult.pdfUrl) {
+        throw new Error(pdfResult.error || 'Error generando PDF');
+      }
+      
+      // Extraer el nombre del archivo de la URL
+      const fileName = pdfResult.pdfUrl.split('/').pop();
       
       // Descargar el archivo recién subido
       const { data, error } = await supabase.storage

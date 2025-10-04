@@ -6,16 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEmployees } from "@/hooks/useEmployees";
-import { Search, Filter, Download, Eye } from "lucide-react";
-
-// Payroll data - initially empty for real data loading
-const mockPayrollData: any[] = [];
+import { usePayroll } from "@/hooks/usePayroll";
+import { Search, Filter, Download, Eye, Trash2 } from "lucide-react";
 
 const PayrollList = () => {
   const { employees } = useEmployees();
+  const { payrollRecords, isLoading, deletePayroll } = usePayroll();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterPeriod, setFilterPeriod] = useState("all");
+
+  const getEmployeeName = (employeeId: string) => {
+    const employee = employees.find(e => e.id === employeeId);
+    return employee ? `${employee.nombres} ${employee.apellidos}` : "Empleado desconocido";
+  };
 
   const getTypeLabel = (type: string) => {
     const labels = {
@@ -62,17 +66,19 @@ const PayrollList = () => {
     return date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
   };
 
-  const filteredData = mockPayrollData.filter(record => {
-    const matchesSearch = record.employeeName.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredData = payrollRecords.filter(record => {
+    const employeeName = getEmployeeName(record.employee_id);
+    const matchesSearch = employeeName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = filterType === "all" || record.type === filterType;
     const matchesPeriod = filterPeriod === "all" || record.period === filterPeriod;
     
     return matchesSearch && matchesType && matchesPeriod;
   });
 
-  const generatePayslip = (record: any) => {
-    console.log("Generando recibo para:", record);
-    // Aquí se implementará la generación de PDF
+  const handleDelete = async (id: string) => {
+    if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
+      await deletePayroll.mutateAsync(id);
+    }
   };
 
   return (
@@ -136,7 +142,13 @@ const PayrollList = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredData.length === 0 ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Cargando registros...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredData.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No se encontraron registros de pagos
@@ -146,7 +158,7 @@ const PayrollList = () => {
                   filteredData.map((record) => (
                     <TableRow key={record.id}>
                       <TableCell className="font-medium">
-                        {record.employeeName}
+                        {getEmployeeName(record.employee_id)}
                       </TableCell>
                       <TableCell>
                         <Badge variant={getTypeVariant(record.type) as any}>
@@ -160,11 +172,11 @@ const PayrollList = () => {
                         {formatPeriod(record.period)}
                       </TableCell>
                       <TableCell>
-                        {formatDate(record.paymentDate)}
+                        {formatDate(record.payment_date)}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getStatusVariant(record.status) as any}>
-                          {getStatusLabel(record.status)}
+                        <Badge variant="default">
+                          Pagado
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -172,12 +184,9 @@ const PayrollList = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => generatePayslip(record)}
+                            onClick={() => handleDelete(record.id)}
                           >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>

@@ -35,36 +35,31 @@ const modules = [
     id: "employees",
     name: "Gestión de Empleados",
     icon: Users,
-    description: "Legajo Digital",
-    badge: "0"
+    description: "Legajo Digital"
   },
   {
     id: "vacations",
     name: "Vacaciones",
     icon: CalendarDays,
-    description: "Gestión de vacaciones",
-    badge: "0"
+    description: "Gestión de vacaciones"
   },
   {
     id: "absences",
     name: "Ausencias y Permisos",
     icon: ClipboardList,
-    description: "Permisos y Certificados",
-    badge: "0"
+    description: "Permisos y Certificados"
   },
   {
     id: "training",
     name: "Capacitaciones",
     icon: GraduationCap,
-    description: "Formación y Desarrollo",
-    badge: "0"
+    description: "Formación y Desarrollo"
   },
   {
     id: "uniforms",
     name: "Entrega de Uniformes",
     icon: Shirt,
-    description: "Control de Uniformes",
-    badge: "0"
+    description: "Control de Uniformes"
   },
   {
     id: "selection",

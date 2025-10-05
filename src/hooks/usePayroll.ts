@@ -5,7 +5,7 @@ import { toast } from "sonner";
 export interface PayrollRecord {
   id: string;
   employee_id: string;
-  type: "salary" | "advance" | "commission" | "deduction";
+  type: "salary" | "advance" | "bonus" | "deduction";
   amount: number;
   period: string;
   payment_date: string;

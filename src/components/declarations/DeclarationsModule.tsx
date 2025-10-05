@@ -168,9 +168,11 @@ const DeclarationsModule = () => {
               </div>
             </div>
             <div style="text-align: center; width: 45%;">
-              <div style="border-top: 1px solid #333; padding-top: 10px;">
-                <strong>Aclaración</strong><br>
+              <div style="margin-bottom: 5px;">
                 ${declaration.nombres} ${declaration.apellidos}
+              </div>
+              <div style="border-top: 1px solid #333; padding-top: 10px;">
+                <strong>Aclaración</strong>
               </div>
             </div>
           </div>

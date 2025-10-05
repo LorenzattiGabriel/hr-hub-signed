@@ -180,7 +180,7 @@ const DeclarationsModule = () => {
         </div>
 
         <div style="margin-top: 30px; text-align: center; font-size: 12px; color: #666;">
-          <p>Lugar y fecha: ________________, ${new Date().toLocaleDateString('es-AR')}</p>
+          <p>Lugar y fecha: ________________________________________________</p>
         </div>
       </div>
     `;

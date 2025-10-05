@@ -12,7 +12,7 @@ const PayrollModule = () => {
       <div>
         <h1 className="text-3xl font-bold text-foreground">Gestión de Nómina</h1>
         <p className="text-muted-foreground">
-          Administra sueldos, adelantos, comisiones y descuentos de tus empleados
+          Administra sueldos, adelantos, bonificaciones y descuentos de tus empleados
         </p>
       </div>
 
@@ -37,7 +37,7 @@ const PayrollModule = () => {
             <CardHeader>
               <CardTitle>Nuevo Registro de Pago</CardTitle>
               <CardDescription>
-                Registra sueldos, adelantos, comisiones o descuentos
+                Registra sueldos, adelantos, bonificaciones o descuentos
               </CardDescription>
             </CardHeader>
             <CardContent>

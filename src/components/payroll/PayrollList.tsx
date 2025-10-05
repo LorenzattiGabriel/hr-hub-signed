@@ -25,7 +25,7 @@ const PayrollList = () => {
     const labels = {
       salary: "Sueldo",
       advance: "Adelanto", 
-      commission: "Comisión",
+      bonus: "Bonificación",
       deduction: "Descuento"
     };
     return labels[type as keyof typeof labels];
@@ -35,7 +35,7 @@ const PayrollList = () => {
     const variants = {
       salary: "default",
       advance: "secondary",
-      commission: "outline",
+      bonus: "outline",
       deduction: "destructive"
     };
     return variants[type as keyof typeof variants];
@@ -87,7 +87,7 @@ const PayrollList = () => {
         <CardHeader>
           <CardTitle>Historial de Pagos</CardTitle>
           <CardDescription>
-            Consulta todos los registros de pagos, adelantos, comisiones y descuentos
+            Consulta todos los registros de pagos, adelantos, bonificaciones y descuentos
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -110,7 +110,7 @@ const PayrollList = () => {
                 <SelectItem value="all">Todos los tipos</SelectItem>
                 <SelectItem value="salary">Sueldos</SelectItem>
                 <SelectItem value="advance">Adelantos</SelectItem>
-                <SelectItem value="commission">Comisiones</SelectItem>
+                <SelectItem value="bonus">Bonificaciones</SelectItem>
                 <SelectItem value="deduction">Descuentos</SelectItem>
               </SelectContent>
             </Select>

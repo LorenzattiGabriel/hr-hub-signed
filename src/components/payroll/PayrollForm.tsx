@@ -14,7 +14,7 @@ import { CalendarIcon, DollarSign } from "lucide-react";
 
 const payrollSchema = z.object({
   employeeId: z.string().min(1, "Selecciona un empleado"),
-  type: z.enum(["salary", "advance", "commission", "deduction"], {
+  type: z.enum(["salary", "advance", "bonus", "deduction"], {
     required_error: "Selecciona el tipo de pago",
   }),
   amount: z.string().min(1, "El monto es requerido"),
@@ -65,7 +65,7 @@ const PayrollForm = () => {
     const labels = {
       salary: "Sueldo",
       advance: "Adelanto",
-      commission: "Comisión",
+      bonus: "Bonificación",
       deduction: "Descuento"
     };
     return labels[type as keyof typeof labels];
@@ -130,7 +130,7 @@ const PayrollForm = () => {
                     <SelectContent>
                       <SelectItem value="salary">Sueldo</SelectItem>
                       <SelectItem value="advance">Adelanto</SelectItem>
-                      <SelectItem value="commission">Comisión</SelectItem>
+                      <SelectItem value="bonus">Bonificación</SelectItem>
                       <SelectItem value="deduction">Descuento</SelectItem>
                     </SelectContent>
                   </Select>

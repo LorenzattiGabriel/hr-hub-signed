@@ -163,6 +163,7 @@ const DeclarationsModule = () => {
         <div style="margin-top: 50px;">
           <div style="display: flex; justify-content: space-between;">
             <div style="text-align: center; width: 45%;">
+              <div style="height: 24px; margin-bottom: 5px;"></div>
               <div style="border-top: 1px solid #333; padding-top: 10px;">
                 <strong>Firma del Declarante</strong>
               </div>

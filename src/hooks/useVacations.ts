@@ -257,6 +257,31 @@ export const useVacations = () => {
     }
   };
 
+  const deleteVacationRequest = async (requestId: string) => {
+    try {
+      const { error } = await supabase
+        .from('vacation_requests')
+        .delete()
+        .eq('id', requestId);
+
+      if (error) throw error;
+
+      await fetchVacationRequests();
+      
+      toast({
+        title: "Éxito",
+        description: "Solicitud eliminada correctamente",
+      });
+    } catch (error) {
+      console.error('Error deleting vacation request:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo eliminar la solicitud",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getEmployeeVacationBalance = (employeeId: string, year?: number) => {
     const targetYear = year || new Date().getFullYear();
     return vacationBalances.find(
@@ -275,6 +300,7 @@ export const useVacations = () => {
     addVacationRequest,
     approveVacationRequest,
     rejectVacationRequest,
+    deleteVacationRequest,
     updateVacationBalance,
     getTotalAvailableDays,
     getEmployeeVacationBalance,

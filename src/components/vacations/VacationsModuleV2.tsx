@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Download, Plus, Search, Clock, User, FileText } from "lucide-react";
+import { Calendar, Download, Plus, Search, Clock, User, FileText, Trash2 } from "lucide-react";
 import VacationForm from "./VacationFormV2";
 import VacationDetail from "./VacationDetail";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,7 @@ export const VacationsModule = () => {
     addVacationRequest, 
     approveVacationRequest, 
     rejectVacationRequest,
+    deleteVacationRequest,
     getEmployeeVacationBalance 
   } = useVacations();
 
@@ -111,60 +112,61 @@ export const VacationsModule = () => {
       const container = document.createElement("div");
       container.style.width = "210mm";
       container.style.minHeight = "297mm";
-      container.style.padding = "20mm";
+      container.style.padding = "15mm 20mm";
       container.style.fontFamily = "Arial, sans-serif";
       container.style.color = "#000";
       container.style.backgroundColor = "#fff";
       container.style.boxSizing = "border-box";
+      container.style.fontSize = "11px";
       
       container.innerHTML = `
-        <div style="text-align:center; margin-bottom:24px;">
-          <h2 style="margin:0 0 8px 0; font-size:18px; font-weight:bold;">AVÍCOLA La Paloma</h2>
+        <div style="text-align:center; margin-bottom:12px;">
+          <h2 style="margin:0 0 4px 0; font-size:16px; font-weight:bold;">AVÍCOLA La Paloma</h2>
         </div>
         
-        <h1 style="text-align:center; font-size:20px; font-weight:bold; margin:24px 0;">NOTIFICACIÓN DE VACACIONES</h1>
+        <h1 style="text-align:center; font-size:18px; font-weight:bold; margin:12px 0;">NOTIFICACIÓN DE VACACIONES</h1>
         
-        <div style="margin-bottom:16px;">
-          <p style="margin:8px 0;"><strong>Nombre y Apellido:</strong> ${empleadoNombre.toUpperCase()}</p>
-          <p style="margin:8px 0;"><strong>DNI:</strong> ${dni}</p>
+        <div style="margin-bottom:10px;">
+          <p style="margin:4px 0;"><strong>Nombre y Apellido:</strong> ${empleadoNombre.toUpperCase()}</p>
+          <p style="margin:4px 0;"><strong>DNI:</strong> ${dni}</p>
         </div>
         
-        <p style="line-height:1.8; text-align:justify; margin:24px 0;">
+        <p style="line-height:1.5; text-align:justify; margin:12px 0;">
           En cumplimiento de la Legislación vigente Art. 154 de la Ley de Contrato de trabajo, se le notifica que el período de descanso anual ${periodo} es de <strong>${dias} días</strong>, comenzando desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong> inclusive.
         </p>
         
-        <p style="margin:32px 0 48px 0;">Sin otro particular saludo muy atte.</p>
+        <p style="margin:16px 0 20px 0;">Sin otro particular saludo muy atte.</p>
         
-        <div style="margin-bottom:24px;">
-          <p style="margin:4px 0;"><strong>Empleador:</strong> FOLCO MARCOS DENIS.</p>
-          <p style="margin:4px 0;"><strong>Domicilio:</strong> Avda. José Hernández N°90, Rio Primero (5127) Córdoba.</p>
-          <p style="margin:4px 0;"><strong>Cuit:</strong> 20-24088189-7</p>
+        <div style="margin-bottom:12px;">
+          <p style="margin:2px 0;"><strong>Empleador:</strong> FOLCO MARCOS DENIS.</p>
+          <p style="margin:2px 0;"><strong>Domicilio:</strong> Avda. José Hernández N°90, Rio Primero (5127) Córdoba.</p>
+          <p style="margin:2px 0;"><strong>Cuit:</strong> 20-24088189-7</p>
         </div>
         
-        <p style="margin:24px 0;"><strong>Fecha:</strong> ${emitido}</p>
+        <p style="margin:12px 0;"><strong>Fecha:</strong> ${emitido}</p>
         
-        <div style="text-align:center; margin:48px 0 24px 0;">
-          <p style="font-style:italic; margin-bottom:8px;">La Paloma</p>
+        <div style="text-align:center; margin:20px 0 12px 0;">
+          <p style="font-style:italic; margin-bottom:4px;">La Paloma</p>
         </div>
         
-        <p style="margin:32px 0 16px 0;">Me notifico de la comunicación que antecede, tomando debida nota.</p>
+        <p style="margin:16px 0 8px 0;">Me notifico de la comunicación que antecede, tomando debida nota.</p>
         
-        <p style="margin:16px 0;"><strong>Fecha:</strong> ________________</p>
+        <p style="margin:8px 0;"><strong>Fecha:</strong> ________________</p>
         
-        <div style="margin:48px 0; text-align:center;">
-          <div style="border-top:1px solid #000; width:250px; margin:0 auto 8px;"></div>
-          <p style="margin:0;">FIRMA DEL EMPLEADO</p>
+        <div style="margin:24px 0; text-align:center;">
+          <div style="border-top:1px solid #000; width:220px; margin:0 auto 6px;"></div>
+          <p style="margin:0; font-size:10px;">FIRMA DEL EMPLEADO</p>
         </div>
         
-        <div style="border-top:2px solid #000; margin:48px 0 32px 0;"></div>
+        <div style="border-top:2px solid #000; margin:24px 0 16px 0;"></div>
         
-        <p style="margin:24px 0 16px 0;">Certifico haber gozado del período de vacaciones arriba mencionado, reintegrandome en la fecha de conformidad a mis ocupaciones</p>
+        <p style="margin:12px 0 8px 0;">Certifico haber gozado del período de vacaciones arriba mencionado, reintegrandome en la fecha de conformidad a mis ocupaciones</p>
         
-        <p style="margin:16px 0;"><strong>Fecha:</strong> ________________</p>
+        <p style="margin:8px 0;"><strong>Fecha:</strong> ________________</p>
         
-        <div style="margin:48px 0; text-align:center;">
-          <div style="border-top:1px solid #000; width:250px; margin:0 auto 8px;"></div>
-          <p style="margin:0;">FIRMA DEL EMPLEADO</p>
+        <div style="margin:24px 0; text-align:center;">
+          <div style="border-top:1px solid #000; width:220px; margin:0 auto 6px;"></div>
+          <p style="margin:0; font-size:10px;">FIRMA DEL EMPLEADO</p>
         </div>
       `;
 
@@ -573,6 +575,19 @@ export const VacationsModule = () => {
                             Constancia
                           </Button>
                         )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-red-600 border-red-600 hover:bg-red-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm('¿Estás seguro de que quieres eliminar esta solicitud?')) {
+                              deleteVacationRequest(vacation.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </CardContent>

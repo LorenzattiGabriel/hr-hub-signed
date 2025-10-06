@@ -102,41 +102,74 @@ export const VacationsModule = () => {
       const inicio = vacation.fecha_inicio ? new Date(vacation.fecha_inicio).toLocaleDateString("es-AR") : "";
       const fin = vacation.fecha_fin ? new Date(vacation.fecha_fin).toLocaleDateString("es-AR") : "";
       const emitido = new Date().toLocaleDateString("es-AR");
-      const motivo = vacation.motivo || "Vacaciones";
       const dias = vacation.dias_solicitados || 0;
+      const periodo = vacation.periodo || new Date().getFullYear().toString();
 
       const safeName = empleadoNombre.replace(/\s+/g, "_");
-      const fileName = `Constancia_Vacaciones_${safeName}_${vacation.periodo}_${vacation.fecha_inicio}_${vacation.fecha_fin}.pdf`;
+      const fileName = `Notificacion_Vacaciones_${safeName}_${periodo}.pdf`;
 
       const container = document.createElement("div");
-      container.style.padding = "24px";
-      container.style.fontFamily = "Inter, Arial, sans-serif";
-      container.style.color = "#0f1115";
+      container.style.width = "210mm";
+      container.style.minHeight = "297mm";
+      container.style.padding = "20mm";
+      container.style.fontFamily = "Arial, sans-serif";
+      container.style.color = "#000";
+      container.style.backgroundColor = "#fff";
+      container.style.boxSizing = "border-box";
+      
       container.innerHTML = `
-        <div style="text-align:center; margin-bottom:16px;">
-          <h1 style="margin:0; font-size:22px;">Constancia de Vacaciones</h1>
-          <p style="margin:4px 0; font-size:12px;">Período ${vacation.periodo || "-"}</p>
+        <div style="text-align:center; margin-bottom:24px;">
+          <h2 style="margin:0 0 8px 0; font-size:18px; font-weight:bold;">AVÍCOLA La Paloma</h2>
         </div>
-        <p style="line-height:1.6; font-size:14px;">
-          Se deja constancia de que <strong>${empleadoNombre}</strong> ${dni ? "(DNI " + dni + ")" : ""} gozará de su período de vacaciones desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong>, totalizando <strong>${dias}</strong> días corridos.
+        
+        <h1 style="text-align:center; font-size:20px; font-weight:bold; margin:24px 0;">NOTIFICACIÓN DE VACACIONES</h1>
+        
+        <div style="margin-bottom:16px;">
+          <p style="margin:8px 0;"><strong>Nombre y Apellido:</strong> ${empleadoNombre.toUpperCase()}</p>
+          <p style="margin:8px 0;"><strong>DNI:</strong> ${dni}</p>
+        </div>
+        
+        <p style="line-height:1.8; text-align:justify; margin:24px 0;">
+          En cumplimiento de la Legislación vigente Art. 154 de la Ley de Contrato de trabajo, se le notifica que el período de descanso anual ${periodo} es de <strong>${dias} días</strong>, comenzando desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong> inclusive.
         </p>
-        ${motivo ? `<p style="font-size:13px;"><strong>Motivo:</strong> ${motivo}</p>` : ""}
-        ${vacation.observaciones ? `<p style=\"font-size:13px;\"><strong>Observaciones:</strong> ${vacation.observaciones}</p>` : ""}
-        <p style="margin-top:24px; font-size:13px;">Emitido el ${emitido}.</p>
-        <div style="display:flex; justify-content:space-between; margin-top:48px;">
-          <div style="text-align:center;">
-            <div style="border-top:1px solid #777; width:220px; margin:0 auto 6px;"></div>
-            <span style="font-size:12px;">Firma del Empleado</span>
-          </div>
-          <div style="text-align:center;">
-            <div style="border-top:1px solid #777; width:220px; margin:0 auto 6px;"></div>
-            <span style="font-size:12px;">Firma de la Empresa</span>
-          </div>
+        
+        <p style="margin:32px 0 48px 0;">Sin otro particular saludo muy atte.</p>
+        
+        <div style="margin-bottom:24px;">
+          <p style="margin:4px 0;"><strong>Empleador:</strong> FOLCO MARCOS DENIS.</p>
+          <p style="margin:4px 0;"><strong>Domicilio:</strong> Avda. José Hernández N°90, Rio Primero (5127) Córdoba.</p>
+          <p style="margin:4px 0;"><strong>Cuit:</strong> 20-24088189-7</p>
+        </div>
+        
+        <p style="margin:24px 0;"><strong>Fecha:</strong> ${emitido}</p>
+        
+        <div style="text-align:center; margin:48px 0 24px 0;">
+          <p style="font-style:italic; margin-bottom:8px;">La Paloma</p>
+        </div>
+        
+        <p style="margin:32px 0 16px 0;">Me notifico de la comunicación que antecede, tomando debida nota.</p>
+        
+        <p style="margin:16px 0;"><strong>Fecha:</strong> ________________</p>
+        
+        <div style="margin:48px 0; text-align:center;">
+          <div style="border-top:1px solid #000; width:250px; margin:0 auto 8px;"></div>
+          <p style="margin:0;">FIRMA DEL EMPLEADO</p>
+        </div>
+        
+        <div style="border-top:2px solid #000; margin:48px 0 32px 0;"></div>
+        
+        <p style="margin:24px 0 16px 0;">Certifico haber gozado del período de vacaciones arriba mencionado, reintegrandome en la fecha de conformidad a mis ocupaciones</p>
+        
+        <p style="margin:16px 0;"><strong>Fecha:</strong> ________________</p>
+        
+        <div style="margin:48px 0; text-align:center;">
+          <div style="border-top:1px solid #000; width:250px; margin:0 auto 8px;"></div>
+          <p style="margin:0;">FIRMA DEL EMPLEADO</p>
         </div>
       `;
 
       const opt = {
-        margin: 10,
+        margin: 0,
         filename: fileName,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
@@ -158,13 +191,13 @@ export const VacationsModule = () => {
 
       toast({
         title: "Descarga iniciada",
-        description: "La constancia se está descargando.",
+        description: "La notificación de vacaciones se está descargando.",
       });
     } catch (error) {
       console.error(error);
       toast({
         title: "Error",
-        description: "Error al generar la constancia PDF",
+        description: "Error al generar la notificación PDF",
         variant: "destructive",
       });
     }

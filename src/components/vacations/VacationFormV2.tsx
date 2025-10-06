@@ -374,7 +374,7 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
                   <div className="space-y-3">
                     <h4 className="font-medium text-foreground">Balance de Vacaciones</h4>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
                       <div className="space-y-1">
                         <span className="text-muted-foreground block">Días correspondientes:</span>
                         <p className="font-medium text-foreground">{vacationDaysInfo.totalDays}</p>

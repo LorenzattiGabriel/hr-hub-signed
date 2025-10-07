@@ -221,7 +221,7 @@ export const signPDF = async (params: SignPDFParams): Promise<PDFGenerationResul
     
     // Guardar PDF firmado
     const signedPdfBytes = await pdfDoc.save();
-    const signedBlob = new Blob([signedPdfBytes], { type: 'application/pdf' });
+    const signedBlob = new Blob([new Uint8Array(signedPdfBytes)], { type: 'application/pdf' });
     
     // Subir PDF firmado (reemplazar el anterior)
     const { error: uploadError } = await supabase.storage
@@ -279,7 +279,7 @@ export const generateAndUploadPDF = async (params: GeneratePDFParams): Promise<P
     const customizedPdfBytes = await customizePDF(templateBuffer, params.employeeData, params.generatedDate);
     
     // 3. Crear blob
-    const blob = new Blob([customizedPdfBytes], { type: 'application/pdf' });
+    const blob = new Blob([new Uint8Array(customizedPdfBytes)], { type: 'application/pdf' });
     console.log('📦 [PDF TEMPLATE] PDF personalizado generado, tamaño:', blob.size, 'bytes');
     
     if (blob.size === 0) {

@@ -121,7 +121,7 @@ export const VacationsModule = () => {
       
       container.innerHTML = `
         <div style="text-align:center; margin-bottom:12px;">
-          <h2 style="margin:0 0 4px 0; font-size:16px; font-weight:bold;">AVÍCOLA La Paloma</h2>
+          <h2 style="margin:0 0 4px 0; font-size:16px; font-weight:bold;">AVICOLA LA PALOMA</h2>
         </div>
         
         <h1 style="text-align:center; font-size:18px; font-weight:bold; margin:12px 0;">NOTIFICACIÓN DE VACACIONES</h1>

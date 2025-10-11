@@ -15,7 +15,8 @@ import {
   DollarSign,
   ScrollText,
   UserCheck,
-  FileText
+  FileText,
+  AlertCircle
 } from "lucide-react";
 
 interface SidebarProps {
@@ -107,6 +108,13 @@ const modules = [
     name: "Documentos",
     icon: FileText,
     description: "Gestión de Documentos",
+    badge: ""
+  },
+  {
+    id: "sanctions",
+    name: "Suspensiones y Apercibimientos",
+    icon: AlertCircle,
+    description: "Sanciones Disciplinarias",
     badge: ""
   },
 ];

@@ -522,6 +522,60 @@ export type Database = {
           },
         ]
       }
+      sanctions: {
+        Row: {
+          created_at: string
+          dias_suspension: number | null
+          employee_id: string
+          estado: string
+          fecha_documento: string
+          fecha_hecho: string | null
+          fecha_inicio: string | null
+          fecha_reincorporacion: string | null
+          id: string
+          lugar_hecho: string | null
+          motivo: string
+          observaciones: string | null
+          pdf_url: string | null
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dias_suspension?: number | null
+          employee_id: string
+          estado?: string
+          fecha_documento?: string
+          fecha_hecho?: string | null
+          fecha_inicio?: string | null
+          fecha_reincorporacion?: string | null
+          id?: string
+          lugar_hecho?: string | null
+          motivo: string
+          observaciones?: string | null
+          pdf_url?: string | null
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dias_suspension?: number | null
+          employee_id?: string
+          estado?: string
+          fecha_documento?: string
+          fecha_hecho?: string | null
+          fecha_inicio?: string | null
+          fecha_reincorporacion?: string | null
+          id?: string
+          lugar_hecho?: string | null
+          motivo?: string
+          observaciones?: string | null
+          pdf_url?: string | null
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trainings: {
         Row: {
           calificacion: number | null

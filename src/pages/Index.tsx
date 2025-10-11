@@ -15,6 +15,7 @@ import PayrollModule from "@/components/payroll/PayrollModule";
 import DeclarationsModule from "@/components/declarations/DeclarationsModule";
 import ConsultationsModule from "@/components/consultations/ConsultationsModule";
 import DocumentsModule from "@/components/documents/DocumentsModule";
+import { SanctionsModule } from "@/components/sanctions/SanctionsModule";
 
 
 const Index = () => {
@@ -48,6 +49,8 @@ const Index = () => {
         return <ConsultationsModule />;
       case "documents":
         return <DocumentsModule />;
+      case "sanctions":
+        return <SanctionsModule />;
       default:
         return <DashboardOverview />;
     }

@@ -8,6 +8,9 @@ export interface GeneratePDFParams {
     apellidos: string;
     dni: string;
     direccion?: string;
+    cuil?: string;
+    employee?: any;
+    sanction?: any;
   };
   generatedDate: string;
   documentId: string;
@@ -16,6 +19,7 @@ export interface GeneratePDFParams {
 export interface PDFGenerationResult {
   success: boolean;
   pdfUrl?: string;
+  url?: string;
   error?: string;
   blob?: Blob;
 }
@@ -353,6 +357,133 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
       yPos += 10;
       doc.text(`Fecha: ${formattedDate}`, 20, yPos);
       
+    } else if (documentType === 'apercibimiento') {
+      // Apercibimiento Template
+      const sanction = employeeData.sanction;
+      const employee = employeeData.employee;
+      
+      let yPos = 30;
+      
+      // ENCABEZADO
+      doc.setFontSize(14);
+      doc.text('AVICOLA LA PALOMA', 105, yPos, { align: 'center' });
+      yPos += 20;
+      
+      doc.setFontSize(12);
+      doc.text(`Córdoba, ${formattedDate}`, 20, yPos);
+      yPos += 20;
+      
+      doc.text(`Sr/a: ${employee.apellidos}, ${employee.nombres}`, 20, yPos);
+      yPos += 10;
+      doc.text(`DNI: ${employee.dni}`, 20, yPos);
+      yPos += 20;
+      
+      // CONTENIDO
+      const notificacion = 'Por medio de la presente, procedemos a notificarle de manera fehaciente que se ha resuelto aplicar un Apercibimiento.';
+      const splitNotif = doc.splitTextToSize(notificacion, 170);
+      doc.text(splitNotif, 20, yPos);
+      yPos += splitNotif.length * 7 + 15;
+      
+      const motivo = `Atento a ${sanction.motivo.toLowerCase()}, ocurrido el día ${new Date(sanction.fecha_hecho || sanction.fecha_documento).toLocaleDateString('es-AR')}${sanction.lugar_hecho ? ` en ${sanction.lugar_hecho}` : ''}.`;
+      const splitMotivo = doc.splitTextToSize(motivo, 170);
+      doc.text(splitMotivo, 20, yPos);
+      yPos += splitMotivo.length * 7 + 15;
+      
+      const exhorto = 'Por ello, se le aplica un apercibimiento y se lo exhorta a que, en lo sucesivo, adecúe su conducta a las pautas de cumplimiento normativo del Art. 16 del CCT 422/05 y al reglamento interno de la empresa, bajo apercibimiento de aplicar sanciones de mayor gravedad.';
+      const splitExhorto = doc.splitTextToSize(exhorto, 170);
+      doc.text(splitExhorto, 20, yPos);
+      yPos += splitExhorto.length * 7 + 15;
+      
+      doc.text('//Seguidamente, notifico de la comunicación que me antecede.', 20, yPos);
+      yPos += 20;
+      
+      doc.text(`Córdoba, ${formattedDate}.`, 20, yPos);
+      yPos += 30;
+      
+      doc.text('AVICOLA LA PALOMA', 105, yPos, { align: 'center' });
+      yPos += 40;
+      
+      // FIRMA
+      doc.text('Firma del trabajador: _______________________________', 20, yPos);
+      yPos += 10;
+      doc.text('Aclaración: _______________________________', 20, yPos);
+      yPos += 10;
+      doc.text('DNI: _______________________________', 20, yPos);
+      
+      if (sanction.observaciones) {
+        yPos += 20;
+        doc.setFontSize(10);
+        const obs = `Observaciones: ${sanction.observaciones}`;
+        const splitObs = doc.splitTextToSize(obs, 170);
+        doc.text(splitObs, 20, yPos);
+      }
+      
+    } else if (documentType === 'sancion') {
+      // Sanción Template
+      const sanction = employeeData.sanction;
+      const employee = employeeData.employee;
+      
+      let yPos = 30;
+      
+      // ENCABEZADO
+      doc.setFontSize(14);
+      doc.text('AVICOLA LA PALOMA', 105, yPos, { align: 'center' });
+      yPos += 20;
+      
+      doc.setFontSize(12);
+      doc.text(`Córdoba, ${formattedDate}`, 20, yPos);
+      yPos += 20;
+      
+      doc.text(`Sr/a: ${employee.apellidos}, ${employee.nombres}`, 20, yPos);
+      yPos += 10;
+      doc.text(`CUIL: ${employee.cuil || employee.dni}`, 20, yPos);
+      yPos += 20;
+      
+      // CONTENIDO
+      const notificacion = 'Por medio de la presente, procedemos a notificarle de manera fehaciente que se ha resuelto aplicar una sanción.';
+      const splitNotif = doc.splitTextToSize(notificacion, 170);
+      doc.text(splitNotif, 20, yPos);
+      yPos += splitNotif.length * 7 + 15;
+      
+      const motivo = `Atento a ${sanction.motivo.toLowerCase()}, ocurrido el día ${new Date(sanction.fecha_hecho || sanction.fecha_documento).toLocaleDateString('es-AR')}${sanction.lugar_hecho ? ` en ${sanction.lugar_hecho}` : ''}.`;
+      const splitMotivo = doc.splitTextToSize(motivo, 170);
+      doc.text(splitMotivo, 20, yPos);
+      yPos += splitMotivo.length * 7 + 15;
+      
+      const suspension = `Por ello, se le aplican ${sanction.dias_suspension} días de suspensión sin goce de haberes, a partir del día ${new Date(sanction.fecha_inicio).toLocaleDateString('es-AR')}, debiendo reincorporarse el día ${new Date(sanction.fecha_reincorporacion).toLocaleDateString('es-AR')}.`;
+      const splitSuspension = doc.splitTextToSize(suspension, 170);
+      doc.text(splitSuspension, 20, yPos);
+      yPos += splitSuspension.length * 7 + 15;
+      
+      const exhorto = 'Se lo exhorta a que, en lo sucesivo, adecúe su conducta a las pautas de cumplimiento normativo del Art. 16 del CCT 422/05 y al reglamento interno de la empresa, bajo apercibimiento de aplicar sanciones de mayor gravedad.';
+      const splitExhorto = doc.splitTextToSize(exhorto, 170);
+      doc.text(splitExhorto, 20, yPos);
+      yPos += splitExhorto.length * 7 + 15;
+      
+      doc.text('//Seguidamente, notificó de la comunicación que me antecede.', 20, yPos);
+      yPos += 20;
+      
+      doc.text(`Córdoba, ${formattedDate}.`, 20, yPos);
+      yPos += 30;
+      
+      doc.text('AVICOLA LA PALOMA', 105, yPos, { align: 'center' });
+      yPos += 40;
+      
+      // FIRMA
+      doc.text('Firma del trabajador: _______________________________', 20, yPos);
+      yPos += 10;
+      doc.text('Aclaración: _______________________________', 20, yPos);
+      yPos += 10;
+      doc.text('DNI: _______________________________', 20, yPos);
+      
+      if (sanction.observaciones) {
+        yPos += 20;
+        doc.setFontSize(10);
+        const obs = `Observaciones: ${sanction.observaciones}`;
+        const splitObs = doc.splitTextToSize(obs, 170);
+        doc.text(splitObs, 20, yPos);
+      }
+      
     } else {
       throw new Error(`Tipo de documento no soportado: ${documentType}`);
     }
@@ -399,6 +530,7 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
       return {
         success: true,
         pdfUrl: urlData.publicUrl,
+        url: urlData.publicUrl,
         blob: blob
       };
     } else {

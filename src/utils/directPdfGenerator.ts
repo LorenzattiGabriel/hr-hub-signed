@@ -418,6 +418,74 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
         doc.text(splitObs, 20, yPos);
       }
       
+    } else if (documentType === 'despido_periodo_prueba') {
+      // Despido - Período de Prueba Template
+      let yPos = 30;
+      
+      // ENCABEZADO
+      doc.setFontSize(16);
+      doc.text('Avícola La Paloma', 105, yPos, { align: 'center' });
+      yPos += 10;
+      
+      doc.setFontSize(10);
+      doc.text('20-24088189-7', 105, yPos, { align: 'center' });
+      yPos += 7;
+      doc.text('Av. José Hernández 90 – Río Primero', 105, yPos, { align: 'center' });
+      yPos += 20;
+      
+      doc.setFontSize(12);
+      doc.text(`Río Primero, Córdoba – ${formattedDate}`, 150, yPos, { align: 'right' });
+      yPos += 20;
+      
+      doc.text(`Al Sr. ${employeeData.apellidos} ${employeeData.nombres}`, 20, yPos);
+      yPos += 10;
+      doc.text(`DNI: ${employeeData.dni}`, 20, yPos);
+      yPos += 20;
+      
+      // REFERENCIA
+      doc.setFontSize(14);
+      const refText = 'Ref.: Comunicación de finalización de la relación laboral durante el período de prueba.';
+      const splitRef = doc.splitTextToSize(refText, 170);
+      doc.text(splitRef, 20, yPos);
+      yPos += splitRef.length * 7 + 15;
+      
+      // CUERPO
+      doc.setFontSize(11);
+      const parrafo1 = `Por medio de la presente, le informamos que hemos decidido dar por finalizada la relación laboral que lo vincula con esta empresa a partir del día ${formattedDate}, conforme lo dispuesto por el Artículo 92 bis de la Ley de Contrato de Trabajo N.º 20.744, encontrándose usted dentro del período de prueba legalmente establecido.`;
+      const splitP1 = doc.splitTextToSize(parrafo1, 170);
+      doc.text(splitP1, 20, yPos);
+      yPos += splitP1.length * 7 + 12;
+      
+      const parrafo2 = 'La extinción de la relación laboral no obedece a causa disciplinaria alguna y, por tratarse de una desvinculación dentro del período de prueba, no corresponde el pago de indemnización por despido, conforme a lo establecido en la legislación vigente.';
+      const splitP2 = doc.splitTextToSize(parrafo2, 170);
+      doc.text(splitP2, 20, yPos);
+      yPos += splitP2.length * 7 + 12;
+      
+      const parrafo3 = 'En los próximos días podrá retirar su liquidación final, recibo correspondiente y demás documentación laboral, incluyendo su certificado de trabajo conforme al Art. 80 de la LCT.';
+      const splitP3 = doc.splitTextToSize(parrafo3, 170);
+      doc.text(splitP3, 20, yPos);
+      yPos += splitP3.length * 7 + 12;
+      
+      doc.text('Sin otro particular, saludamos a usted atentamente.', 20, yPos);
+      yPos += 30;
+      
+      // FIRMAS
+      doc.setFontSize(11);
+      doc.text('Firma del empleador:', 20, yPos);
+      yPos += 15;
+      doc.text('Nombre: ____________________________', 20, yPos);
+      yPos += 10;
+      doc.text('Cargo: ____________________________', 20, yPos);
+      yPos += 25;
+      
+      doc.text('Firma del trabajador:', 20, yPos);
+      yPos += 15;
+      doc.text('Nombre: ____________________________', 20, yPos);
+      yPos += 10;
+      doc.text('DNI: ____________________________', 20, yPos);
+      yPos += 10;
+      doc.text('Fecha de recepción: __________________', 20, yPos);
+      
     } else if (documentType === 'sancion') {
       // Sanción Template
       const sanction = employeeData.sanction;

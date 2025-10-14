@@ -84,7 +84,7 @@ export const EmployeeImport = ({ onComplete, refetch }: EmployeeImportProps) => 
             tieneHijos,
             nombresHijos: nombresHijos || '',
             tieneLicencia,
-            tipoLicencia: tipoLicencia === '-' ? '' : mapLicenseType(tipoLicencia),
+            tipoLicencia: tipoLicencia === '-' ? [] : [mapLicenseType(tipoLicencia)],
             fotoDni: null,
             fotoCarnet: null
           };
@@ -205,7 +205,7 @@ export const EmployeeImport = ({ onComplete, refetch }: EmployeeImportProps) => 
             tieneHijos: toBoolText(r['¿Tiene Hijos?']),
             nombresHijos: norm(r['En caso afirmativo detallar sus nombres completos y edades']),
             tieneLicencia: toBoolText(r['Posee licencia de conducir:']),
-            tipoLicencia: tipoLic ? mapLicenseType(tipoLic) : '',
+            tipoLicencia: tipoLic ? [mapLicenseType(tipoLic)] : [],
             fotoDni: null,
             fotoCarnet: null,
           } as Omit<Employee, 'id'>;

@@ -9,98 +9,122 @@ import {
   Clock,
   AlertTriangle,
   CheckCircle,
-  Calendar
+  Calendar,
+  AlertCircle,
+  UserCheck
 } from "lucide-react";
 import { useEmployees } from "@/hooks/useEmployees";
-import { useVacationStats } from "@/hooks/useVacationStats";
 import { useAttendance } from "@/hooks/useAttendance";
 import { useTraining } from "@/hooks/useTraining";
 import { useAbsences } from "@/hooks/useAbsences";
-import { usePerformanceStats } from "@/hooks/usePerformanceStats";
+import { useSanctionStats } from "@/hooks/useSanctionStats";
+import { formatDateLocal } from "@/utils/dateUtils";
 
 const DashboardOverview = () => {
   const { employees, getActiveEmployees } = useEmployees();
-  const { stats: vacationStats } = useVacationStats();
   const { stats: attendanceStats } = useAttendance();
   const { stats: trainingStats } = useTraining();
   const { absences } = useAbsences();
-  const { stats: performanceStats } = usePerformanceStats();
+  const { stats: sanctionStats } = useSanctionStats();
   const activeEmployees = getActiveEmployees();
   
-  // Calculate average seniority
-  const calculateAverageSeniority = () => {
-    if (activeEmployees.length === 0) return 0;
-    
-    const today = new Date();
-    const totalYears = activeEmployees.reduce((sum, employee) => {
-      const dateField = employee.fechaIngreso;
-      if (dateField) {
-        const startDate = new Date(dateField);
-        const years = (today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
-        return sum + years;
-      }
-      return sum;
-    }, 0);
-    
-    return Math.round((totalYears / activeEmployees.length) * 10) / 10; // Round to 1 decimal
+  // Calculate upcoming birthdays for this month
+  const getUpcomingBirthdays = () => {
+    try {
+      const currentMonth = new Date().getMonth() + 1;
+      
+      return activeEmployees.filter(employee => {
+        if (!employee.fechaNacimiento) return false;
+        try {
+          const birthDateString = formatDateLocal(employee.fechaNacimiento);
+          const dateParts = birthDateString.split('/');
+          if (dateParts.length !== 3) return false;
+          const month = parseInt(dateParts[1]);
+          return month === currentMonth;
+        } catch (error) {
+          return false;
+        }
+      }).map(employee => {
+        try {
+          const birthDateString = formatDateLocal(employee.fechaNacimiento!);
+          const [day, month, year] = birthDateString.split('/');
+          
+          return {
+            id: employee.id,
+            name: `${employee.nombres} ${employee.apellidos}`,
+            date: parseInt(day) || 0,
+            fullDate: birthDateString,
+            originalDate: employee.fechaNacimiento
+          };
+        } catch (error) {
+          return {
+            id: employee.id,
+            name: `${employee.nombres} ${employee.apellidos}`,
+            date: 0,
+            fullDate: 'Fecha inválida',
+            originalDate: employee.fechaNacimiento
+          };
+        }
+      }).sort((a, b) => a.date - b.date);
+    } catch (error) {
+      return [];
+    }
   };
-  
-  const averageSeniority = calculateAverageSeniority();
   
   const quickStats = [
     {
-      title: "Días de vacaciones usados",
-      value: vacationStats.totalUsedDays.toString(),
-      change: `${vacationStats.totalEmployees} empleados`,
-      icon: CalendarDays,
+      title: "Total empleados activos",
+      value: (activeEmployees?.length || 0).toString(),
+      change: `${employees?.length || 0} empleados en total`,
+      icon: UserCheck,
       color: "text-primary",
       bgColor: "bg-primary/10"
     },
     {
-      title: "Días de vacaciones disponibles",
-      value: vacationStats.totalAvailableDays.toString(),
-      change: `Promedio: ${vacationStats.averageUsedDays} días`,
-      icon: CalendarDays,
-      color: "text-warning",
-      bgColor: "bg-warning/10"
-    },
-    {
       title: "Llegadas tarde este mes",
-      value: attendanceStats.lateArrivals.toString(),
-      change: `${attendanceStats.totalRecords} registros`,
+      value: (attendanceStats?.lateArrivals || 0).toString(),
+      change: `${attendanceStats?.totalRecords || 0} registros`,
       icon: Clock,
       color: "text-destructive",
       bgColor: "bg-destructive/10"
     },
     {
       title: "Capacitaciones completadas",
-      value: trainingStats.completedTrainings.toString(),
-      change: `${trainingStats.completionRate}% completado`,
+      value: (trainingStats?.completedTrainings || 0).toString(),
+      change: `${trainingStats?.completionRate || 0}% completado`,
       icon: ClipboardList,
       color: "text-secondary",
       bgColor: "bg-secondary/10"
+    },
+    {
+      title: "Suspensiones y apercibimientos",
+      value: (sanctionStats?.totalSanctions || 0).toString(),
+      change: `${sanctionStats?.thisMonthSanctions || 0} este mes`,
+      icon: AlertCircle,
+      color: "text-warning",
+      bgColor: "bg-warning/10"
     }
   ];
 
   // Actividades recientes basadas en datos reales
   const recentActivities = [
-    ...absences.slice(0, 2).map(absence => ({
+    ...(absences || []).slice(0, 2).map(absence => ({
       id: `absence-${absence.id}`,
       message: `${absence.empleadoNombre} solicitó ausencia por ${absence.tipo}`,
       time: new Date(absence.created_at).toLocaleDateString(),
       status: absence.estado === 'aprobado' ? 'success' : 'warning'
     })),
-    ...trainingStats.completedTrainings > 0 ? [{
+    ...(trainingStats?.completedTrainings || 0) > 0 ? [{
       id: 'training-completed',
-      message: `${trainingStats.completedTrainings} capacitaciones completadas`,
+      message: `${trainingStats?.completedTrainings || 0} capacitaciones completadas`,
       time: new Date().toLocaleDateString(),
       status: 'success'
     }] : [],
-    ...performanceStats.completedEvaluations > 0 ? [{
-      id: 'evaluations-completed',
-      message: `${performanceStats.completedEvaluations} evaluaciones completadas`,
+    ...(sanctionStats?.thisMonthSanctions || 0) > 0 ? [{
+      id: 'sanctions-this-month',
+      message: `${sanctionStats?.thisMonthSanctions || 0} sanciones este mes`,
       time: new Date().toLocaleDateString(),
-      status: 'info'
+      status: 'warning'
     }] : []
   ].slice(0, 5);
 
@@ -150,51 +174,6 @@ const DashboardOverview = () => {
         })}
       </div>
 
-      {/* Employee Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Empleados</p>
-                <p className="text-3xl font-bold text-card-foreground">{employees.length}</p>
-              </div>
-              <div className="p-3 bg-primary/10 rounded-lg">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Empleados Activos</p>
-                <p className="text-3xl font-bold text-card-foreground">{activeEmployees.length}</p>
-              </div>
-              <div className="p-3 bg-success/10 rounded-lg">
-                <Users className="h-6 w-6 text-success" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Promedio Antigüedad</p>
-                <p className="text-3xl font-bold text-card-foreground">{averageSeniority}</p>
-                <p className="text-xs text-muted-foreground">años</p>
-              </div>
-              <div className="p-3 bg-warning/10 rounded-lg">
-                <Clock className="h-6 w-6 text-warning" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Recent Activities */}
@@ -235,30 +214,38 @@ const DashboardOverview = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-secondary" />
-              Próximos Eventos
+              Cumpleaños de este mes
             </CardTitle>
           </CardHeader>
           <CardContent>
             {(() => {
-              const upcomingEvents: any[] = [];
-              if (upcomingEvents.length === 0) {
+              const upcomingBirthdays = getUpcomingBirthdays();
+              
+              if (upcomingBirthdays.length === 0) {
                 return (
-                  <div className="text-center py-8 text-muted-foreground">No hay eventos próximos</div>
+                  <div className="text-center py-8 text-muted-foreground">
+                    No hay cumpleaños este mes
+                  </div>
                 );
               }
               return (
-                <div className="space-y-4">
-                  {upcomingEvents.map((event) => (
-                    <div key={event.id} className="border border-border rounded-lg p-3 hover:bg-muted/50 transition-colors">
-                      <h4 className="font-medium text-card-foreground text-sm">
-                        {event.title}
-                      </h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {event.date} a las {event.time}
-                      </p>
-                      <div className="flex items-center justify-between mt-2">
-                        <Badge variant="outline" className="text-xs">
-                          {event.attendees} participantes
+                <div className="space-y-3">
+                  {upcomingBirthdays.map((birthday) => (
+                    <div key={birthday.id} className="border border-border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium text-card-foreground text-sm">
+                            🎂 {birthday.name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {birthday.date} de {new Date().toLocaleDateString('es-AR', { month: 'long' })}
+                          </p>
+                          <p className="text-xs text-muted-foreground/70">
+                            ({birthday.fullDate})
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="text-xs bg-primary/10 text-primary">
+                          Cumpleaños
                         </Badge>
                       </div>
                     </div>
@@ -266,9 +253,13 @@ const DashboardOverview = () => {
                 </div>
               );
             })()}
-            <Button variant="outline" className="w-full mt-4">
-              Ver calendario completo
-            </Button>
+            {getUpcomingBirthdays().length > 0 && (
+              <div className="mt-4 text-center">
+                <p className="text-xs text-muted-foreground">
+                  🎉 ¡No olvides felicitar a tus compañeros!
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

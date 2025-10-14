@@ -5,52 +5,47 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEmployees } from "@/hooks/useEmployees";
+import { usePayroll } from "@/hooks/usePayroll";
 import { Download, Calendar, DollarSign, TrendingUp, TrendingDown } from "lucide-react";
 
-// Datos de ejemplo para reportes - se reemplazará con datos de Supabase
-const mockMonthlyReport = {
-  period: "2024-01",
-  summary: {
-    totalSalaries: 320000,
-    totalAdvances: 45000,
-    totalCommissions: 28000,
-    totalDeductions: 12000,
-    netTotal: 381000
-  },
-  employeeDetails: [
-    {
-      employeeId: 1,
-      employeeName: "Juan Pérez",
-      baseSalary: 85000,
-      advances: 15000,
-      commissions: 8000,
-      deductions: 3000,
-      netPay: 105000
-    },
-    {
-      employeeId: 2,
-      employeeName: "María García",
-      baseSalary: 75000,
-      advances: 10000,
-      commissions: 12000,
-      deductions: 2000,
-      netPay: 95000
-    },
-    {
-      employeeId: 3,
-      employeeName: "Carlos López",
-      baseSalary: 90000,
-      advances: 20000,
-      commissions: 5000,
-      deductions: 4000,
-      netPay: 111000
-    }
-  ]
+// Utilidad para exportar a Excel
+const exportToExcel = async (data: any[], filename: string) => {
+  try {
+    // Crear workbook y worksheet
+    const ws_data = [
+      ['Empleado', 'Sueldo Base', 'Bonificaciones', 'Adelantos', 'Descuentos', 'Neto a Pagar'], // Headers
+      ...data.map(emp => [
+        emp.employeeName,
+        emp.baseSalary,
+        emp.bonifications,
+        emp.advances,
+        emp.deductions,
+        emp.netPay
+      ])
+    ];
+    
+    // Crear CSV content
+    const csvContent = ws_data.map(row => row.join(',')).join('\n');
+    
+    // Crear blob y descargar
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `${filename}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Error exportando a Excel:', error);
+  }
 };
 
 const PayrollReports = () => {
   const { employees } = useEmployees();
-  const [selectedPeriod, setSelectedPeriod] = useState("2024-01");
+  const { payrollRecords, isLoading } = usePayroll();
+  const [selectedPeriod, setSelectedPeriod] = useState("all");
   const [selectedEmployee, setSelectedEmployee] = useState("all");
 
   const formatCurrency = (amount: number) => {
@@ -66,19 +61,102 @@ const PayrollReports = () => {
     return date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
   };
 
+  // Obtener períodos únicos de los datos reales
+  const getAvailablePeriods = () => {
+    const periods = [...new Set(payrollRecords.map(record => record.period))];
+    return periods.sort().reverse(); // Más recientes primero
+  };
+
+  // Procesar datos reales para crear el reporte
+  const processPayrollData = () => {
+    let filteredRecords = payrollRecords;
+
+    // Filtrar por período si se selecciona uno específico
+    if (selectedPeriod !== "all") {
+      filteredRecords = filteredRecords.filter(record => record.period === selectedPeriod);
+    } else {
+      // Si no hay filtro, usar el mes actual
+      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+      filteredRecords = filteredRecords.filter(record => record.period === currentMonth);
+    }
+
+    // Filtrar por empleado si se selecciona uno específico
+    if (selectedEmployee !== "all") {
+      filteredRecords = filteredRecords.filter(record => record.employee_id === selectedEmployee);
+    }
+
+    // Agrupar por empleado y calcular totales
+    const employeeData = new Map();
+    
+    filteredRecords.forEach(record => {
+      const employee = employees.find(emp => emp.id === record.employee_id);
+      if (!employee) return;
+
+      const employeeName = `${employee.nombres} ${employee.apellidos}`;
+      
+      if (!employeeData.has(record.employee_id)) {
+        employeeData.set(record.employee_id, {
+          employeeId: record.employee_id,
+          employeeName,
+          baseSalary: 0,
+          bonifications: 0,
+          advances: 0,
+          deductions: 0,
+          netPay: 0
+        });
+      }
+
+      const empData = employeeData.get(record.employee_id);
+      
+      switch (record.type) {
+        case 'salary':
+          empData.baseSalary += record.amount;
+          break;
+        case 'bonus':
+          empData.bonifications += record.amount;
+          break;
+        case 'advance':
+          empData.advances += record.amount;
+          break;
+        case 'deduction':
+          empData.deductions += record.amount;
+          break;
+      }
+    });
+
+    // Calcular neto a pagar para cada empleado
+    const employeeDetails = Array.from(employeeData.values()).map(emp => ({
+      ...emp,
+      netPay: emp.baseSalary + emp.bonifications - emp.advances - emp.deductions
+    }));
+
+    // Calcular totales generales
+    const summary = {
+      totalSalaries: employeeDetails.reduce((sum, emp) => sum + emp.baseSalary, 0),
+      totalBonifications: employeeDetails.reduce((sum, emp) => sum + emp.bonifications, 0),
+      totalAdvances: employeeDetails.reduce((sum, emp) => sum + emp.advances, 0),
+      totalDeductions: employeeDetails.reduce((sum, emp) => sum + emp.deductions, 0),
+      netTotal: employeeDetails.reduce((sum, emp) => sum + emp.netPay, 0)
+    };
+
+    return { employeeDetails, summary };
+  };
+
+  const { employeeDetails: filteredEmployees, summary } = processPayrollData();
+
   const exportReport = () => {
-    console.log("Exportando reporte del período:", selectedPeriod);
-    // Aquí se implementará la exportación a PDF/Excel
+    const filename = `reporte-nomina-${selectedPeriod === "all" ? "actual" : selectedPeriod}`;
+    exportToExcel(filteredEmployees, filename);
   };
 
-  const exportPayslips = () => {
-    console.log("Exportando recibos de sueldo del período:", selectedPeriod);
-    // Aquí se implementará la exportación masiva de recibos
-  };
 
-  const filteredEmployees = selectedEmployee === "all" 
-    ? mockMonthlyReport.employeeDetails
-    : mockMonthlyReport.employeeDetails.filter(emp => emp.employeeId.toString() === selectedEmployee);
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-muted-foreground">Cargando datos de nómina...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -99,9 +177,17 @@ const PayrollReports = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="2024-01">Enero 2024</SelectItem>
-                  <SelectItem value="2023-12">Diciembre 2023</SelectItem>
-                  <SelectItem value="2023-11">Noviembre 2023</SelectItem>
+                  <SelectItem value="all">
+                    {(() => {
+                      const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+                      return formatPeriod(currentMonth);
+                    })()}
+                  </SelectItem>
+                  {getAvailablePeriods().map((period) => (
+                    <SelectItem key={period} value={period}>
+                      {formatPeriod(period)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -128,10 +214,6 @@ const PayrollReports = () => {
                 <Download className="h-4 w-4 mr-2" />
                 Exportar Reporte
               </Button>
-              <Button onClick={exportPayslips} className="w-full sm:w-auto">
-                <Download className="h-4 w-4 mr-2" />
-                Generar Recibos
-              </Button>
             </div>
           </div>
         </CardContent>
@@ -145,18 +227,18 @@ const PayrollReports = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(mockMonthlyReport.summary.totalSalaries)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(summary.totalSalaries)}</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Comisiones</CardTitle>
+            <CardTitle className="text-sm font-medium">Bonificaciones</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {formatCurrency(mockMonthlyReport.summary.totalCommissions)}
+              {formatCurrency(summary.totalBonifications)}
             </div>
           </CardContent>
         </Card>
@@ -168,7 +250,7 @@ const PayrollReports = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              {formatCurrency(mockMonthlyReport.summary.totalAdvances)}
+              {formatCurrency(summary.totalAdvances)}
             </div>
           </CardContent>
         </Card>
@@ -180,7 +262,7 @@ const PayrollReports = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {formatCurrency(mockMonthlyReport.summary.totalDeductions)}
+              {formatCurrency(summary.totalDeductions)}
             </div>
           </CardContent>
         </Card>
@@ -204,17 +286,16 @@ const PayrollReports = () => {
                 <TableRow>
                   <TableHead>Empleado</TableHead>
                   <TableHead>Sueldo Base</TableHead>
-                  <TableHead>Comisiones</TableHead>
+                  <TableHead>Bonificaciones</TableHead>
                   <TableHead>Adelantos</TableHead>
                   <TableHead>Descuentos</TableHead>
                   <TableHead className="font-bold">Neto a Pagar</TableHead>
-                  <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredEmployees.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                       No hay datos para el período seleccionado
                     </TableCell>
                   </TableRow>
@@ -228,7 +309,7 @@ const PayrollReports = () => {
                         {formatCurrency(employee.baseSalary)}
                       </TableCell>
                       <TableCell className="font-mono text-green-600">
-                        +{formatCurrency(employee.commissions)}
+                        +{formatCurrency(employee.bonifications)}
                       </TableCell>
                       <TableCell className="font-mono text-orange-600">
                         -{formatCurrency(employee.advances)}
@@ -238,12 +319,6 @@ const PayrollReports = () => {
                       </TableCell>
                       <TableCell className="font-mono font-bold text-lg">
                         {formatCurrency(employee.netPay)}
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="outline" size="sm">
-                          <Download className="h-4 w-4 mr-1" />
-                          Recibo
-                        </Button>
                       </TableCell>
                     </TableRow>
                   ))

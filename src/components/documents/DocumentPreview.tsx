@@ -7,6 +7,7 @@ import html2pdf from "html2pdf.js";
 import { useToast } from "@/hooks/use-toast";
 import ConsentimientoSimple from "./templates/ConsentimientoSimple";
 import ReglamentoInternoSimple from "./templates/ReglamentoInternoSimple";
+import { DespidoPeriodoPruebaTemplate } from "./templates/DespidoPeriodoPruebaTemplate";
 
 interface DocumentPreviewProps {
   documentType: string;
@@ -103,6 +104,19 @@ const DocumentPreview = ({
           ref={documentRef}
           employeeName={employeeName}
           date={formattedDate}
+        />
+      );
+    } else if (documentType === "despido_periodo_prueba") {
+      return (
+        <DespidoPeriodoPruebaTemplate
+          ref={documentRef}
+          employeeData={{
+            nombres: employeeData.nombres,
+            apellidos: employeeData.apellidos,
+            dni: employeeData.dni,
+            cuil: employeeData.cuil
+          }}
+          fecha={formattedDate}
         />
       );
     }

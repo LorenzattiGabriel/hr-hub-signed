@@ -53,8 +53,23 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
       return;
     }
 
+    const diasSolicitados = calculateDays();
+
+    // Validar que no se soliciten días negativos o cero
+    if (diasSolicitados <= 0) {
+      toast({
+        title: "Error - Fechas inválidas",
+        description: "La fecha de fin debe ser posterior a la fecha de inicio.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (onSave) {
-      onSave(formData);
+      onSave({
+        ...formData,
+        dias_solicitados: diasSolicitados
+      });
     }
 
     setTimeout(() => onBack(), 1500);

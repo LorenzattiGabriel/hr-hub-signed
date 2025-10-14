@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { formatDateLocal, calculateYearsOfService } from "@/utils/dateUtils";
 import { 
   ArrowLeft, 
   Edit, 
@@ -35,12 +36,6 @@ const EmployeeDetail = ({ employee, onBack, onEdit }: EmployeeDetailProps) => {
     });
   };
 
-  const calculateYearsOfService = (startDate: string) => {
-    const start = new Date(startDate);
-    const now = new Date();
-    const years = now.getFullYear() - start.getFullYear();
-    return years;
-  };
 
   // Helper: calculate vacation days for current year using calendar days and decimals
   const calcVacationDaysCurrentYear = (fechaIngreso?: string) => {
@@ -126,7 +121,7 @@ const EmployeeDetail = ({ employee, onBack, onEdit }: EmployeeDetailProps) => {
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">Fecha de Nacimiento</p>
-                <p className="text-foreground/70">{new Date(employee.fechaNacimiento).toLocaleDateString()}</p>
+                <p className="text-foreground/70">{formatDateLocal(employee.fechaNacimiento)}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">Estado Civil</p>
@@ -184,7 +179,7 @@ const EmployeeDetail = ({ employee, onBack, onEdit }: EmployeeDetailProps) => {
                 <Calendar className="h-4 w-4 text-primary" />
                 <div>
                   <p className="text-sm font-medium text-foreground">Fecha de Ingreso</p>
-                  <p className="text-foreground/70">{new Date(employee.fechaIngreso).toLocaleDateString()}</p>
+                  <p className="text-foreground/70">{formatDateLocal(employee.fechaIngreso)}</p>
                 </div>
               </div>
               <div>

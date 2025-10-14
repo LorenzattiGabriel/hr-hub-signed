@@ -39,7 +39,7 @@ export interface Employee {
   tieneHijos?: string;
   nombresHijos?: string;
   tieneLicencia?: string;
-  tipoLicencia?: string;
+  tipoLicencia?: string[];
   fotoDni?: any;
   fotoCarnet?: any;
 }
@@ -145,6 +145,12 @@ export const useEmployees = () => {
 
   const addEmployee = async (employeeData: Omit<Employee, 'id'>) => {
     try {
+      // Validar campos obligatorios antes de enviar a la BD
+      if (!employeeData.dni || !employeeData.nombres || !employeeData.apellidos || 
+          (!employeeData.fecha_ingreso && !employeeData.fechaIngreso)) {
+        throw new Error('Los campos DNI, nombres, apellidos y fecha de ingreso son obligatorios');
+      }
+
       const dbEmployee = toDbEmployee(employeeData);
       const { data, error } = await supabase
         .from('employees')
@@ -186,7 +192,6 @@ export const useEmployees = () => {
           employee_id: data.id,
           year: currentYear,
           dias_totales: vacationDays,
-          dias_adeudados: 0,
           dias_usados: 0
         }]);
 
@@ -312,7 +317,6 @@ export const useEmployees = () => {
             employee_id: employee.id,
             year: currentYear,
             dias_totales: vacationDays,
-            dias_adeudados: 0,
             dias_usados: 0
           };
         })

@@ -4,11 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, Save, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import LegajoPDF from "./LegajoPDF";
+import { calculateDetailedAntiquity } from "@/utils/dateUtils";
 
 interface EmployeeFormProps {
   onBack: () => void;
@@ -16,6 +18,38 @@ interface EmployeeFormProps {
   employee?: any;
   isEditing?: boolean;
 }
+
+const licenseTypes = [
+  // Clase A (Motos y Ciclomotores)
+  { id: "A.1.1", label: "A.1.1: Ciclomotores" },
+  { id: "A.1.2", label: "A.1.2: Motocicletas de hasta 150 cc" },
+  { id: "A.1.3", label: "A.1.3: Motocicletas de más de 150 cc hasta 300 cc" },
+  { id: "A.1.4", label: "A.1.4: Motocicletas de más de 300 cc" },
+  { id: "A.2.1", label: "A.2.1: Motocicletas, triciclos y cuatriciclos" },
+  { id: "A.2.2", label: "A.2.2: Triciclos y cuatriciclos de más de 300 kg" },
+  
+  // Clase B (Automóviles y Camionetas)
+  { id: "B.1", label: "B.1: Automóviles, utilitarios, camionetas y casas rodantes hasta 3.500 kg" },
+  { id: "B.2", label: "B.2: Automóviles, utilitarios, camionetas y casas rodantes de más de 3.500 kg" },
+  
+  // Clase C (Vehículos de Carga)
+  { id: "C.1", label: "C.1: Camiones hasta 12.000 kg" },
+  { id: "C.2", label: "C.2: Camiones de más de 12.000 kg" },
+  { id: "C.3", label: "C.3: Vehículos de carga pesada" },
+  
+  // Clase D (Transporte de Pasajeros)
+  { id: "D.1", label: "D.1: Transporte de hasta 8 pasajeros" },
+  { id: "D.2", label: "D.2: Transporte de más de 8 pasajeros" },
+  { id: "D.3", label: "D.3: Vehículos de emergencia y seguridad" },
+  
+  // Clase E (Vehículos Articulados)
+  { id: "E.1", label: "E.1: Vehículos de carga con remolque o semirremolque" },
+  { id: "E.2", label: "E.2: Vehículos de pasajeros con remolque o articulados" },
+  
+  // Clase G (Maquinaria Especial)
+  { id: "G.1", label: "G.1: Tractores" },
+  { id: "G.2", label: "G.2: Maquinaria agrícola, de construcción y vial" },
+];
 
 const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeFormProps) => {
   const { toast } = useToast();
@@ -63,7 +97,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     tieneHijos: employee?.tieneHijos || "",
     nombresHijos: employee?.nombresHijos || "",
     tieneLicencia: employee?.tieneLicencia || "",
-    tipoLicencia: employee?.tipoLicencia || "",
+    tipoLicencia: employee?.tipoLicencia || [],
     
     // Observaciones
     observaciones: employee?.observaciones || ""
@@ -77,29 +111,25 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     setFormData(prev => ({ ...prev, [field]: file }));
   };
 
-  const calculateAntiquity = (fechaIngreso: string) => {
-    if (!fechaIngreso) return { years: 0, months: 0, days: 0 };
-    
-    const ingresoDate = new Date(fechaIngreso);
-    const today = new Date();
-    
-    let years = today.getFullYear() - ingresoDate.getFullYear();
-    let months = today.getMonth() - ingresoDate.getMonth();
-    let days = today.getDate() - ingresoDate.getDate();
-    
-    if (days < 0) {
-      months--;
-      const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-      days += lastMonth.getDate();
-    }
-    
-    if (months < 0) {
-      years--;
-      months += 12;
-    }
-    
-    return { years, months, days };
+  const handleLicenseChange = (licenseType: string, checked: boolean) => {
+    setFormData(prev => {
+      const currentLicenses = Array.isArray(prev.tipoLicencia) ? prev.tipoLicencia : [];
+      let newLicenses;
+      
+      if (checked) {
+        // Agregar licencia si no existe
+        newLicenses = currentLicenses.includes(licenseType) 
+          ? currentLicenses 
+          : [...currentLicenses, licenseType];
+      } else {
+        // Remover licencia
+        newLicenses = currentLicenses.filter(license => license !== licenseType);
+      }
+      
+      return { ...prev, tipoLicencia: newLicenses };
+    });
   };
+
 
   const calculateVacationDays = (fechaIngreso: string) => {
     if (!fechaIngreso) return 0;
@@ -135,10 +165,10 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
 
   const handleSave = () => {
     // Validaciones básicas
-    if (!formData.nombres || !formData.apellidos || !formData.dni) {
+    if (!formData.nombres || !formData.apellidos || !formData.dni || !formData.fechaIngreso) {
       toast({
         title: "Error",
-        description: "Por favor complete los campos obligatorios (Nombres, Apellidos, DNI)",
+        description: "Por favor complete los campos obligatorios (Nombres, Apellidos, DNI, Fecha de Ingreso)",
         variant: "destructive"
       });
       return;
@@ -225,6 +255,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   value={formData.nombres}
                   onChange={(e) => handleInputChange("nombres", e.target.value)}
                   placeholder="Nombres completos"
+                  required
                 />
               </div>
               <div>
@@ -234,6 +265,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   value={formData.apellidos}
                   onChange={(e) => handleInputChange("apellidos", e.target.value)}
                   placeholder="Apellidos completos"
+                  required
                 />
               </div>
             </div>
@@ -246,6 +278,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   value={formData.dni}
                   onChange={(e) => handleInputChange("dni", e.target.value)}
                   placeholder="12345678"
+                  required
                 />
               </div>
               <div>
@@ -465,12 +498,13 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
             </div>
 
             <div>
-              <Label htmlFor="fechaIngreso" className="text-foreground">Fecha de Ingreso</Label>
+              <Label htmlFor="fechaIngreso" className="text-foreground">Fecha de Ingreso *</Label>
               <Input
                 id="fechaIngreso"
                 type="date"
                 value={formData.fechaIngreso}
                 onChange={(e) => handleInputChange("fechaIngreso", e.target.value)}
+                required
               />
             </div>
 
@@ -509,7 +543,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                     <Label className="text-foreground">Antigüedad:</Label>
                     <p className="text-foreground/80">
                       {(() => {
-                        const antiquity = calculateAntiquity(formData.fechaIngreso);
+                        const antiquity = calculateDetailedAntiquity(formData.fechaIngreso);
                         return `${antiquity.years} años, ${antiquity.months} meses, ${antiquity.days} días`;
                       })()}
                     </p>
@@ -681,43 +715,46 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
 
             {formData.tieneLicencia === "si" && (
               <div>
-                <Label htmlFor="tipoLicencia" className="text-foreground">Tipo de Licencia</Label>
-                <Select onValueChange={(value) => handleInputChange("tipoLicencia", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar tipo de licencia" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border border-border max-h-[200px] overflow-y-auto z-50">
-                    {/* Clase A (Motos y Ciclomotores) */}
-                    <SelectItem value="A.1.1">A.1.1: Ciclomotores</SelectItem>
-                    <SelectItem value="A.1.2">A.1.2: Motocicletas de hasta 150 cc</SelectItem>
-                    <SelectItem value="A.1.3">A.1.3: Motocicletas de más de 150 cc hasta 300 cc</SelectItem>
-                    <SelectItem value="A.1.4">A.1.4: Motocicletas de más de 300 cc</SelectItem>
-                    <SelectItem value="A.2.1">A.2.1: Motocicletas, triciclos y cuatriciclos</SelectItem>
-                    <SelectItem value="A.2.2">A.2.2: Triciclos y cuatriciclos de más de 300 kg</SelectItem>
+                <Label className="text-foreground mb-3 block">Tipos de Licencia (seleccione todos los que posee)</Label>
+                <div className="grid grid-cols-1 gap-3 max-h-[300px] overflow-y-auto p-4 border rounded-md bg-background">
+                  {licenseTypes.map((license) => {
+                    const currentLicenses = Array.isArray(formData.tipoLicencia) ? formData.tipoLicencia : [];
+                    const isChecked = currentLicenses.includes(license.id);
                     
-                    {/* Clase B (Automóviles y Camionetas) */}
-                    <SelectItem value="B.1">B.1: Automóviles, utilitarios, camionetas y casas rodantes hasta 3.500 kg</SelectItem>
-                    <SelectItem value="B.2">B.2: Automóviles, utilitarios, camionetas y casas rodantes de más de 3.500 kg</SelectItem>
-                    
-                    {/* Clase C (Vehículos de Carga) */}
-                    <SelectItem value="C.1">C.1: Camiones hasta 12.000 kg</SelectItem>
-                    <SelectItem value="C.2">C.2: Camiones de más de 12.000 kg</SelectItem>
-                    <SelectItem value="C.3">C.3: Vehículos de carga pesada</SelectItem>
-                    
-                    {/* Clase D (Transporte de Pasajeros) */}
-                    <SelectItem value="D.1">D.1: Transporte de hasta 8 pasajeros</SelectItem>
-                    <SelectItem value="D.2">D.2: Transporte de más de 8 pasajeros</SelectItem>
-                    <SelectItem value="D.3">D.3: Vehículos de emergencia y seguridad</SelectItem>
-                    
-                    {/* Clase E (Vehículos Articulados) */}
-                    <SelectItem value="E.1">E.1: Vehículos de carga con remolque o semirremolque</SelectItem>
-                    <SelectItem value="E.2">E.2: Vehículos de pasajeros con remolque o articulados</SelectItem>
-                    
-                    {/* Clase G (Maquinaria Especial) */}
-                    <SelectItem value="G.1">G.1: Tractores</SelectItem>
-                    <SelectItem value="G.2">G.2: Maquinaria agrícola, de construcción y vial</SelectItem>
-                  </SelectContent>
-                </Select>
+                    return (
+                      <div key={license.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={license.id}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => handleLicenseChange(license.id, checked as boolean)}
+                        />
+                        <Label 
+                          htmlFor={license.id} 
+                          className="text-sm font-normal cursor-pointer flex-1"
+                        >
+                          {license.label}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {/* Mostrar licencias seleccionadas */}
+                {Array.isArray(formData.tipoLicencia) && formData.tipoLicencia.length > 0 && (
+                  <div className="mt-3">
+                    <Label className="text-foreground text-sm">Licencias seleccionadas:</Label>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {formData.tipoLicencia.map((licenseId) => {
+                        const license = licenseTypes.find(l => l.id === licenseId);
+                        return license ? (
+                          <Badge key={licenseId} variant="secondary" className="text-xs">
+                            {license.label}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

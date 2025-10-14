@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Download, FileText, User, MapPin, Phone, Mail, GraduationCap, Heart, Briefcase } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatDateLocal, calculateDetailedAntiquity, getCurrentDateString } from "@/utils/dateUtils";
 
 interface LegajoPDFProps {
   employeeData: any;
@@ -47,32 +48,9 @@ const downloadPDF = async () => {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "No especificado";
-    return new Date(dateString).toLocaleDateString();
+    return formatDateLocal(dateString);
   };
 
-  const calculateAntiquity = (fechaIngreso: string) => {
-    if (!fechaIngreso) return { years: 0, months: 0, days: 0 };
-    
-    const ingresoDate = new Date(fechaIngreso);
-    const today = new Date();
-    
-    let years = today.getFullYear() - ingresoDate.getFullYear();
-    let months = today.getMonth() - ingresoDate.getMonth();
-    let days = today.getDate() - ingresoDate.getDate();
-    
-    if (days < 0) {
-      months--;
-      const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-      days += lastMonth.getDate();
-    }
-    
-    if (months < 0) {
-      years--;
-      months += 12;
-    }
-    
-    return { years, months, days };
-  };
 
   const calculateVacationDays = (fechaIngreso: string) => {
     if (!fechaIngreso) return 0;
@@ -131,7 +109,7 @@ const downloadPDF = async () => {
             <h1 className="text-2xl font-bold mb-2" style={{ color: '#1f2937' }}>LEGAJO DIGITAL DE EMPLEADO</h1>
             <h2 className="text-lg font-semibold" style={{ color: '#4b5563' }}>AVÍCOLA LA PALOMA</h2>
             <p className="text-sm mt-2" style={{ color: '#6b7280' }}>
-              Fecha de Generación: {new Date().toLocaleDateString()}
+              Fecha de Generación: {formatDateLocal(getCurrentDateString())}
             </p>
           </div>
 
@@ -262,7 +240,7 @@ const downloadPDF = async () => {
                   <strong style={{ color: '#1f2937' }}>Antigüedad:</strong>
                   <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
                     {(() => {
-                      const antiquity = calculateAntiquity(employeeData.fechaIngreso);
+                      const antiquity = calculateDetailedAntiquity(employeeData.fechaIngreso);
                       return `${antiquity.years} años, ${antiquity.months} meses, ${antiquity.days} días`;
                     })()}
                   </p>
@@ -374,7 +352,7 @@ const downloadPDF = async () => {
               Este documento constituye el legajo digital del empleado según normativas laborales vigentes.
             </p>
             <p className="mt-1">
-              Generado el {new Date().toLocaleDateString()} - Sistema RRHH Avícola La Paloma
+              Generado el {formatDateLocal(getCurrentDateString())} - Sistema RRHH Avícola La Paloma
             </p>
           </div>
         </div>

@@ -13,7 +13,7 @@ import { useEmployees } from "@/hooks/useEmployees";
 import { useAbsences } from "@/hooks/useAbsences";
 
 const AbsencesModule = () => {
-  console.log("🔍 AbsencesModule rendering...");
+  // AbsencesModule rendering
   const { toast } = useToast();
   const { getActiveEmployees } = useEmployees();
   const activeEmployees = getActiveEmployees();
@@ -126,7 +126,7 @@ const AbsencesModule = () => {
     return <AbsenceDetail absence={selectedAbsence} onBack={handleBackToList} />;
   }
 
-  console.log("📊 Rendering list view with", filteredAbsences.length, "absences");
+  // Rendering list view with filtered absences
 
   return (
     <div className="space-y-6">

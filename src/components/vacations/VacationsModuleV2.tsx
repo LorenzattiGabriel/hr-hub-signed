@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,8 +23,38 @@ export const VacationsModule = () => {
     approveVacationRequest, 
     rejectVacationRequest,
     deleteVacationRequest,
-    getEmployeeVacationBalance 
+    getEmployeeVacationBalance,
+    refetch
   } = useVacations();
+
+  // Wrapper functions to ensure UI refresh
+  const handleApproveVacation = async (requestId: string) => {
+    try {
+      await approveVacationRequest(requestId);
+      // Force refresh to ensure UI updates
+      await refetch();
+      // Navigate back to list if we're in detail view
+      if (view === "detail") {
+        setView("list");
+        setSelectedVacation(null);
+      }
+    } catch (error) {
+      console.error('❌ Error approving vacation:', error);
+    }
+  };
+
+  const handleRejectVacation = async (requestId: string) => {
+    try {
+      await rejectVacationRequest(requestId);
+      await refetch();
+      if (view === "detail") {
+        setView("list");
+        setSelectedVacation(null);
+      }
+    } catch (error) {
+      console.error('Error rejecting vacation:', error);
+    }
+  };
 
   const [view, setView] = useState<"list" | "form" | "detail">("list");
   const [selectedVacation, setSelectedVacation] = useState<any>(null);
@@ -57,23 +87,23 @@ export const VacationsModule = () => {
   };
 
   // Create employees with vacation information from database
-  const employeesWithVacations = getActiveEmployees().map(employee => {
-    const currentYear = new Date().getFullYear();
-    const balance = getEmployeeVacationBalance(employee.id, currentYear);
+  const employeesWithVacations = useMemo(() => {
+    return getActiveEmployees().map(employee => {
+      const currentYear = new Date().getFullYear();
+      const balance = getEmployeeVacationBalance(employee.id, currentYear);
 
-    const computedDays = calcVacationDaysCurrentYear(employee.fecha_ingreso || employee.fechaIngreso);
-    const totalDays = balance && balance.dias_totales > 0 ? balance.dias_totales : computedDays;
-    const adeudados = balance?.dias_adeudados || 0;
-    const usados = balance?.dias_usados || 0;
+      const computedDays = calcVacationDaysCurrentYear(employee.fecha_ingreso || employee.fechaIngreso);
+      const totalDays = balance && balance.dias_totales > 0 ? balance.dias_totales : computedDays;
+      const usados = balance?.dias_usados || 0;
 
-    return {
-      ...employee,
-      vacationDays: totalDays,
-      diasAdeudados: adeudados,
-      usedDays: usados,
-      availableDays: Math.round(((totalDays + adeudados - usados) + Number.EPSILON) * 100) / 100,
-    };
-  });
+      return {
+        ...employee,
+        vacationDays: totalDays,
+        usedDays: usados,
+        availableDays: Math.round(((totalDays - usados) + Number.EPSILON) * 100) / 100,
+      };
+    });
+  }, [employees, vacationBalances, getActiveEmployees, getEmployeeVacationBalance]);
 
   // Function to calculate days between dates
   const calculateRequestDays = (startDate: string, endDate: string): number => {
@@ -314,6 +344,7 @@ export const VacationsModule = () => {
         employees={getActiveEmployees()} 
         onSave={async (requestData) => {
           await addVacationRequest(requestData);
+          await refetch(); // Force refresh after adding request
           handleBackToList();
         }} 
       />
@@ -325,8 +356,8 @@ export const VacationsModule = () => {
       <VacationDetail
         vacation={selectedVacation}
         onBack={handleBackToList}
-        onApprove={() => approveVacationRequest(selectedVacation.id)}
-        onReject={() => rejectVacationRequest(selectedVacation.id)}
+        onApprove={() => handleApproveVacation(selectedVacation.id)}
+        onReject={() => handleRejectVacation(selectedVacation.id)}
         onGeneratePDF={() => generateVacationCertificate(selectedVacation)}
       />
     );
@@ -435,7 +466,6 @@ export const VacationsModule = () => {
                   <TableHead>DNI</TableHead>
                   <TableHead>Puesto</TableHead>
                   <TableHead>Días Totales</TableHead>
-                  <TableHead>Días Adeudados</TableHead>
                   <TableHead>Días Usados</TableHead>
                   <TableHead>Días Disponibles</TableHead>
                 </TableRow>
@@ -449,7 +479,6 @@ export const VacationsModule = () => {
                     <TableCell>{employee.dni}</TableCell>
                     <TableCell>{employee.puesto}</TableCell>
                     <TableCell>{employee.vacationDays}</TableCell>
-                    <TableCell className="text-orange-600 font-medium">{employee.diasAdeudados}</TableCell>
                     <TableCell>{employee.usedDays}</TableCell>
                     <TableCell className="font-medium">{employee.availableDays}</TableCell>
                   </TableRow>
@@ -545,7 +574,7 @@ export const VacationsModule = () => {
                               className="text-green-600 border-green-600 hover:bg-green-50"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                approveVacationRequest(vacation.id);
+                                handleApproveVacation(vacation.id);
                               }}
                             >
                               ✓ Aprobar
@@ -556,7 +585,7 @@ export const VacationsModule = () => {
                               className="text-red-600 border-red-600 hover:bg-red-50"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                rejectVacationRequest(vacation.id);
+                                handleRejectVacation(vacation.id);
                               }}
                             >
                               ✗ Rechazar

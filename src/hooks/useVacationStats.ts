@@ -32,7 +32,7 @@ export const useVacationStats = () => {
       if (balances && balances.length > 0) {
         const totalUsed = balances.reduce((sum, bal) => sum + (bal.dias_usados || 0), 0);
         const totalAvailable = balances.reduce((sum, bal) => 
-          sum + ((bal.dias_totales || 0) + (bal.dias_adeudados || 0) - (bal.dias_usados || 0)), 0);
+          sum + ((bal.dias_totales || 0) - (bal.dias_usados || 0)), 0);
         const totalEmployees = balances.length;
         const averageUsed = totalEmployees > 0 ? totalUsed / totalEmployees : 0;
 

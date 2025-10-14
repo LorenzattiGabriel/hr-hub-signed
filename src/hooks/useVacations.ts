@@ -26,7 +26,6 @@ export interface VacationBalance {
   employee_id: string;
   year: number;
   dias_totales: number;
-  dias_adeudados: number;
   dias_usados: number;
   created_at: string;
   updated_at: string;
@@ -74,7 +73,7 @@ export const useVacations = () => {
       if (error) throw error;
       setVacationBalances(data || []);
     } catch (error) {
-      console.error('Error fetching vacation balances:', error);
+      console.error('❌ Error fetching vacation balances:', error);
       toast({
         title: "Error",
         description: "No se pudieron cargar los balances de vacaciones",
@@ -152,12 +151,46 @@ export const useVacations = () => {
       if (balanceError && balanceError.code !== 'PGRST116') throw balanceError;
 
       if (balance) {
-        await supabase
+        const newUsedDays = balance.dias_usados + request.dias_solicitados;
+        
+        const { data: updatedBalance, error: updateBalanceError } = await supabase
           .from('vacation_balances')
           .update({ 
-            dias_usados: balance.dias_usados + request.dias_solicitados 
+            dias_usados: newUsedDays
           })
-          .eq('id', balance.id);
+          .eq('id', balance.id)
+          .select()
+          .single();
+
+        if (updateBalanceError) throw updateBalanceError;
+      } else {
+        
+        // Crear balance inicial para el empleado
+        const { data: employeeData } = await supabase
+          .from('employees')
+          .select('fecha_ingreso')
+          .eq('id', request.employee_id)
+          .single();
+          
+        let vacationDays = 14; // Default
+        if (employeeData?.fecha_ingreso) {
+          const { data: calculatedDays } = await supabase
+            .rpc('calculate_vacation_days', { fecha_ingreso: employeeData.fecha_ingreso });
+          vacationDays = calculatedDays || 14;
+        }
+        
+        const { data: newBalance, error: createBalanceError } = await supabase
+          .from('vacation_balances')
+          .insert({
+            employee_id: request.employee_id,
+            year: currentYear,
+            dias_totales: vacationDays,
+            dias_usados: request.dias_solicitados
+          })
+          .select()
+          .single();
+          
+        if (createBalanceError) throw createBalanceError;
       }
 
       // Refresh data
@@ -168,7 +201,7 @@ export const useVacations = () => {
         description: "Solicitud de vacaciones aprobada",
       });
     } catch (error) {
-      console.error('Error approving vacation request:', error);
+      console.error('❌ Error approving vacation request:', error);
       toast({
         title: "Error",
         description: "No se pudo aprobar la solicitud",
@@ -205,7 +238,7 @@ export const useVacations = () => {
   const updateVacationBalance = async (
     employeeId: string, 
     year: number, 
-    balanceData: Partial<Pick<VacationBalance, 'dias_totales' | 'dias_adeudados' | 'dias_usados'>>
+    balanceData: Partial<Pick<VacationBalance, 'dias_totales' | 'dias_usados'>>
   ) => {
     try {
       const { data, error } = await supabase
@@ -284,9 +317,10 @@ export const useVacations = () => {
 
   const getEmployeeVacationBalance = (employeeId: string, year?: number) => {
     const targetYear = year || new Date().getFullYear();
-    return vacationBalances.find(
+    const balance = vacationBalances.find(
       balance => balance.employee_id === employeeId && balance.year === targetYear
     );
+    return balance;
   };
 
   useEffect(() => {

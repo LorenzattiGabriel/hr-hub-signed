@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Mail, Phone, Calendar, Eye, Edit, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatDateLocal, calculateYearsOfService } from "@/utils/dateUtils";
 
 interface EmployeeCardProps {
   employee: {
@@ -36,16 +37,6 @@ const EmployeeCard = ({ employee, onView, onEdit }: EmployeeCardProps) => {
     });
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-AR');
-  };
-
-  const calculateYearsOfService = (startDate: string) => {
-    const start = new Date(startDate);
-    const now = new Date();
-    const years = now.getFullYear() - start.getFullYear();
-    return years;
-  };
 
   return (
     <Card className="hover:shadow-lg transition-all duration-300 group">
@@ -78,7 +69,7 @@ const EmployeeCard = ({ employee, onView, onEdit }: EmployeeCardProps) => {
               
               <div className="flex items-center space-x-1 mt-2 text-sm text-foreground/70">
                 <Calendar className="h-4 w-4" />
-                <span>Ingreso: {formatDate(employee.fechaIngreso)}</span>
+                <span>Ingreso: {formatDateLocal(employee.fechaIngreso)}</span>
                 <span className="mx-2">•</span>
                 <span>{calculateYearsOfService(employee.fechaIngreso)} años de antigüedad</span>
               </div>

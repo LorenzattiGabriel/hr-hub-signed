@@ -7,14 +7,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useEmployees } from "@/hooks/useEmployees";
 import { usePayroll } from "@/hooks/usePayroll";
-import { Search, Filter, Download, Eye, Trash2 } from "lucide-react";
+import { Search, Filter, Download, Edit, Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { formatDateLocal } from "@/utils/dateUtils";
 
 const PayrollList = () => {
   const { employees } = useEmployees();
-  const { payrollRecords, isLoading, deletePayroll } = usePayroll();
+  const { payrollRecords, isLoading, deletePayroll, updatePayroll } = usePayroll();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
   const [filterPeriod, setFilterPeriod] = useState("all");
+  const [editingRecord, setEditingRecord] = useState<any>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    type: "",
+    amount: "",
+    period: "",
+    payment_date: "",
+    description: ""
+  });
 
   const getEmployeeName = (employeeId: string) => {
     const employee = employees.find(e => e.id === employeeId);
@@ -56,9 +69,6 @@ const PayrollList = () => {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-AR');
-  };
 
   const formatPeriod = (period: string) => {
     const [year, month] = period.split('-');
@@ -75,9 +85,40 @@ const PayrollList = () => {
     return matchesSearch && matchesType && matchesPeriod;
   });
 
+  const handleEdit = (record: any) => {
+    setEditingRecord(record);
+    setEditForm({
+      type: record.type,
+      amount: record.amount.toString(),
+      period: record.period,
+      payment_date: record.payment_date,
+      description: record.description || ""
+    });
+    setIsEditDialogOpen(true);
+  };
+
   const handleDelete = async (id: string) => {
     if (confirm("¿Estás seguro de que deseas eliminar este registro?")) {
       await deletePayroll.mutateAsync(id);
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingRecord) return;
+    
+    try {
+      await updatePayroll.mutateAsync({
+        id: editingRecord.id,
+        type: editForm.type as any,
+        amount: parseFloat(editForm.amount),
+        period: editForm.period,
+        payment_date: editForm.payment_date,
+        description: editForm.description
+      });
+      setIsEditDialogOpen(false);
+      setEditingRecord(null);
+    } catch (error) {
+      console.error("Error updating payroll:", error);
     }
   };
 
@@ -172,7 +213,7 @@ const PayrollList = () => {
                         {formatPeriod(record.period)}
                       </TableCell>
                       <TableCell>
-                        {formatDate(record.payment_date)}
+                        {formatDateLocal(record.payment_date)}
                       </TableCell>
                       <TableCell>
                         <Badge variant="default">
@@ -181,6 +222,13 @@ const PayrollList = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEdit(record)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
                           <Button 
                             variant="outline" 
                             size="sm"
@@ -198,6 +246,92 @@ const PayrollList = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Edición */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Registro de Pago</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="type" className="text-right">
+                Tipo
+              </Label>
+              <Select 
+                value={editForm.type} 
+                onValueChange={(value) => setEditForm({...editForm, type: value})}
+              >
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="salary">Sueldo</SelectItem>
+                  <SelectItem value="advance">Adelanto</SelectItem>
+                  <SelectItem value="bonus">Bonificación</SelectItem>
+                  <SelectItem value="deduction">Descuento</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="amount" className="text-right">
+                Monto
+              </Label>
+              <Input
+                id="amount"
+                type="number"
+                value={editForm.amount}
+                onChange={(e) => setEditForm({...editForm, amount: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="period" className="text-right">
+                Período
+              </Label>
+              <Input
+                id="period"
+                type="month"
+                value={editForm.period}
+                onChange={(e) => setEditForm({...editForm, period: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="payment_date" className="text-right">
+                Fecha de Pago
+              </Label>
+              <Input
+                id="payment_date"
+                type="date"
+                value={editForm.payment_date}
+                onChange={(e) => setEditForm({...editForm, payment_date: e.target.value})}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="description" className="text-right">
+                Descripción
+              </Label>
+              <Textarea
+                id="description"
+                value={editForm.description}
+                onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                className="col-span-3"
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveEdit}>
+              Guardar Cambios
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

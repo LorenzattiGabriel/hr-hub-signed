@@ -2,6 +2,24 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+// Temporary interface extension until migration is run and types are regenerated
+interface UniformRecord {
+  id: string;
+  employee_id: string;
+  uniform_type: string;
+  size: string;
+  quantity: number;
+  delivery_date: string;
+  next_delivery_date: string | null;
+  season: string;
+  condition: string;
+  notes: string | null;
+  galpon: number | null; // New field
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface UniformDelivery {
   id: string;
   employee_id: string;
@@ -13,6 +31,7 @@ export interface UniformDelivery {
   season: string;
   condition: string;
   notes: string | null;
+  galpon: number | null;
   status: 'entregado' | 'pendiente' | 'devuelto';
   created_at: string;
   updated_at: string;
@@ -37,7 +56,7 @@ export const useUniforms = () => {
 
       if (error) throw error;
 
-      const mapped = (data || []).map((row: any) => {
+      const mapped = (data || []).map((row: UniformRecord & { employees: any }) => {
         const emp = row.employees;
         const uniform: UniformDelivery = {
           id: row.id,
@@ -50,6 +69,7 @@ export const useUniforms = () => {
           season: row.season,
           condition: row.condition,
           notes: row.notes,
+          galpon: row.galpon,
           status: row.status as 'entregado' | 'pendiente' | 'devuelto',
           created_at: row.created_at,
           updated_at: row.updated_at,
@@ -83,6 +103,7 @@ export const useUniforms = () => {
         season: uniformData.season,
         condition: uniformData.condition,
         notes: uniformData.notes,
+        galpon: uniformData.galpon,
         status: uniformData.status
       };
 
@@ -90,7 +111,7 @@ export const useUniforms = () => {
         .from('uniforms')
         .insert([insertPayload])
         .select(`*, employees:employees(*)`)
-        .single();
+        .single() as { data: UniformRecord & { employees: any } | null, error: any };
 
       if (error) throw error;
 
@@ -106,6 +127,7 @@ export const useUniforms = () => {
         season: data.season,
         condition: data.condition,
         notes: data.notes,
+        galpon: data.galpon,
         status: data.status as 'entregado' | 'pendiente' | 'devuelto',
         created_at: data.created_at,
         updated_at: data.updated_at,
@@ -141,7 +163,7 @@ export const useUniforms = () => {
         .update(updatePayload)
         .eq('id', id)
         .select(`*, employees:employees(*)`)
-        .single();
+        .single() as { data: UniformRecord & { employees: any } | null, error: any };
 
       if (error) throw error;
 
@@ -157,6 +179,7 @@ export const useUniforms = () => {
         season: data.season,
         condition: data.condition,
         notes: data.notes,
+        galpon: data.galpon,
         status: data.status as 'entregado' | 'pendiente' | 'devuelto',
         created_at: data.created_at,
         updated_at: data.updated_at,

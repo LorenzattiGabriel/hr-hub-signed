@@ -66,7 +66,6 @@ export const addNoeliaBelen = async () => {
           employee_id: data.id,
           year: currentYear,
           dias_totales: vacationDays || 14,
-          dias_adeudados: 0,
           dias_usados: 0
         }]);
       

@@ -35,6 +35,7 @@ const DocumentForm = ({ onBack, onSave, employees }: DocumentFormProps) => {
   const documentTypes = [
     { value: "reglamento_interno", label: "Reglamento Interno" },
     { value: "consentimiento_datos_biometricos", label: "Constancia de Consentimiento para Uso de Cámaras de Vigilancia y Datos Biométricos" },
+    { value: "despido_periodo_prueba", label: "Despido - Período de Prueba" },
   ];
 
   const handleInputChange = (field: string, value: string) => {

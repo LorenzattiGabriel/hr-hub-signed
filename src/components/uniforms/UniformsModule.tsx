@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useEmployees } from "@/hooks/useEmployees";
-import { useUniforms } from "@/hooks/useUniforms";
+import { useUniforms, UniformDelivery } from "@/hooks/useUniforms";
 import { Shirt, Plus, Download, Calendar, User, Package, Trash2, Search, Filter } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +29,7 @@ const UniformsModule = () => {
   const [season, setSeason] = useState("");
   const [condition, setCondition] = useState("");
   const [notes, setNotes] = useState("");
+  const [galpon, setGalpon] = useState("");
   
   // Filtros
   const [searchTerm, setSearchTerm] = useState("");
@@ -141,8 +142,9 @@ const UniformsModule = () => {
         season,
         condition,
         notes: notes || null,
+        galpon: galpon ? parseInt(galpon) : null,
         status: "entregado"
-      });
+      } as any);
 
       // Reset form
       setSelectedEmployee("");
@@ -153,6 +155,7 @@ const UniformsModule = () => {
       setSeason("");
       setCondition("");
       setNotes("");
+      setGalpon("");
       setIsDialogOpen(false);
     } catch (error) {
       // Error already handled by hook
@@ -502,11 +505,28 @@ const UniformsModule = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="notes">Observaciones</Label>
+                  <Label htmlFor="galpon">Galpón</Label>
+                  <Select value={galpon} onValueChange={setGalpon}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar galpón (opcional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sin galpón</SelectItem>
+                      <SelectItem value="1">Galpón 1</SelectItem>
+                      <SelectItem value="2">Galpón 2</SelectItem>
+                      <SelectItem value="3">Galpón 3</SelectItem>
+                      <SelectItem value="4">Galpón 4</SelectItem>
+                      <SelectItem value="5">Galpón 5</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="notes">Observaciones/Finalidad</Label>
                   <Textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Notas adicionales (opcional)"
+                    placeholder="Observaciones y/o finalidad de la entrega (opcional)"
                   />
                 </div>
               </div>
@@ -604,6 +624,7 @@ const UniformsModule = () => {
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Categoría</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Talle</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Cantidad</th>
+                    <th className="px-6 py-3 text-sm font-medium text-foreground/70">Galpón</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Fecha Entrega</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Próxima Entrega</th>
                     <th className="px-6 py-3 text-sm font-medium text-foreground/70">Estado</th>
@@ -629,6 +650,9 @@ const UniformsModule = () => {
                       </td>
                       <td className="px-6 py-4 text-foreground">{delivery.size}</td>
                       <td className="px-6 py-4 text-foreground">{delivery.quantity}</td>
+                      <td className="px-6 py-4 text-foreground">
+                        {(delivery as any).galpon ? `Galpón ${(delivery as any).galpon}` : '-'}
+                      </td>
                       <td className="px-6 py-4 text-foreground">
                         {new Date(delivery.delivery_date).toLocaleDateString('es-AR')}
                       </td>

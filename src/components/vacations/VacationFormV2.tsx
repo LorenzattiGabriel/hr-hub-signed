@@ -55,9 +55,32 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
       return;
     }
 
+    const diasSolicitados = calculateDays();
+    const diasDisponibles = vacationDaysInfo?.availableDays || 0;
+
+    // Validar que los días solicitados no excedan los disponibles
+    if (diasSolicitados > diasDisponibles) {
+      toast({
+        title: "Error - Días insuficientes",
+        description: `No puedes solicitar ${diasSolicitados} días. Solo tienes ${diasDisponibles} días disponibles.`,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validar que no se soliciten días negativos o cero
+    if (diasSolicitados <= 0) {
+      toast({
+        title: "Error - Fechas inválidas",
+        description: "La fecha de fin debe ser posterior a la fecha de inicio.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const requestData = {
       ...formData,
-      dias_solicitados: calculateDays(),
+      dias_solicitados: diasSolicitados,
       estado: "pendiente"
     };
 
@@ -210,13 +233,12 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
     totalDays: vacationBalance && vacationBalance.dias_totales > 0 
       ? vacationBalance.dias_totales 
       : calcVacationDaysCurrentYear(selectedEmployeeInfo.fecha_ingreso || selectedEmployeeInfo.fechaIngreso),
-    diasAdeudados: vacationBalance?.dias_adeudados || 0,
     usedDays: vacationBalance?.dias_usados || 0,
     availableDays: 0 // Will be calculated below
   } : null;
   
   if (vacationDaysInfo) {
-    vacationDaysInfo.availableDays = Math.round(((vacationDaysInfo.totalDays + vacationDaysInfo.diasAdeudados - vacationDaysInfo.usedDays) + Number.EPSILON) * 100) / 100;
+    vacationDaysInfo.availableDays = Math.round(((vacationDaysInfo.totalDays - vacationDaysInfo.usedDays) + Number.EPSILON) * 100) / 100;
   }
 
   return (
@@ -241,7 +263,12 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
             <Download className="h-4 w-4 mr-2" />
             Generar Constancia
           </Button>
-          <Button onClick={handleSave}>
+          <Button 
+            onClick={handleSave}
+            disabled={
+              vacationDaysInfo && calculateDays() > vacationDaysInfo.availableDays
+            }
+          >
             <Save className="h-4 w-4 mr-2" />
             Guardar Solicitud
           </Button>
@@ -297,6 +324,21 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
               <div className="p-3 bg-muted/50 rounded-lg">
                 <p className="text-2xl font-bold text-foreground">{calculateDays()}</p>
                 <p className="text-sm text-foreground/70">días laborables</p>
+                {vacationDaysInfo && calculateDays() > 0 && (
+                  <div className="mt-2">
+                    {calculateDays() > vacationDaysInfo.availableDays ? (
+                      <div className="flex items-center text-red-600 text-xs">
+                        <span className="w-2 h-2 bg-red-600 rounded-full mr-2"></span>
+                        Excede días disponibles ({vacationDaysInfo.availableDays})
+                      </div>
+                    ) : (
+                      <div className="flex items-center text-green-600 text-xs">
+                        <span className="w-2 h-2 bg-green-600 rounded-full mr-2"></span>
+                        Dentro del límite disponible
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -374,14 +416,10 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
                   <div className="space-y-3">
                     <h4 className="font-medium text-foreground">Balance de Vacaciones</h4>
                     
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-3 gap-4 text-sm">
                       <div className="space-y-1">
                         <span className="text-muted-foreground block">Días correspondientes:</span>
                         <p className="font-medium text-foreground">{vacationDaysInfo.totalDays}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-muted-foreground block">Días adeudados:</span>
-                        <p className="font-medium text-orange-600">{vacationDaysInfo.diasAdeudados}</p>
                       </div>
                       <div className="space-y-1">
                         <span className="text-muted-foreground block">Días usados:</span>
@@ -398,8 +436,8 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
                 <div className="p-3 bg-muted/30 rounded-lg">
                   <p className="text-sm text-foreground/70 mb-1">Cálculo según legislación argentina</p>
                   <p className="text-xs text-foreground/60">
-                    Los días adeudados son de períodos anteriores no utilizados. 
-                    El total disponible incluye días correspondientes + adeudados - usados.
+                    Los días disponibles se calculan como: días correspondientes - días usados.
+                    Al aprobar una solicitud, los días se descuentan automáticamente del saldo.
                   </p>
                 </div>
               </>

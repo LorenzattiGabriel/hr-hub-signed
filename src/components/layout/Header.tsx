@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -9,10 +10,23 @@ import {
   Calendar,
   Bell,
   Settings,
-  User
+  User,
+  LogOut
 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 
 const Header = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('authenticated');
+    toast({
+      title: "Sesión cerrada",
+      description: "Has salido del sistema exitosamente",
+    });
+    navigate('/login');
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-white shadow-sm">
       <div className="container flex h-16 items-center justify-between px-6">
@@ -40,6 +54,14 @@ const Header = () => {
           </Button>
           <Button variant="ghost" size="icon">
             <Settings className="h-5 w-5" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleLogout}
+            title="Cerrar sesión"
+          >
+            <LogOut className="h-5 w-5" />
           </Button>
           <div className="h-9 w-9 bg-primary rounded-full flex items-center justify-center">
             <span className="text-sm font-medium text-primary-foreground">UA</span>

@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import EmployeeList from "@/components/employees/EmployeeList";
@@ -20,6 +21,14 @@ import { SanctionsModule } from "@/components/sanctions/SanctionsModule";
 
 const Index = () => {
   const [activeModule, setActiveModule] = useState("dashboard");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem('authenticated');
+    if (!isAuthenticated) {
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const renderContent = () => {
     switch (activeModule) {

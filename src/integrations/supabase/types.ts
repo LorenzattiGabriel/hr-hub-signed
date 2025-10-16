@@ -114,6 +114,36 @@ export type Database = {
           },
         ]
       }
+      backup_logs: {
+        Row: {
+          backup_data: Json | null
+          created_at: string
+          error_message: string | null
+          file_size_bytes: number | null
+          filename: string
+          id: string
+          status: string
+        }
+        Insert: {
+          backup_data?: Json | null
+          created_at?: string
+          error_message?: string | null
+          file_size_bytes?: number | null
+          filename: string
+          id?: string
+          status: string
+        }
+        Update: {
+          backup_data?: Json | null
+          created_at?: string
+          error_message?: string | null
+          file_size_bytes?: number | null
+          filename?: string
+          id?: string
+          status?: string
+        }
+        Relationships: []
+      }
       candidate_history: {
         Row: {
           candidate_id: string
@@ -333,7 +363,7 @@ export type Database = {
           tiene_hijos: string | null
           tiene_licencia: string | null
           tipo_contrato: string | null
-          tipo_licencia: string | null
+          tipo_licencia: string[] | null
           titulo: string | null
           updated_at: string
         }
@@ -368,7 +398,7 @@ export type Database = {
           tiene_hijos?: string | null
           tiene_licencia?: string | null
           tipo_contrato?: string | null
-          tipo_licencia?: string | null
+          tipo_licencia?: string[] | null
           titulo?: string | null
           updated_at?: string
         }
@@ -403,7 +433,7 @@ export type Database = {
           tiene_hijos?: string | null
           tiene_licencia?: string | null
           tipo_contrato?: string | null
-          tipo_licencia?: string | null
+          tipo_licencia?: string[] | null
           titulo?: string | null
           updated_at?: string
         }
@@ -650,6 +680,7 @@ export type Database = {
           created_at: string
           delivery_date: string
           employee_id: string
+          galpon: number | null
           id: string
           next_delivery_date: string | null
           notes: string | null
@@ -665,6 +696,7 @@ export type Database = {
           created_at?: string
           delivery_date: string
           employee_id: string
+          galpon?: number | null
           id?: string
           next_delivery_date?: string | null
           notes?: string | null
@@ -680,6 +712,7 @@ export type Database = {
           created_at?: string
           delivery_date?: string
           employee_id?: string
+          galpon?: number | null
           id?: string
           next_delivery_date?: string | null
           notes?: string | null
@@ -823,7 +856,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      backup_dashboard: {
+        Row: {
+          avg_size_bytes: number | null
+          backup_date: string | null
+          failed_backups: number | null
+          latest_backup_time: string | null
+          successful_backups: number | null
+          total_backups: number | null
+          total_size_bytes: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calculate_next_delivery_date: {
@@ -833,6 +877,22 @@ export type Database = {
       calculate_vacation_days: {
         Args: { fecha_ingreso: string }
         Returns: number
+      }
+      check_backup_health: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      cleanup_old_backup_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      get_backup_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      get_latest_backup_info: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
       }
       get_total_available_days: {
         Args: { employee_id: string; year: number }

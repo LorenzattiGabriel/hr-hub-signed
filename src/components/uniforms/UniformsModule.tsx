@@ -9,18 +9,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useUniforms, UniformDelivery } from "@/hooks/useUniforms";
-import { Shirt, Plus, Download, Calendar, User, Package, Trash2, Search, Filter } from "lucide-react";
+import { Shirt, Plus, Download, Calendar, User, Package, Trash2, Search, Filter, Pencil } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import html2pdf from "html2pdf.js";
 
 const UniformsModule = () => {
   const { getActiveEmployees } = useEmployees();
-  const { uniforms, addUniform, deleteUniform, loading } = useUniforms();
+  const { uniforms, addUniform, updateUniform, deleteUniform, loading } = useUniforms();
   const { toast } = useToast();
   const activeEmployees = getActiveEmployees();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingUniform, setEditingUniform] = useState<UniformDelivery | null>(null);
   const [selectedEmployee, setSelectedEmployee] = useState("");
   const [uniformType, setUniformType] = useState("");
   const [size, setSize] = useState("");
@@ -157,6 +159,61 @@ const UniformsModule = () => {
       setNotes("");
       setGalpon("");
       setIsDialogOpen(false);
+    } catch (error) {
+      // Error already handled by hook
+    }
+  };
+
+  const handleEditUniform = (uniform: UniformDelivery) => {
+    setEditingUniform(uniform);
+    setSelectedEmployee(uniform.employee_id);
+    setUniformType(uniform.uniform_type);
+    setSize(uniform.size);
+    setQuantity(uniform.quantity.toString());
+    setDeliveryDate(uniform.delivery_date);
+    setSeason(uniform.season);
+    setCondition(uniform.condition);
+    setNotes(uniform.notes || "");
+    setGalpon(uniform.galpon?.toString() || "");
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateUniform = async () => {
+    if (!editingUniform || !selectedEmployee || !uniformType || !size || !season || !condition || !deliveryDate) {
+      toast({
+        title: "Error",
+        description: "Por favor completa todos los campos obligatorios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await updateUniform(editingUniform.id, {
+        employee_id: selectedEmployee,
+        uniform_type: uniformType,
+        size,
+        quantity: parseInt(quantity),
+        delivery_date: deliveryDate,
+        season,
+        condition,
+        notes: notes || null,
+        galpon: galpon ? parseInt(galpon) : null,
+        status: editingUniform.status
+      } as any);
+
+      // Reset form
+      setEditingUniform(null);
+      setSelectedEmployee("");
+      setUniformType("");
+      setSize("");
+      setQuantity("1");
+      setDeliveryDate(new Date().toISOString().split('T')[0]);
+      setSeason("");
+      setCondition("");
+      setNotes("");
+      setGalpon("");
+      setIsEditDialogOpen(false);
     } catch (error) {
       // Error already handled by hook
     }
@@ -538,6 +595,152 @@ const UniformsModule = () => {
               </div>
             </DialogContent>
           </Dialog>
+
+          {/* Dialog para Editar Uniforme */}
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Editar Entrega de Uniforme</DialogTitle>
+                <DialogDescription>
+                  Modifica la información de la entrega de uniforme
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div>
+                  <Label htmlFor="employee">Empleado *</Label>
+                  <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar empleado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeEmployees.map((employee) => (
+                        <SelectItem key={employee.id} value={employee.id.toString()}>
+                          {employee.nombres} {employee.apellidos} - {employee.dni}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="uniformType">Tipo de Uniforme/Elemento *</Label>
+                  <Select value={uniformType} onValueChange={setUniformType}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {uniformTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="size">Talle *</Label>
+                    <Select value={size} onValueChange={setSize}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Talle" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {sizes.map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="quantity">Cantidad *</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={quantity}
+                      onChange={(e) => setQuantity(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="deliveryDate">Fecha de Entrega *</Label>
+                  <Input
+                    type="date"
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="season">Temporada *</Label>
+                  <Select value={season} onValueChange={setSeason}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar temporada" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {seasons.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="condition">Estado *</Label>
+                  <Select value={condition} onValueChange={setCondition}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {conditions.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="galpon">Galpón</Label>
+                  <Select value={galpon} onValueChange={setGalpon}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar galpón (opcional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Sin galpón</SelectItem>
+                      <SelectItem value="1">Galpón 1</SelectItem>
+                      <SelectItem value="2">Galpón 2</SelectItem>
+                      <SelectItem value="3">Galpón 3</SelectItem>
+                      <SelectItem value="4">Galpón 4</SelectItem>
+                      <SelectItem value="5">Galpón 5</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="notes">Observaciones/Finalidad</Label>
+                  <Textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Observaciones y/o finalidad de la entrega (opcional)"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button onClick={handleUpdateUniform}>Guardar Cambios</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -671,8 +874,16 @@ const UniformsModule = () => {
                           {delivery.status}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4">
+                       <td className="px-6 py-4">
                         <div className="flex space-x-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleEditUniform(delivery)}
+                          >
+                            <Pencil className="h-4 w-4 mr-1" />
+                            Editar
+                          </Button>
                           <Button 
                             variant="ghost" 
                             size="sm"

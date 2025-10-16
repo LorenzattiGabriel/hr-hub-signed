@@ -16,6 +16,7 @@ interface DocumentPreviewProps {
     apellidos: string;
     dni: string;
     direccion: string;
+    cuil?: string;
   };
   generatedDate: string;
   onClose: () => void;

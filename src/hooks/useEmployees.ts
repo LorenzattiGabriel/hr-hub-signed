@@ -126,7 +126,7 @@ export const useEmployees = () => {
         tieneHijos: emp.tiene_hijos,
         nombresHijos: emp.nombres_hijos,
         tieneLicencia: emp.tiene_licencia,
-        tipoLicencia: emp.tipo_licencia,
+        tipoLicencia: Array.isArray(emp.tipo_licencia) ? emp.tipo_licencia : (emp.tipo_licencia ? [emp.tipo_licencia] : []),
         estadoCivil: emp.estado_civil
       }));
       
@@ -178,7 +178,7 @@ export const useEmployees = () => {
         tieneHijos: data.tiene_hijos,
         nombresHijos: data.nombres_hijos,
         tieneLicencia: data.tiene_licencia,
-        tipoLicencia: data.tipo_licencia,
+        tipoLicencia: Array.isArray(data.tipo_licencia) ? data.tipo_licencia : (data.tipo_licencia ? [data.tipo_licencia] : []),
         estadoCivil: data.estado_civil
       }]);
       
@@ -251,7 +251,7 @@ export const useEmployees = () => {
         tieneHijos: data.tiene_hijos,
         nombresHijos: data.nombres_hijos,
         tieneLicencia: data.tiene_licencia,
-        tipoLicencia: data.tipo_licencia,
+        tipoLicencia: Array.isArray(data.tipo_licencia) ? data.tipo_licencia : (data.tipo_licencia ? [data.tipo_licencia] : []),
         estadoCivil: data.estado_civil
       } : emp));
       
@@ -344,7 +344,7 @@ export const useEmployees = () => {
         tieneHijos: emp.tiene_hijos,
         nombresHijos: emp.nombres_hijos,
         tieneLicencia: emp.tiene_licencia,
-        tipoLicencia: emp.tipo_licencia,
+        tipoLicencia: Array.isArray(emp.tipo_licencia) ? emp.tipo_licencia : (emp.tipo_licencia ? [emp.tipo_licencia] : []),
         estadoCivil: emp.estado_civil
       }));
       setEmployees(prev => [...prev, ...mapped]);

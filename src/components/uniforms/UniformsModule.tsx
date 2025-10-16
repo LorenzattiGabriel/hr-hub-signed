@@ -13,6 +13,7 @@ import { Shirt, Plus, Download, Calendar, User, Package, Trash2, Search, Filter,
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import html2pdf from "html2pdf.js";
+import { formatDateLocal } from "@/utils/dateUtils";
 
 const UniformsModule = () => {
   const { getActiveEmployees } = useEmployees();
@@ -100,8 +101,14 @@ const UniformsModule = () => {
     const today = new Date();
     const isOverdue = nextDate < today;
     
+    // Convertir nextDate a formato YYYY-MM-DD para usar formatDateLocal
+    const year = nextDate.getFullYear();
+    const month = String(nextDate.getMonth() + 1).padStart(2, '0');
+    const day = String(nextDate.getDate()).padStart(2, '0');
+    const nextDateString = `${year}-${month}-${day}`;
+    
     return {
-      text: nextDate.toLocaleDateString('es-AR'),
+      text: formatDateLocal(nextDateString),
       color: isOverdue ? "text-red-600" : "text-green-600",
       bgColor: isOverdue ? "bg-red-50" : "bg-green-50"
     };
@@ -299,7 +306,7 @@ const UniformsModule = () => {
             <td style="border: 2px solid #000; padding: 12px; font-size: 12px;">GENERICO</td>
             <td style="border: 2px solid #000; padding: 12px; font-size: 12px;">SI</td>
             <td style="border: 2px solid #000; padding: 12px; text-align: center; font-size: 12px;">${delivery.quantity}</td>
-            <td style="border: 2px solid #000; padding: 12px; text-align: center; font-size: 12px;">${new Date(delivery.delivery_date).toLocaleDateString('es-AR')}</td>
+            <td style="border: 2px solid #000; padding: 12px; text-align: center; font-size: 12px;">${formatDateLocal(delivery.delivery_date)}</td>
             <td style="border: 2px solid #000; padding: 12px;">&nbsp;</td>
           </tr>
           <!-- Filas vacías optimizadas -->
@@ -380,7 +387,7 @@ const UniformsModule = () => {
                 <td style="border: 1px solid #d1d5db; padding: 8px;">${delivery.employeeName}</td>
                 <td style="border: 1px solid #d1d5db; padding: 8px;">${delivery.uniform_type}</td>
                 <td style="border: 1px solid #d1d5db; padding: 8px;">${delivery.size}</td>
-                <td style="border: 1px solid #d1d5db; padding: 8px;">${new Date(delivery.delivery_date).toLocaleDateString('es-AR')}</td>
+                <td style="border: 1px solid #d1d5db; padding: 8px;">${formatDateLocal(delivery.delivery_date)}</td>
                 <td style="border: 1px solid #d1d5db; padding: 8px;">${delivery.status}</td>
               </tr>
             `).join('')}
@@ -857,7 +864,7 @@ const UniformsModule = () => {
                         {(delivery as any).galpon ? `Galpón ${(delivery as any).galpon}` : '-'}
                       </td>
                       <td className="px-6 py-4 text-foreground">
-                        {new Date(delivery.delivery_date).toLocaleDateString('es-AR')}
+                        {formatDateLocal(delivery.delivery_date)}
                       </td>
                       <td className="px-6 py-4">
                         {(() => {

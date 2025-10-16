@@ -290,8 +290,56 @@ export const useVacations = () => {
     }
   };
 
+  const updateVacationRequest = async (requestId: string, requestData: Partial<VacationRequest>) => {
+    try {
+      const { data, error } = await supabase
+        .from('vacation_requests')
+        .update(requestData)
+        .eq('id', requestId)
+        .select(`
+          *,
+          employee:employees (
+            nombres,
+            apellidos,
+            dni
+          )
+        `)
+        .single();
+
+      if (error) throw error;
+
+      await fetchVacationRequests();
+      
+      toast({
+        title: "Éxito",
+        description: "Solicitud actualizada correctamente",
+      });
+      
+      return data;
+    } catch (error) {
+      console.error('Error updating vacation request:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la solicitud",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   const deleteVacationRequest = async (requestId: string) => {
     try {
+      // Verificar que la solicitud no esté aprobada
+      const request = vacationRequests.find(r => r.id === requestId);
+      if (request?.estado === 'aprobado') {
+        toast({
+          title: "No permitido",
+          description: "No se puede eliminar una solicitud aprobada",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('vacation_requests')
         .delete()
@@ -332,6 +380,7 @@ export const useVacations = () => {
     vacationBalances,
     loading,
     addVacationRequest,
+    updateVacationRequest,
     approveVacationRequest,
     rejectVacationRequest,
     deleteVacationRequest,

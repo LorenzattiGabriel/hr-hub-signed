@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Calendar, Download, Plus, Search, Clock, User, FileText, Trash2 } from "lucide-react";
+import { Calendar, Download, Plus, Search, Clock, User, FileText, Trash2, Pencil } from "lucide-react";
 import VacationForm from "./VacationFormV2";
 import VacationDetail from "./VacationDetail";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +19,8 @@ export const VacationsModule = () => {
   const { 
     vacationRequests, 
     vacationBalances,
-    addVacationRequest, 
+    addVacationRequest,
+    updateVacationRequest,
     approveVacationRequest, 
     rejectVacationRequest,
     deleteVacationRequest,
@@ -56,10 +57,15 @@ export const VacationsModule = () => {
     }
   };
 
-  const [view, setView] = useState<"list" | "form" | "detail">("list");
+  const [view, setView] = useState<"list" | "form" | "detail" | "edit">("list");
   const [selectedVacation, setSelectedVacation] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("todos");
+
+  const handleEditVacation = (vacation: any) => {
+    setSelectedVacation(vacation);
+    setView("edit");
+  };
 
   // Helper: calculate vacation days for current year using calendar days and decimals
   const calcVacationDaysCurrentYear = (fechaIngreso?: string) => {
@@ -336,15 +342,19 @@ export const VacationsModule = () => {
     }
   };
 
-  if (view === "form") {
+  if (view === "form" || view === "edit") {
     return (
       <VacationForm 
         onBack={handleBackToList} 
-        vacation={selectedVacation} 
+        vacation={view === "edit" ? selectedVacation : null}
         employees={getActiveEmployees()} 
         onSave={async (requestData) => {
-          await addVacationRequest(requestData);
-          await refetch(); // Force refresh after adding request
+          if (view === "edit" && selectedVacation) {
+            await updateVacationRequest(selectedVacation.id, requestData);
+          } else {
+            await addVacationRequest(requestData);
+          }
+          await refetch(); // Force refresh after adding/updating request
           handleBackToList();
         }} 
       />
@@ -605,19 +615,34 @@ export const VacationsModule = () => {
                             Constancia
                           </Button>
                         )}
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-600 border-red-600 hover:bg-red-50"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (confirm('¿Estás seguro de que quieres eliminar esta solicitud?')) {
-                              deleteVacationRequest(vacation.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {vacation.estado !== "aprobado" && (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditVacation(vacation);
+                              }}
+                            >
+                              <Pencil className="h-4 w-4 mr-1" />
+                              Editar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-red-600 border-red-600 hover:bg-red-50"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (confirm('¿Estás seguro de que quieres eliminar esta solicitud?')) {
+                                  deleteVacationRequest(vacation.id);
+                                }
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </div>
                   </CardContent>

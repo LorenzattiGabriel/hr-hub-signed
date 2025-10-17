@@ -36,7 +36,7 @@ export const addNoeliaBelen = async () => {
       tiene_hijos: "si",
       nombres_hijos: "Thomas Benjamín Sánchez (8 años)\nIan Gael Sánchez (2 años)",
       tiene_licencia: "si",
-      tipo_licencia: "B2",
+      tipo_licencia: ["B2"],
       estado_civil: null,
     };
 

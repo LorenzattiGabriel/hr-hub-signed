@@ -117,25 +117,30 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
           // Process and validate data
           const attendanceRecords = [];
           for (const row of jsonData as any[]) {
-            // Try to find employee by DNI or name
+            // Try to find employee by ID de usuario (huella biométrica)
+            const idUsuario = String(row['ID de usuario'] || row['ID de Usuario'] || row['Id de usuario'] || row['ID Usuario'] || row['id_usuario'] || '').trim();
             const employeeDni = String(row.DNI || row.Empleado || '').trim();
             const employeeName = String(row.Nombre || row.Empleado || '').trim();
             
-            let employee = employees.find(emp => 
-              emp.dni === employeeDni || 
-              `${emp.nombres} ${emp.apellidos}`.toLowerCase().includes(employeeName.toLowerCase())
-            );
+            // Buscar primero por ID de huella
+            let employee = employees.find(emp => emp.idHuella && emp.idHuella === idUsuario);
+
+            // Si no se encuentra por ID de huella, intentar con DNI o nombre como fallback
+            if (!employee && employeeDni) {
+              employee = employees.find(emp => emp.dni === employeeDni);
+            }
 
             if (!employee && employeeName) {
-              // Try partial name match
+              // Try partial name match as last resort
               employee = employees.find(emp => 
+                `${emp.nombres} ${emp.apellidos}`.toLowerCase().includes(employeeName.toLowerCase()) ||
                 employeeName.toLowerCase().includes(emp.nombres.toLowerCase()) ||
                 employeeName.toLowerCase().includes(emp.apellidos.toLowerCase())
               );
             }
 
             if (!employee) {
-              console.warn(`No se encontró empleado para: ${employeeName || employeeDni}`);
+              console.warn(`No se encontró empleado para ID: ${idUsuario || employeeDni || employeeName}`);
               continue;
             }
 
@@ -195,7 +200,7 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
           if (attendanceRecords.length === 0) {
             toast({
               title: "No se encontraron registros válidos",
-              description: "No hubo coincidencias de empleados por DNI o Nombre. Verifica las columnas 'DNI' o 'Empleado' y que existan empleados en el sistema.",
+              description: "No hubo coincidencias de empleados. Verifica que la columna 'ID de usuario' del Excel coincida con el 'ID de Huella' en los legajos.",
               variant: "destructive",
             });
             return;
@@ -359,10 +364,11 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
             <div>
               <h4 className="font-semibold text-foreground mb-2">Formato del Archivo</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Formato Excel (.xlsx o .xls)</li>
-                <li>• Incluir columnas: Empleado, Fecha, Hora Entrada, Hora Salida</li>
-                <li>• Una fila por día trabajado</li>
-                <li>• Fechas en formato DD/MM/AAAA</li>
+                <li>• Formato Excel (.xlsx, .xls) o CSV</li>
+                <li>• Columna requerida: <strong>ID de usuario</strong> (debe coincidir con ID de Huella del legajo)</li>
+                <li>• Columnas opcionales: Fecha, Entrada/Hora Entrada, Salida/Hora Salida</li>
+                <li>• Una fila por día trabajado por empleado</li>
+                <li>• Fechas en formato DD/MM/AAAA o serial de Excel</li>
               </ul>
             </div>
 
@@ -389,13 +395,13 @@ const AttendanceUpload = ({ onBack }: AttendanceUploadProps) => {
 
             <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg">
               <p className="text-sm text-warning">
-                <strong>Importante:</strong> El archivo debe contener datos de un mes completo para generar estadísticas precisas.
+                <strong>Importante:</strong> Asegúrate de que todos los empleados tengan su ID de Huella cargado en el legajo antes de procesar el archivo.
               </p>
             </div>
 
             <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
               <p className="text-sm text-primary">
-                <strong>Tip:</strong> Puedes descargar la plantilla Excel para ver el formato exacto requerido.
+                <strong>Tip:</strong> El sistema busca empleados usando el "ID de usuario" del Excel y lo compara con el "ID de Huella" del legajo.
               </p>
             </div>
           </CardContent>

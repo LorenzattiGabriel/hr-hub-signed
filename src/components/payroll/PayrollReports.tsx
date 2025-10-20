@@ -56,6 +56,12 @@ const PayrollReports = () => {
   };
 
   const formatPeriod = (period: string) => {
+    if (period === 'all') {
+      const currentMonth = new Date().toISOString().slice(0, 7);
+      const [year, month] = currentMonth.split('-');
+      const date = new Date(parseInt(year), parseInt(month) - 1);
+      return date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+    }
     const [year, month] = period.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
     return date.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
@@ -124,10 +130,10 @@ const PayrollReports = () => {
       }
     });
 
-    // Calcular neto a pagar para cada empleado
+    // Calcular total abonado en el mes (incluye adelantos)
     const employeeDetails = Array.from(employeeData.values()).map(emp => ({
       ...emp,
-      netPay: emp.baseSalary + emp.bonifications - emp.advances - emp.deductions
+      netPay: emp.baseSalary + emp.bonifications + emp.advances - emp.deductions
     }));
 
     // Calcular totales generales
@@ -289,7 +295,7 @@ const PayrollReports = () => {
                   <TableHead>Bonificaciones</TableHead>
                   <TableHead>Adelantos</TableHead>
                   <TableHead>Descuentos</TableHead>
-                  <TableHead className="font-bold">Neto a Pagar</TableHead>
+                  <TableHead className="font-bold">Total Abonado</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -312,7 +318,7 @@ const PayrollReports = () => {
                         +{formatCurrency(employee.bonifications)}
                       </TableCell>
                       <TableCell className="font-mono text-orange-600">
-                        -{formatCurrency(employee.advances)}
+                        +{formatCurrency(employee.advances)}
                       </TableCell>
                       <TableCell className="font-mono text-red-600">
                         -{formatCurrency(employee.deductions)}

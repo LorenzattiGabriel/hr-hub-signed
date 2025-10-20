@@ -20,6 +20,7 @@ export interface Employee {
   // Legacy fields for compatibility
   fechaIngreso?: string;
   cuil?: string;
+  idHuella?: string;
   cargo?: string;
   sector?: string;
   tipoContrato?: string;
@@ -75,6 +76,7 @@ export const useEmployees = () => {
       estado: input.estado || 'activo',
       // Extended fields
       cuil: input.cuil || null,
+      id_huella: input.idHuella || null,
       contacto_emergencia: input.contactoEmergencia || null,
       telefono_emergencia: input.telefonoEmergencia || null,
       parentesco_emergencia: input.parentescoEmergencia || null,
@@ -114,6 +116,7 @@ export const useEmployees = () => {
         cargo: emp.puesto,
         sector: emp.departamento,
         tipoContrato: emp.tipo_contrato,
+        idHuella: emp.id_huella,
         // Map extended fields for UI compatibility
         contactoEmergencia: emp.contacto_emergencia,
         telefonoEmergencia: emp.telefono_emergencia,
@@ -167,6 +170,7 @@ export const useEmployees = () => {
         cargo: data.puesto, 
         sector: data.departamento, 
         tipoContrato: data.tipo_contrato,
+        idHuella: data.id_huella,
         contactoEmergencia: data.contacto_emergencia,
         telefonoEmergencia: data.telefono_emergencia,
         parentescoEmergencia: data.parentesco_emergencia,
@@ -240,6 +244,7 @@ export const useEmployees = () => {
         cargo: data.puesto, 
         sector: data.departamento, 
         tipoContrato: data.tipo_contrato,
+        idHuella: data.id_huella,
         contactoEmergencia: data.contacto_emergencia,
         telefonoEmergencia: data.telefono_emergencia,
         parentescoEmergencia: data.parentesco_emergencia,
@@ -333,6 +338,7 @@ export const useEmployees = () => {
         cargo: emp.puesto,
         sector: emp.departamento,
         tipoContrato: emp.tipo_contrato,
+        idHuella: emp.id_huella,
         contactoEmergencia: emp.contacto_emergencia,
         telefonoEmergencia: emp.telefono_emergencia,
         parentescoEmergencia: emp.parentesco_emergencia,

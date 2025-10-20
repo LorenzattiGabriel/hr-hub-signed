@@ -59,6 +59,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     apellidos: employee?.apellidos || "",
     dni: employee?.dni || "",
     cuil: employee?.cuil || "",
+    idHuella: employee?.idHuella || "",
     fechaNacimiento: employee?.fechaNacimiento || "",
     direccion: employee?.direccion || "",
     
@@ -290,6 +291,16 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   placeholder="20-12345678-9"
                 />
               </div>
+            </div>
+
+            <div>
+              <Label htmlFor="idHuella" className="text-foreground">ID de Huella</Label>
+              <Input
+                id="idHuella"
+                value={formData.idHuella}
+                onChange={(e) => handleInputChange("idHuella", e.target.value)}
+                placeholder="Identificador del sistema biométrico"
+              />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

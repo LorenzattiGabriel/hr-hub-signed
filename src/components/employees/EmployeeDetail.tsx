@@ -119,6 +119,12 @@ const EmployeeDetail = ({ employee, onBack, onEdit }: EmployeeDetailProps) => {
                 <p className="text-sm font-medium text-foreground">CUIL</p>
                 <p className="text-foreground/70">{employee.cuil}</p>
               </div>
+              {employee.idHuella && (
+                <div>
+                  <p className="text-sm font-medium text-foreground">ID de Huella</p>
+                  <p className="text-foreground/70">{employee.idHuella}</p>
+                </div>
+              )}
               <div>
                 <p className="text-sm font-medium text-foreground">Fecha de Nacimiento</p>
                 <p className="text-foreground/70">{formatDateLocal(employee.fechaNacimiento)}</p>

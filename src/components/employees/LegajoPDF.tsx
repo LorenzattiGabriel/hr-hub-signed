@@ -140,6 +140,14 @@ const downloadPDF = async () => {
                   {employeeData.cuil || "_______________"}
                 </p>
               </div>
+              {employeeData.idHuella && (
+                <div>
+                  <strong style={{ color: '#1f2937' }}>ID de Huella:</strong>
+                  <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>
+                    {employeeData.idHuella}
+                  </p>
+                </div>
+              )}
               <div>
                 <strong style={{ color: '#1f2937' }}>Fecha de Nacimiento:</strong>
                 <p className="border-b border-dotted pb-1" style={{ borderColor: '#9ca3af', color: '#1f2937' }}>

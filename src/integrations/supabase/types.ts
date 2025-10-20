@@ -348,6 +348,7 @@ export type Database = {
           fecha_nacimiento: string | null
           grupo_sanguineo: string | null
           id: string
+          id_huella: string | null
           medicacion_habitual: string | null
           nivel_educativo: string | null
           nombres: string
@@ -383,6 +384,7 @@ export type Database = {
           fecha_nacimiento?: string | null
           grupo_sanguineo?: string | null
           id?: string
+          id_huella?: string | null
           medicacion_habitual?: string | null
           nivel_educativo?: string | null
           nombres: string
@@ -418,6 +420,7 @@ export type Database = {
           fecha_nacimiento?: string | null
           grupo_sanguineo?: string | null
           id?: string
+          id_huella?: string | null
           medicacion_habitual?: string | null
           nivel_educativo?: string | null
           nombres?: string

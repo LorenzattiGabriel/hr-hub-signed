@@ -102,16 +102,18 @@ export const SelectionModule = () => {
       );
     }
 
-    if (ageFilter) {
+    if (ageFilter && ageFilter.trim() !== '') {
       const targetAge = parseInt(ageFilter);
-      filtered = filtered.filter(app => {
-        if (!app.birth_date) return false;
-        const age = getAge(app.birth_date);
-        return age === targetAge;
-      });
+      if (!isNaN(targetAge)) {
+        filtered = filtered.filter(app => {
+          if (!app.birth_date) return false;
+          const age = getAge(app.birth_date);
+          return age >= targetAge;
+        });
+      }
     }
 
-    if (educationFilter && educationFilter !== 'todos') {
+    if (educationFilter && educationFilter.trim() !== '' && educationFilter !== 'todos') {
       filtered = filtered.filter(app => app.education === educationFilter);
     }
 

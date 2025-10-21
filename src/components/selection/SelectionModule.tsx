@@ -179,6 +179,45 @@ export const SelectionModule = () => {
     setShowDetailDialog(true);
   };
 
+  const downloadCV = async (application: Application) => {
+    if (!application.cv_file_name) {
+      toast({
+        title: "Error",
+        description: "No hay CV adjunto para esta postulación",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .storage
+        .from('cv-files')
+        .download(application.cv_file_name);
+
+      if (error) throw error;
+
+      const url = window.URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = application.cv_file_name;
+      a.click();
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Éxito",
+        description: "CV descargado correctamente",
+      });
+    } catch (error) {
+      console.error('Error downloading CV:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo descargar el CV",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -259,6 +298,7 @@ export const SelectionModule = () => {
                   application={application}
                   onView={() => openDetailDialog(application)}
                   onDelete={() => confirmDeleteApplication(application)}
+                  onDownloadCV={() => downloadCV(application)}
                 />
               ))}
             </div>
@@ -327,10 +367,18 @@ export const SelectionModule = () => {
               {selectedApplication.cv_file_name && (
                 <div>
                   <Label>CV Adjunto</Label>
-                  <div className="mt-2">
-                    <Badge variant="outline">
+                  <div className="mt-2 flex items-center gap-2">
+                    <Badge variant="outline" className="text-sm">
                       {selectedApplication.cv_file_name}
                     </Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => downloadCV(selectedApplication)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Descargar CV
+                    </Button>
                   </div>
                 </div>
               )}

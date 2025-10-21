@@ -33,9 +33,10 @@ interface ApplicationCardProps {
   application: Application;
   onView: () => void;
   onDelete: () => void;
+  onDownloadCV: () => void;
 }
 
-export const ApplicationCard = ({ application, onView, onDelete }: ApplicationCardProps) => {
+export const ApplicationCard = ({ application, onView, onDelete, onDownloadCV }: ApplicationCardProps) => {
   const getInitials = (fullName: string) => {
     const names = fullName.split(' ');
     if (names.length >= 2) {
@@ -96,7 +97,14 @@ export const ApplicationCard = ({ application, onView, onDelete }: ApplicationCa
                   {application.education}
                 </Badge>
                 {application.cv_file_name && (
-                  <Badge variant="outline" className="text-xs flex items-center gap-1 shrink-0">
+                  <Badge 
+                    variant="outline" 
+                    className="text-xs flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDownloadCV();
+                    }}
+                  >
                     <FileText className="h-3 w-3" />
                     CV
                   </Badge>

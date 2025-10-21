@@ -67,6 +67,78 @@ export type Database = {
           },
         ]
       }
+      applications: {
+        Row: {
+          accept_terms: boolean
+          birth_date: string
+          created_at: string | null
+          cv_file_name: string | null
+          cv_file_path: string | null
+          cv_file_size: number | null
+          education: string
+          experience: string
+          full_name: string
+          has_transport: string
+          id: string
+          phone: string
+          position: string
+          reference_company: string
+          reference_name: string
+          reference_phone: string
+          reference_position: string
+          updated_at: string | null
+          why_work_here: string
+          willing_to_work_onsite: string
+          work_schedule: string
+        }
+        Insert: {
+          accept_terms?: boolean
+          birth_date: string
+          created_at?: string | null
+          cv_file_name?: string | null
+          cv_file_path?: string | null
+          cv_file_size?: number | null
+          education: string
+          experience: string
+          full_name: string
+          has_transport: string
+          id?: string
+          phone: string
+          position: string
+          reference_company: string
+          reference_name: string
+          reference_phone: string
+          reference_position: string
+          updated_at?: string | null
+          why_work_here: string
+          willing_to_work_onsite: string
+          work_schedule: string
+        }
+        Update: {
+          accept_terms?: boolean
+          birth_date?: string
+          created_at?: string | null
+          cv_file_name?: string | null
+          cv_file_path?: string | null
+          cv_file_size?: number | null
+          education?: string
+          experience?: string
+          full_name?: string
+          has_transport?: string
+          id?: string
+          phone?: string
+          position?: string
+          reference_company?: string
+          reference_name?: string
+          reference_phone?: string
+          reference_position?: string
+          updated_at?: string | null
+          why_work_here?: string
+          willing_to_work_onsite?: string
+          work_schedule?: string
+        }
+        Relationships: []
+      }
       attendance: {
         Row: {
           created_at: string

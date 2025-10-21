@@ -190,14 +190,18 @@ export const SelectionModule = () => {
     }
 
     try {
-      const { data, error } = await supabase
+      // Obtener la URL pública del archivo
+      const { data } = supabase
         .storage
         .from('cv-files')
-        .download(application.cv_file_name);
+        .getPublicUrl(application.cv_file_name);
 
-      if (error) throw error;
-
-      const url = window.URL.createObjectURL(data);
+      // Descargar usando fetch
+      const response = await fetch(data.publicUrl);
+      if (!response.ok) throw new Error('Failed to download file');
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = application.cv_file_name;

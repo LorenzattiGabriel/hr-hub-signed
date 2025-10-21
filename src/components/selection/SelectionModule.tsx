@@ -2,105 +2,76 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, Upload, Eye, Download, Edit, FileText, Plus, Trash2 } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import * as XLSX from 'xlsx';
-import { ColumnMappingDialog } from './ColumnMappingDialog';
+import { ApplicationCard } from './ApplicationCard';
 
-interface Candidate {
+interface Application {
   id: string;
-  nombre_apellido?: string;
-  fecha_nacimiento?: string;
-  edad?: number;
-  sexo?: string;
-  localidad?: string;
-  vacante_postulada?: string;
-  mail?: string;
-  numero_contacto?: string;
-  experiencia_laboral?: string;
-  conocimientos_habilidades?: string;
-  observaciones_reclutador?: string;
-  tipo_jornada_buscada?: string;
-  disponibilidad?: string;
-  referencias_laborales?: string;
-  estado: string;
+  full_name: string;
+  birth_date: string;
+  phone: string;
+  position: string;
+  education: string;
+  experience: string;
+  reference_name: string;
+  reference_position: string;
+  reference_company: string;
+  reference_phone: string;
+  has_transport: string;
+  work_schedule: string;
+  willing_to_work_onsite: string;
+  why_work_here: string;
+  cv_file_path?: string;
+  cv_file_name?: string;
+  cv_file_size?: number;
+  accept_terms: boolean;
   created_at: string;
   updated_at: string;
 }
 
-interface CandidateHistory {
-  id: string;
-  candidate_id: string;
-  estado_anterior?: string;
-  estado_nuevo: string;
-  notas?: string;
-  created_at: string;
-}
-
-const ESTADOS_CANDIDATO = [
-  'no_entrevistado',
-  'entrevistado',
-  'preseleccionado',
-  'fuera_de_proceso',
-  'seleccionado'
-];
-
 export const SelectionModule = () => {
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [filteredCandidates, setFilteredCandidates] = useState<Candidate[]>([]);
-  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
-  const [candidateHistory, setCandidateHistory] = useState<CandidateHistory[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [ageFilter, setAgeFilter] = useState('');
-  const [locationFilter, setLocationFilter] = useState('');
-  const [genderFilter, setGenderFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [showAddCandidateDialog, setShowAddCandidateDialog] = useState(false);
+  const [educationFilter, setEducationFilter] = useState('');
   const [showDetailDialog, setShowDetailDialog] = useState(false);
-  const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showColumnMappingDialog, setShowColumnMappingDialog] = useState(false);
-  const [candidateToDelete, setCandidateToDelete] = useState<Candidate | null>(null);
-  const [newCandidate, setNewCandidate] = useState<Partial<Candidate>>({});
-  const [newStatus, setNewStatus] = useState('');
-  const [statusNotes, setStatusNotes] = useState('');
-  const [cvText, setCvText] = useState('');
-  const [excelHeaders, setExcelHeaders] = useState<string[]>([]);
-  const [excelData, setExcelData] = useState<any[][]>([]);
+  const [applicationToDelete, setApplicationToDelete] = useState<Application | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchCandidates();
+    fetchApplications();
   }, []);
 
   useEffect(() => {
-    filterCandidates();
-  }, [candidates, searchTerm, ageFilter, locationFilter, genderFilter, statusFilter]);
+    filterApplications();
+  }, [applications, searchTerm, ageFilter, educationFilter]);
 
-  const fetchCandidates = async () => {
+  const fetchApplications = async () => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('candidates')
+        .from('applications' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCandidates(data || []);
+      setApplications((data || []) as unknown as Application[]);
     } catch (error) {
-      console.error('Error fetching candidates:', error);
+      console.error('Error fetching applications:', error);
       toast({
         title: "Error",
-        description: "No se pudieron cargar los candidatos",
+        description: "No se pudieron cargar las postulaciones",
         variant: "destructive",
       });
     } finally {
@@ -108,335 +79,89 @@ export const SelectionModule = () => {
     }
   };
 
-  const fetchCandidateHistory = async (candidateId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('candidate_history')
-        .select('*')
-        .eq('candidate_id', candidateId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setCandidateHistory(data || []);
-    } catch (error) {
-      console.error('Error fetching candidate history:', error);
+  const getAge = (birthDate: string) => {
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
     }
+    return age;
   };
 
-  const filterCandidates = () => {
-    let filtered = candidates;
+  const filterApplications = () => {
+    let filtered = applications;
 
     if (searchTerm) {
-      filtered = filtered.filter(candidate => 
-        candidate.nombre_apellido?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        candidate.vacante_postulada?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        candidate.conocimientos_habilidades?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        candidate.localidad?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(app => 
+        app.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.position?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.experience?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.education?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (ageFilter) {
-      const age = parseInt(ageFilter);
-      filtered = filtered.filter(candidate => candidate.edad === age);
-    }
-
-    if (locationFilter) {
-      filtered = filtered.filter(candidate => 
-        candidate.localidad?.toLowerCase().includes(locationFilter.toLowerCase())
-      );
-    }
-
-    if (genderFilter && genderFilter !== 'todos') {
-      filtered = filtered.filter(candidate => candidate.sexo === genderFilter);
-    }
-
-    if (statusFilter && statusFilter !== 'todos') {
-      filtered = filtered.filter(candidate => candidate.estado === statusFilter);
-    }
-
-    setFilteredCandidates(filtered);
-  };
-
-  const processCVWithAI = (cvText: string): Partial<Candidate> => {
-    // Simulamos el procesamiento con IA por ahora
-    const lines = cvText.split('\n').filter(line => line.trim());
-    const candidate: Partial<Candidate> = {};
-
-    // Extraer información básica (esto sería reemplazado por IA real)
-    lines.forEach(line => {
-      const lowerLine = line.toLowerCase();
-      
-      if (lowerLine.includes('nombre') || lowerLine.includes('name')) {
-        candidate.nombre_apellido = line.split(':')[1]?.trim();
-      }
-      if (lowerLine.includes('edad') || lowerLine.includes('age')) {
-        const ageMatch = line.match(/\d+/);
-        if (ageMatch) candidate.edad = parseInt(ageMatch[0]);
-      }
-      if (lowerLine.includes('email') || lowerLine.includes('@')) {
-        const emailMatch = line.match(/\S+@\S+\.\S+/);
-        if (emailMatch) candidate.mail = emailMatch[0];
-      }
-      if (lowerLine.includes('teléfono') || lowerLine.includes('telefono') || lowerLine.includes('phone')) {
-        const phoneMatch = line.match(/[\d\s\-\+\(\)]+/);
-        if (phoneMatch) candidate.numero_contacto = phoneMatch[0].trim();
-      }
-      if (lowerLine.includes('localidad') || lowerLine.includes('ciudad') || lowerLine.includes('city')) {
-        candidate.localidad = line.split(':')[1]?.trim();
-      }
-    });
-
-    candidate.experiencia_laboral = cvText.length > 500 ? cvText.substring(0, 500) + '...' : cvText;
-    candidate.estado = 'no_entrevistado';
-
-    return candidate;
-  };
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-        const data = await file.arrayBuffer();
-        const workbook = XLSX.read(data);
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-
-        // Leer como matriz para poder usar la primera fila como encabezados reales
-        const rows = XLSX.utils.sheet_to_json<any[]>(worksheet, { header: 1, defval: '' }) as any[];
-        if (!rows || rows.length < 2) {
-          toast({ title: 'Archivo vacío', description: 'No se encontraron filas para importar', variant: 'destructive' });
-          return;
-        }
-
-        // Obtener encabezados
-        const headersRaw: string[] = (rows[0] as any[]).map((h) => (h ? String(h) : '').replace(/:\s*$/, '').trim());
-        
-        // Guardar datos para el mapeo
-        setExcelHeaders(headersRaw);
-        setExcelData(rows);
-        setShowColumnMappingDialog(true);
-      } else {
-        // Procesar como texto de CV
-        const text = await file.text();
-        const processedCandidate = processCVWithAI(text);
-        setNewCandidate(processedCandidate);
-        setShowAddCandidateDialog(true);
-      }
-    } catch (error) {
-      console.error('Error processing file:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo procesar el archivo",
-        variant: "destructive",
+      const targetAge = parseInt(ageFilter);
+      filtered = filtered.filter(app => {
+        if (!app.birth_date) return false;
+        const age = getAge(app.birth_date);
+        return age === targetAge;
       });
     }
-  };
 
-  const handleConfirmColumnMapping = async (mapping: Record<string, string>) => {
-    try {
-      const parseExcelDate = (v: any): string | null => {
-        if (v == null || v === '') return null;
-        if (typeof v === 'number') {
-          const date = new Date(Math.round((v - 25569) * 86400 * 1000));
-          return isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
-        }
-        const s = String(v).trim();
-        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-        const parts = s.replace(/[^0-9/.-]/g, '').split(/[\/\-.]/).map((n) => parseInt(n, 10));
-        if (parts.length === 3) {
-          let [a, b, c] = parts; // dd/mm/yyyy o mm/dd/yyyy
-          let yyyy = c < 100 ? 2000 + c : c;
-          let mm = b; let dd = a;
-          if (a <= 12 && b > 12) { mm = a; dd = b; }
-          const d = new Date(yyyy, mm - 1, dd);
-          return isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
-        }
-        return null;
-      };
-
-      // Construir candidatos desde filas usando el mapeo del usuario
-      const candidatesToInsert = excelData.slice(1).map((cols) => {
-        const obj: any = { estado: 'no_entrevistado' };
-        
-        // Aplicar mapeo personalizado
-        for (const [columnIndex, fieldKey] of Object.entries(mapping)) {
-          const idx = Number(columnIndex);
-          let val: any = (cols as any[])[idx];
-          
-          if (typeof val === 'string') val = val.trim();
-          
-          // Procesamiento especial por tipo de campo
-          if (fieldKey === 'fecha_nacimiento') {
-            val = parseExcelDate(val);
-          } else if (fieldKey === 'edad') {
-            val = val === '' ? null : Number(val);
-          }
-          
-          if (val !== '' && val != null) {
-            obj[fieldKey] = val;
-          }
-        }
-        
-        return obj;
-      }).filter((c) => c.nombre_apellido); // Solo incluir filas con nombre
-
-      if (!candidatesToInsert.length) {
-        toast({ 
-          title: 'Sin datos válidos', 
-          description: 'No se encontraron candidatos con nombre válido.', 
-          variant: 'destructive' 
-        });
-        return;
-      }
-
-      const { error } = await supabase.from('candidates').insert(candidatesToInsert);
-      if (error) throw error;
-
-      toast({
-        title: 'Excel procesado',
-        description: `Se agregaron ${candidatesToInsert.length} candidatos correctamente`,
-      });
-
-      setShowColumnMappingDialog(false);
-      setExcelHeaders([]);
-      setExcelData([]);
-      fetchCandidates(); // Refrescar la lista
-    } catch (error) {
-      console.error('Error inserting candidates:', error);
-      toast({
-        title: "Error",
-        description: "No se pudieron insertar los candidatos",
-        variant: "destructive",
-      });
+    if (educationFilter && educationFilter !== 'todos') {
+      filtered = filtered.filter(app => app.education === educationFilter);
     }
+
+    setFilteredApplications(filtered);
   };
 
-  const deleteCandidate = async () => {
-    if (!candidateToDelete) return;
+  const deleteApplication = async () => {
+    if (!applicationToDelete) return;
 
     try {
       const { error } = await supabase
-        .from('candidates')
+        .from('applications' as any)
         .delete()
-        .eq('id', candidateToDelete.id);
+        .eq('id', applicationToDelete.id);
 
       if (error) throw error;
 
       toast({
-        title: "Candidato eliminado",
-        description: "El candidato ha sido eliminado correctamente",
+        title: "Postulación eliminada",
+        description: "La postulación ha sido eliminada correctamente",
       });
 
       setShowDeleteDialog(false);
-      setCandidateToDelete(null);
-      fetchCandidates();
+      setApplicationToDelete(null);
+      fetchApplications();
     } catch (error) {
-      console.error('Error deleting candidate:', error);
+      console.error('Error deleting application:', error);
       toast({
         title: "Error",
-        description: "No se pudo eliminar el candidato",
+        description: "No se pudo eliminar la postulación",
         variant: "destructive",
       });
     }
   };
 
-  const confirmDeleteCandidate = (candidate: Candidate) => {
-    setCandidateToDelete(candidate);
+  const confirmDeleteApplication = (application: Application) => {
+    setApplicationToDelete(application);
     setShowDeleteDialog(true);
-  };
-
-  const addCandidate = async () => {
-    try {
-      const candidateData = { ...newCandidate };
-      
-      // Calcular edad si hay fecha de nacimiento
-      if (candidateData.fecha_nacimiento) {
-        const birthDate = new Date(candidateData.fecha_nacimiento);
-        const today = new Date();
-        const age = today.getFullYear() - birthDate.getFullYear();
-        candidateData.edad = age;
-      }
-
-      const { error } = await supabase
-        .from('candidates')
-        .insert([candidateData]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Éxito",
-        description: "Candidato agregado correctamente",
-      });
-
-      setShowAddCandidateDialog(false);
-      setNewCandidate({});
-      setCvText('');
-      fetchCandidates();
-    } catch (error) {
-      console.error('Error adding candidate:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo agregar el candidato",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const updateCandidateStatus = async () => {
-    if (!selectedCandidate || !newStatus) return;
-
-    try {
-      // Actualizar estado del candidato
-      const { error: updateError } = await supabase
-        .from('candidates')
-        .update({ estado: newStatus })
-        .eq('id', selectedCandidate.id);
-
-      if (updateError) throw updateError;
-
-      // Agregar al historial
-      const { error: historyError } = await supabase
-        .from('candidate_history')
-        .insert([{
-          candidate_id: selectedCandidate.id,
-          estado_anterior: selectedCandidate.estado,
-          estado_nuevo: newStatus,
-          notas: statusNotes
-        }]);
-
-      if (historyError) throw historyError;
-
-      toast({
-        title: "Éxito",
-        description: "Estado actualizado correctamente",
-      });
-
-      setShowStatusDialog(false);
-      setNewStatus('');
-      setStatusNotes('');
-      fetchCandidates();
-    } catch (error) {
-      console.error('Error updating status:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo actualizar el estado",
-        variant: "destructive",
-      });
-    }
   };
 
   const downloadSelectedProfiles = () => {
     const csvContent = [
-      ['Nombre', 'Edad', 'Sexo', 'Localidad', 'Vacante', 'Email', 'Estado'].join(','),
-      ...filteredCandidates.map(candidate => [
-        candidate.nombre_apellido || '',
-        candidate.edad || '',
-        candidate.sexo || '',
-        candidate.localidad || '',
-        candidate.vacante_postulada || '',
-        candidate.mail || '',
-        candidate.estado
+      ['Nombre', 'Edad', 'Teléfono', 'Posición', 'Educación', 'Fecha'].join(','),
+      ...filteredApplications.map(app => [
+        app.full_name || '',
+        app.birth_date ? getAge(app.birth_date) : '',
+        app.phone || '',
+        app.position || '',
+        app.education || '',
+        new Date(app.created_at).toLocaleDateString()
       ].join(','))
     ].join('\n');
 
@@ -444,42 +169,14 @@ export const SelectionModule = () => {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'candidatos_seleccionados.csv';
+    a.download = 'postulaciones_seleccionadas.csv';
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'seleccionado': return 'default';
-      case 'preseleccionado': return 'secondary';
-      case 'entrevistado': return 'outline';
-      case 'fuera_de_proceso': return 'destructive';
-      default: return 'outline';
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    const labels: Record<string, string> = {
-      'no_entrevistado': 'No Entrevistado',
-      'entrevistado': 'Entrevistado',
-      'preseleccionado': 'Preseleccionado',
-      'fuera_de_proceso': 'Fuera de Proceso',
-      'seleccionado': 'Seleccionado'
-    };
-    return labels[status] || status;
-  };
-
-  const openDetailDialog = async (candidate: Candidate) => {
-    setSelectedCandidate(candidate);
-    await fetchCandidateHistory(candidate.id);
+  const openDetailDialog = (application: Application) => {
+    setSelectedApplication(application);
     setShowDetailDialog(true);
-  };
-
-  const openStatusDialog = (candidate: Candidate) => {
-    setSelectedCandidate(candidate);
-    setNewStatus(candidate.estado);
-    setShowStatusDialog(true);
   };
 
   return (
@@ -487,25 +184,6 @@ export const SelectionModule = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-3xl font-bold">Selección de Personal</h2>
         <div className="flex gap-2">
-          <Button onClick={() => setShowAddCandidateDialog(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Candidato
-          </Button>
-          <label htmlFor="file-upload">
-            <Button variant="outline" asChild>
-              <span>
-                <Upload className="h-4 w-4 mr-2" />
-                Cargar CV/Excel
-              </span>
-            </Button>
-          </label>
-          <input
-            id="file-upload"
-            type="file"
-            accept=".txt,.pdf,.doc,.docx,.xlsx,.xls"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
           <Button variant="outline" onClick={downloadSelectedProfiles}>
             <Download className="h-4 w-4 mr-2" />
             Descargar Selección
@@ -522,12 +200,12 @@ export const SelectionModule = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label htmlFor="search">Búsqueda General</Label>
               <Input
                 id="search"
-                placeholder="Nombre, vacante, habilidades..."
+                placeholder="Nombre, posición, experiencia..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -543,41 +221,17 @@ export const SelectionModule = () => {
               />
             </div>
             <div>
-              <Label htmlFor="location">Localidad</Label>
-              <Input
-                id="location"
-                placeholder="Localidad"
-                value={locationFilter}
-                onChange={(e) => setLocationFilter(e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="gender">Sexo</Label>
-              <Select value={genderFilter} onValueChange={setGenderFilter}>
+              <Label htmlFor="education">Educación</Label>
+              <Select value={educationFilter} onValueChange={setEducationFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="Masculino">Masculino</SelectItem>
-                  <SelectItem value="Femenino">Femenino</SelectItem>
-                  <SelectItem value="Otro">Otro</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="status">Estado</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  {ESTADOS_CANDIDATO.map(estado => (
-                    <SelectItem key={estado} value={estado}>
-                      {getStatusLabel(estado)}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="Primario">Primario</SelectItem>
+                  <SelectItem value="Secundario">Secundario</SelectItem>
+                  <SelectItem value="Terciario">Terciario</SelectItem>
+                  <SelectItem value="Universitario">Universitario</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -585,327 +239,103 @@ export const SelectionModule = () => {
         </CardContent>
       </Card>
 
-      {/* Lista de Candidatos */}
+      {/* Grid de Cards de Postulaciones */}
       <Card>
         <CardHeader>
-          <CardTitle>Candidatos ({filteredCandidates.length})</CardTitle>
+          <CardTitle>Postulaciones ({filteredApplications.length})</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nombre y Apellido</TableHead>
-                  <TableHead>Fecha de Nacimiento</TableHead>
-                  <TableHead>Edad</TableHead>
-                  <TableHead>Sexo</TableHead>
-                  <TableHead>Localidad</TableHead>
-                  <TableHead>Vacante Postulada</TableHead>
-                  <TableHead>Mail</TableHead>
-                  <TableHead>Número de Contacto</TableHead>
-                  <TableHead>Tipo de Jornada Buscada</TableHead>
-                  <TableHead>Disponibilidad</TableHead>
-                  <TableHead>Conocimientos y Habilidades</TableHead>
-                  <TableHead>Experiencia Laboral</TableHead>
-                  <TableHead>Observaciones del Reclutador</TableHead>
-                  <TableHead>Referencias Laborales</TableHead>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredCandidates.map((candidate) => (
-                  <TableRow key={candidate.id}>
-                    <TableCell className="font-medium">{candidate.nombre_apellido || 'N/A'}</TableCell>
-                    <TableCell>{candidate.fecha_nacimiento || 'N/A'}</TableCell>
-                    <TableCell>{candidate.edad ?? 'N/A'}</TableCell>
-                    <TableCell>{candidate.sexo || 'N/A'}</TableCell>
-                    <TableCell>{candidate.localidad || 'N/A'}</TableCell>
-                    <TableCell>{candidate.vacante_postulada || 'N/A'}</TableCell>
-                    <TableCell>{candidate.mail || 'N/A'}</TableCell>
-                    <TableCell>{candidate.numero_contacto || 'N/A'}</TableCell>
-                    <TableCell>{candidate.tipo_jornada_buscada || 'N/A'}</TableCell>
-                    <TableCell>{candidate.disponibilidad || 'N/A'}</TableCell>
-                    <TableCell className="max-w-[280px] truncate">{candidate.conocimientos_habilidades || 'N/A'}</TableCell>
-                    <TableCell className="max-w-[280px] truncate">{candidate.experiencia_laboral || 'N/A'}</TableCell>
-                    <TableCell className="max-w-[280px] truncate">{candidate.observaciones_reclutador || 'N/A'}</TableCell>
-                    <TableCell className="max-w-[240px] truncate">{candidate.referencias_laborales || 'N/A'}</TableCell>
-                    <TableCell>
-                      <Badge variant={getStatusBadgeVariant(candidate.estado)}>
-                        {getStatusLabel(candidate.estado)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openDetailDialog(candidate)}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openStatusDialog(candidate)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => confirmDeleteCandidate(candidate)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          {isLoading ? (
+            <div className="text-center py-8">Cargando...</div>
+          ) : filteredApplications.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No se encontraron postulaciones
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredApplications.map((application) => (
+                <ApplicationCard
+                  key={application.id}
+                  application={application}
+                  onView={() => openDetailDialog(application)}
+                  onDelete={() => confirmDeleteApplication(application)}
+                />
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      {/* Dialog para agregar candidato */}
-      <Dialog open={showAddCandidateDialog} onOpenChange={setShowAddCandidateDialog}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Agregar Nuevo Candidato</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="cv-text">Texto del CV (Procesamiento con IA)</Label>
-              <Textarea
-                id="cv-text"
-                placeholder="Pega aquí el texto del CV para procesamiento automático..."
-                value={cvText}
-                onChange={(e) => setCvText(e.target.value)}
-                className="h-32"
-              />
-              <Button
-                onClick={() => {
-                  const processed = processCVWithAI(cvText);
-                  setNewCandidate(processed);
-                }}
-                className="mt-2 w-full"
-                variant="outline"
-              >
-                <FileText className="h-4 w-4 mr-2" />
-                Procesar CV con IA
-              </Button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="nombre">Nombre y Apellido</Label>
-                <Input
-                  id="nombre"
-                  value={newCandidate.nombre_apellido || ''}
-                  onChange={(e) => setNewCandidate({...newCandidate, nombre_apellido: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="fecha-nacimiento">Fecha de Nacimiento</Label>
-                <Input
-                  id="fecha-nacimiento"
-                  type="date"
-                  value={newCandidate.fecha_nacimiento || ''}
-                  onChange={(e) => setNewCandidate({...newCandidate, fecha_nacimiento: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="sexo">Sexo</Label>
-                <Select 
-                  value={newCandidate.sexo || ''} 
-                  onValueChange={(value) => setNewCandidate({...newCandidate, sexo: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Masculino">Masculino</SelectItem>
-                    <SelectItem value="Femenino">Femenino</SelectItem>
-                    <SelectItem value="Otro">Otro</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="localidad">Localidad</Label>
-                <Input
-                  id="localidad"
-                  value={newCandidate.localidad || ''}
-                  onChange={(e) => setNewCandidate({...newCandidate, localidad: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="vacante">Vacante Postulada</Label>
-                <Input
-                  id="vacante"
-                  value={newCandidate.vacante_postulada || ''}
-                  onChange={(e) => setNewCandidate({...newCandidate, vacante_postulada: e.target.value})}
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={newCandidate.mail || ''}
-                  onChange={(e) => setNewCandidate({...newCandidate, mail: e.target.value})}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setShowAddCandidateDialog(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={addCandidate}>
-              Guardar Candidato
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Dialog para ver detalle */}
       <Dialog open={showDetailDialog} onOpenChange={setShowDetailDialog}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Perfil Completo - {selectedCandidate?.nombre_apellido}</DialogTitle>
+            <DialogTitle>Perfil Completo - {selectedApplication?.full_name}</DialogTitle>
           </DialogHeader>
-          {selectedCandidate && (
+          {selectedApplication && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label>Información Personal</Label>
                   <div className="space-y-2 mt-2">
-                    <p><strong>Edad:</strong> {selectedCandidate.edad || 'N/A'}</p>
-                    <p><strong>Sexo:</strong> {selectedCandidate.sexo || 'N/A'}</p>
-                    <p><strong>Localidad:</strong> {selectedCandidate.localidad || 'N/A'}</p>
-                    <p><strong>Email:</strong> {selectedCandidate.mail || 'N/A'}</p>
-                    <p><strong>Teléfono:</strong> {selectedCandidate.numero_contacto || 'N/A'}</p>
+                    <p><strong>Nombre:</strong> {selectedApplication.full_name}</p>
+                    <p><strong>Fecha de nacimiento:</strong> {new Date(selectedApplication.birth_date).toLocaleDateString()}</p>
+                    <p><strong>Edad:</strong> {getAge(selectedApplication.birth_date)} años</p>
+                    <p><strong>Teléfono:</strong> {selectedApplication.phone}</p>
+                    <p><strong>Educación:</strong> {selectedApplication.education}</p>
                   </div>
                 </div>
                 <div>
                   <Label>Información Laboral</Label>
                   <div className="space-y-2 mt-2">
-                    <p><strong>Vacante:</strong> {selectedCandidate.vacante_postulada || 'N/A'}</p>
-                    <p><strong>Tipo de Jornada:</strong> {selectedCandidate.tipo_jornada_buscada || 'N/A'}</p>
-                    <p><strong>Disponibilidad:</strong> {selectedCandidate.disponibilidad || 'N/A'}</p>
-                  </div>
-                </div>
-                <div>
-                  <Label>Estado Actual</Label>
-                  <div className="space-y-2 mt-2">
-                    <Badge variant={getStatusBadgeVariant(selectedCandidate.estado)}>
-                      {getStatusLabel(selectedCandidate.estado)}
-                    </Badge>
+                    <p><strong>Posición:</strong> {selectedApplication.position}</p>
+                    <p><strong>Horario de trabajo:</strong> {selectedApplication.work_schedule}</p>
+                    <p><strong>Dispuesto a trabajar on-site:</strong> {selectedApplication.willing_to_work_onsite}</p>
+                    <p><strong>Tiene transporte:</strong> {selectedApplication.has_transport}</p>
                   </div>
                 </div>
               </div>
               
-              {selectedCandidate.experiencia_laboral && (
+              {selectedApplication.experience && (
                 <div>
                   <Label>Experiencia Laboral</Label>
-                  <div className="mt-2 p-3 bg-gray-50 rounded">
-                    <p className="whitespace-pre-wrap">{selectedCandidate.experiencia_laboral}</p>
+                  <div className="mt-2 p-3 bg-muted rounded">
+                    <p className="whitespace-pre-wrap">{selectedApplication.experience}</p>
                   </div>
                 </div>
               )}
 
-              {selectedCandidate.conocimientos_habilidades && (
+              {selectedApplication.why_work_here && (
                 <div>
-                  <Label>Conocimientos y Habilidades</Label>
-                  <div className="mt-2 p-3 bg-gray-50 rounded">
-                    <p className="whitespace-pre-wrap">{selectedCandidate.conocimientos_habilidades}</p>
-                  </div>
-                </div>
-              )}
-
-              {selectedCandidate.observaciones_reclutador && (
-                <div>
-                  <Label>Observaciones del Reclutador</Label>
-                  <div className="mt-2 p-3 bg-gray-50 rounded">
-                    <p className="whitespace-pre-wrap">{selectedCandidate.observaciones_reclutador}</p>
+                  <Label>¿Por qué quiere trabajar aquí?</Label>
+                  <div className="mt-2 p-3 bg-muted rounded">
+                    <p className="whitespace-pre-wrap">{selectedApplication.why_work_here}</p>
                   </div>
                 </div>
               )}
 
               <div>
-                <Label>Historial de Estados</Label>
-                <div className="mt-2">
-                  {candidateHistory.length > 0 ? (
-                    <div className="space-y-2">
-                      {candidateHistory.map((history) => (
-                        <div key={history.id} className="p-3 border rounded">
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <p><strong>Estado:</strong> {getStatusLabel(history.estado_nuevo)}</p>
-                              {history.estado_anterior && (
-                                <p><strong>Estado anterior:</strong> {getStatusLabel(history.estado_anterior)}</p>
-                              )}
-                              {history.notas && (
-                                <p><strong>Notas:</strong> {history.notas}</p>
-                              )}
-                            </div>
-                            <small className="text-gray-500">
-                              {new Date(history.created_at).toLocaleString()}
-                            </small>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500">No hay historial disponible</p>
-                  )}
+                <Label>Referencias Laborales</Label>
+                <div className="mt-2 p-3 bg-muted rounded space-y-2">
+                  <p><strong>Nombre:</strong> {selectedApplication.reference_name}</p>
+                  <p><strong>Posición:</strong> {selectedApplication.reference_position}</p>
+                  <p><strong>Empresa:</strong> {selectedApplication.reference_company}</p>
+                  <p><strong>Teléfono:</strong> {selectedApplication.reference_phone}</p>
                 </div>
               </div>
+
+              {selectedApplication.cv_file_name && (
+                <div>
+                  <Label>CV Adjunto</Label>
+                  <div className="mt-2">
+                    <Badge variant="outline">
+                      {selectedApplication.cv_file_name}
+                    </Badge>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog para cambiar estado */}
-      <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Cambiar Estado - {selectedCandidate?.nombre_apellido}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="new-status">Nuevo Estado</Label>
-              <Select value={newStatus} onValueChange={setNewStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ESTADOS_CANDIDATO.map(estado => (
-                    <SelectItem key={estado} value={estado}>
-                      {getStatusLabel(estado)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="status-notes">Notas (opcional)</Label>
-              <Textarea
-                id="status-notes"
-                placeholder="Agregar notas sobre el cambio de estado..."
-                value={statusNotes}
-                onChange={(e) => setStatusNotes(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowStatusDialog(false)}>
-                Cancelar
-              </Button>
-              <Button onClick={updateCandidateStatus}>
-                Actualizar Estado
-              </Button>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
 
@@ -915,27 +345,18 @@ export const SelectionModule = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
             <AlertDialogDescription>
-              Esta acción no se puede deshacer. Se eliminará permanentemente el candidato{' '}
-              <strong>{candidateToDelete?.nombre_apellido}</strong> y todos sus datos.
+              Esta acción no se puede deshacer. Se eliminará permanentemente la postulación de{' '}
+              <strong>{applicationToDelete?.full_name}</strong>.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={deleteCandidate} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={deleteApplication}>
               Eliminar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      {/* Dialog para mapeo de columnas */}
-      <ColumnMappingDialog
-        open={showColumnMappingDialog}
-        onOpenChange={setShowColumnMappingDialog}
-        excelHeaders={excelHeaders}
-        excelData={excelData}
-        onConfirmMapping={handleConfirmColumnMapping}
-      />
     </div>
   );
 };

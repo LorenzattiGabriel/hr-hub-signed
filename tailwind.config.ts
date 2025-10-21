@@ -81,6 +81,13 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+      backgroundImage: {
+        'gradient-card': 'linear-gradient(145deg, hsl(0 0% 100%), hsl(210 40% 98%))',
+      },
+      boxShadow: {
+        'soft': '0 2px 8px hsl(217 91% 60% / 0.1)',
+        'medium': '0 4px 20px hsl(217 91% 60% / 0.15)',
+      },
 			keyframes: {
 				'accordion-down': {
 					from: {

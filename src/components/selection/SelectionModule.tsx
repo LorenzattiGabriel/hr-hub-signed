@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,6 +48,15 @@ export const SelectionModule = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [applicationToDelete, setApplicationToDelete] = useState<Application | null>(null);
   const { toast } = useToast();
+
+  const educationOptions = useMemo(() => {
+    const set = new Set<string>();
+    applications.forEach(app => {
+      const val = app.education?.trim();
+      if (val) set.add(val);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'es'));
+  }, [applications]);
 
   useEffect(() => {
     fetchApplications();
@@ -114,7 +123,8 @@ export const SelectionModule = () => {
     }
 
     if (educationFilter && educationFilter.trim() !== '' && educationFilter !== 'todos') {
-      filtered = filtered.filter(app => app.education === educationFilter);
+      const needle = educationFilter.toLowerCase().trim();
+      filtered = filtered.filter(app => app.education?.toLowerCase().includes(needle));
     }
 
     setFilteredApplications(filtered);
@@ -273,10 +283,11 @@ export const SelectionModule = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="Primario">Primario</SelectItem>
-                  <SelectItem value="Secundario">Secundario</SelectItem>
-                  <SelectItem value="Terciario">Terciario</SelectItem>
-                  <SelectItem value="Universitario">Universitario</SelectItem>
+                  {educationOptions.map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

@@ -192,8 +192,11 @@ export const SelectionModule = () => {
   };
 
   const downloadCV = async (application: Application) => {
-    const rawPath = application.cv_file_path?.trim() || application.cv_file_name?.trim();
-    if (!rawPath) {
+    const candidates = [application.cv_file_path?.trim(), application.cv_file_name?.trim()].filter(
+      (v): v is string => !!v && v.length > 0
+    );
+
+    if (candidates.length === 0) {
       toast({
         title: "Error",
         description: "No hay CV adjunto para esta postulación",
@@ -202,43 +205,59 @@ export const SelectionModule = () => {
       return;
     }
 
-    try {
-      // Normalizar la ruta para el bucket (remover prefijo del bucket si viene incluido)
-      let path = rawPath.replace(/^\/+/, '');
-      if (path.toLowerCase().startsWith('cv-files/')) {
-        path = path.slice('cv-files/'.length);
+    const tryPaths = candidates.map((raw) => {
+      let p = raw.replace(/^\/+/, '');
+      return p.toLowerCase().startsWith('cv-files/') ? p.slice('cv-files/'.length) : p;
+    });
+
+    for (const path of tryPaths) {
+      try {
+        // 1) Intento con la API de Storage (evita problemas de encoding)
+        const { data: blob, error } = await supabase.storage.from('cv-files').download(path);
+        if (!error && blob) {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = path.split('/').pop() || 'cv.pdf';
+          a.click();
+          window.URL.revokeObjectURL(url);
+          toast({ title: "Éxito", description: "CV descargado correctamente" });
+          return;
+        }
+      } catch (e) {
+        console.warn('Fallo download() para', path, e);
       }
 
-      const { data } = supabase
-        .storage
-        .from('cv-files')
-        .getPublicUrl(path);
-
-      // Descargar usando fetch
-      const response = await fetch(data.publicUrl);
-      if (!response.ok) throw new Error('Failed to download file');
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const filename = path.split('/').pop() || 'cv.pdf';
-      a.href = url;
-      a.download = filename;
-      a.click();
-      window.URL.revokeObjectURL(url);
-
-      toast({
-        title: "Éxito",
-        description: "CV descargado correctamente",
-      });
-    } catch (error) {
-      console.error('Error downloading CV:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo descargar el CV",
-        variant: "destructive",
-      });
+      try {
+        // 2) Fallback: URL pública
+        const { data } = supabase.storage.from('cv-files').getPublicUrl(path);
+        const response = await fetch(data.publicUrl);
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          // Intentar obtener nombre desde Content-Disposition
+          const cd = response.headers.get('content-disposition');
+          let filename = path.split('/').pop() || 'cv.pdf';
+          const match = cd?.match(/filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i);
+          if (match) filename = decodeURIComponent(match[1] || match[2]);
+          a.href = url;
+          a.download = filename;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          toast({ title: "Éxito", description: "CV descargado correctamente" });
+          return;
+        }
+      } catch (e) {
+        console.warn('Fallo fetch(publicUrl) para', path, e);
+      }
     }
+
+    toast({
+      title: "Error",
+      description: "No se pudo descargar el CV. Verifica que el archivo exista en el bucket cv-files.",
+      variant: "destructive",
+    });
   };
 
   return (

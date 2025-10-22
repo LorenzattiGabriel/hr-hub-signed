@@ -192,7 +192,8 @@ export const SelectionModule = () => {
   };
 
   const downloadCV = async (application: Application) => {
-    if (!application.cv_file_name) {
+    const rawPath = application.cv_file_path?.trim() || application.cv_file_name?.trim();
+    if (!rawPath) {
       toast({
         title: "Error",
         description: "No hay CV adjunto para esta postulación",
@@ -202,11 +203,16 @@ export const SelectionModule = () => {
     }
 
     try {
-      // Obtener la URL pública del archivo
+      // Normalizar la ruta para el bucket (remover prefijo del bucket si viene incluido)
+      let path = rawPath.replace(/^\/+/, '');
+      if (path.toLowerCase().startsWith('cv-files/')) {
+        path = path.slice('cv-files/'.length);
+      }
+
       const { data } = supabase
         .storage
         .from('cv-files')
-        .getPublicUrl(application.cv_file_name);
+        .getPublicUrl(path);
 
       // Descargar usando fetch
       const response = await fetch(data.publicUrl);
@@ -215,8 +221,9 @@ export const SelectionModule = () => {
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
+      const filename = path.split('/').pop() || 'cv.pdf';
       a.href = url;
-      a.download = application.cv_file_name;
+      a.download = filename;
       a.click();
       window.URL.revokeObjectURL(url);
 

@@ -43,7 +43,7 @@ const ReglamentoInternoSimple = React.forwardRef<
           marginBottom: "30px",
           margin: "0 0 30px 0"
         }}>
-          AVÍCOLA LA PALOMA
+          VEMATEL
         </h2>
 
         <p style={{ margin: "0 0 8px 0" }}>

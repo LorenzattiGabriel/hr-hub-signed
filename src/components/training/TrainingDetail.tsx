@@ -26,7 +26,7 @@ const TrainingDetail = ({ training, onBack }: TrainingDetailProps) => {
         <div style="font-family: Arial, sans-serif; padding: 32px; color: #111827; background: #ffffff;">
           <div style="text-align:center; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 24px;">
             <h1 style="margin: 0; font-size: 22px;">CERTIFICADO OFICIAL DE CAPACITACIÓN</h1>
-            <p style="margin: 6px 0 0 0; color: #6b7280;">Avícola La Paloma</p>
+            <p style="margin: 6px 0 0 0; color: #6b7280;">Vematel</p>
           </div>
 
           <p style="font-size: 14px; line-height: 1.6;">
@@ -108,7 +108,7 @@ const TrainingDetail = ({ training, onBack }: TrainingDetailProps) => {
         <div style="font-family: Arial, sans-serif; padding: 32px; color: #111827; background: #ffffff;">
           <div style="text-align:center; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; margin-bottom: 24px;">
             <h1 style="margin: 0; font-size: 22px;">CONSTANCIA DE ASISTENCIA</h1>
-            <p style="margin: 6px 0 0 0; color: #6b7280;">Avícola La Paloma</p>
+            <p style="margin: 6px 0 0 0; color: #6b7280;">Vematel</p>
           </div>
 
           <p style="font-size: 14px; line-height: 1.6;">

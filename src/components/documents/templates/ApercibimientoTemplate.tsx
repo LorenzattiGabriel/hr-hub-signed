@@ -67,7 +67,7 @@ export const ApercibimientoTemplate = ({ employeeData, generatedDate }: Apercibi
       </p>
 
       <p style={{ marginBottom: '60px', textAlign: 'center', fontWeight: 'bold' }}>
-        AVICOLA LA PALOMA
+        VEMATEL
       </p>
 
       <div style={{ marginTop: '80px' }}>

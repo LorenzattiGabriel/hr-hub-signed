@@ -78,7 +78,7 @@ export const SancionTemplate = ({ employeeData, generatedDate }: SancionTemplate
       </p>
 
       <p style={{ marginBottom: '60px', textAlign: 'center', fontWeight: 'bold' }}>
-        AVICOLA LA PALOMA
+        VEMATEL
       </p>
 
       <div style={{ marginTop: '80px' }}>

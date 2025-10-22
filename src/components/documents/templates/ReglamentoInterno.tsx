@@ -40,7 +40,7 @@ const ReglamentoInterno = React.forwardRef<
           textTransform: "uppercase",
           marginBottom: "32px"
         }}>
-          AVÍCOLA LA PALOMA
+          VEMATEL
         </h2>
 
         <p style={{ marginBottom: "8px" }}>
@@ -233,7 +233,7 @@ const ReglamentoInterno = React.forwardRef<
         }}>
           Este Reglamento Interno entra en vigencia a partir de su comunicación a
           los empleados y deberá ser conocido, respetado y cumplido por todos los
-          integrantes de Avícola La Paloma.
+          integrantes de Vematel.
         </p>
 
         <div style={{ marginTop: "40px" }}>

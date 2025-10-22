@@ -98,7 +98,7 @@ const AbsencePDF = ({ absenceData, trigger }: AbsencePDFProps) => {
           {/* Header del Certificado */}
           <div className="text-center border-b-2 pb-4" style={{ borderColor: '#e5e7eb' }}>
             <h1 className="text-2xl font-bold mb-2" style={{ color: '#1f2937' }}>CERTIFICADO DE AUSENCIA</h1>
-            <h2 className="text-lg font-semibold" style={{ color: '#4b5563' }}>AVÍCOLA LA PALOMA</h2>
+            <h2 className="text-lg font-semibold" style={{ color: '#4b5563' }}>VEMATEL</h2>
             <p className="text-sm mt-2" style={{ color: '#6b7280' }}>
               Fecha de Generación: {new Date().toLocaleDateString()}
             </p>

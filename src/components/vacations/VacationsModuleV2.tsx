@@ -182,7 +182,7 @@ export const VacationsModule = () => {
         <p style="margin:12px 0;"><strong>Fecha:</strong> ${emitido}</p>
         
         <div style="text-align:center; margin:20px 0 12px 0;">
-          <p style="font-style:italic; margin-bottom:4px;">La Paloma</p>
+          <p style="font-style:italic; margin-bottom:4px;">Vematel</p>
         </div>
         
         <p style="margin:16px 0 8px 0;">Me notifico de la comunicación que antecede, tomando debida nota.</p>

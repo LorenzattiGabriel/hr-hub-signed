@@ -255,7 +255,7 @@ const UniformsModule = () => {
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 2px solid #000; font-size: 11px;">
           <tr>
             <td style="border: 2px solid #000; padding: 6px; font-weight: bold; width: 12%; background-color: #f0f0f0;">Razón social:</td>
-            <td style="border: 2px solid #000; padding: 6px; width: 28%;">Avícola "La Paloma"</td>
+            <td style="border: 2px solid #000; padding: 6px; width: 28%;">Vematel</td>
             <td style="border: 2px solid #000; padding: 6px; font-weight: bold; width: 10%; background-color: #f0f0f0;">C.U.I.T.:</td>
             <td style="border: 2px solid #000; padding: 6px; width: 20%;">20-24088189-7</td>
             <td style="border: 2px solid #000; padding: 6px; font-weight: bold; width: 10%; background-color: #f0f0f0;">C.P.:</td>

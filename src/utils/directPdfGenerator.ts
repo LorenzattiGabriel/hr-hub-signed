@@ -93,7 +93,7 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
       yPos += 15;
       
       doc.setFontSize(12);
-      const camarasIntro = 'El/la trabajador/a declara haber sido informado/a de la existencia de cámaras de seguridad instaladas en las instalaciones de la empresa Avícola La Paloma (en adelante "la Empresa"), cuya finalidad exclusiva es la prevención de riesgos, seguridad de las personas, resguardo de bienes materiales y control del cumplimiento de normas laborales.';
+      const camarasIntro = 'El/la trabajador/a declara haber sido informado/a de la existencia de cámaras de seguridad instaladas en las instalaciones de la empresa Vematel (en adelante "la Empresa"), cuya finalidad exclusiva es la prevención de riesgos, seguridad de las personas, resguardo de bienes materiales y control del cumplimiento de normas laborales.';
       const splitCamarasIntro = doc.splitTextToSize(camarasIntro, 170);
       doc.text(splitCamarasIntro, 20, yPos);
       yPos += splitCamarasIntro.length * 5 + 8;
@@ -208,7 +208,7 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
       doc.text('REGLAMENTO INTERNO', 105, yPos, { align: 'center' });
       yPos += 15;
       doc.setFontSize(16);
-      doc.text('AVÍCOLA LA PALOMA', 105, yPos, { align: 'center' });
+      doc.text('VEMATEL', 105, yPos, { align: 'center' });
       yPos += 20;
       
       doc.setFontSize(12);
@@ -406,7 +406,7 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
       
       // ENCABEZADO
       doc.setFontSize(16);
-      doc.text('Avícola La Paloma', 105, yPos, { align: 'center' });
+      doc.text('Vematel', 105, yPos, { align: 'center' });
       yPos += 10;
       
       doc.setFontSize(10);

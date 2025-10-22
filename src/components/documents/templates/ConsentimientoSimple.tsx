@@ -63,7 +63,7 @@ const ConsentimientoSimple = React.forwardRef<
           lineHeight: "1.6",
           margin: "0 0 12px 0"
         }}>
-          El/la trabajador/a declara haber sido informado/a de la existencia de cámaras de seguridad instaladas en las instalaciones de la empresa Avícola La Paloma (en adelante "la Empresa"), cuya finalidad exclusiva es la prevención de riesgos, seguridad de las personas, resguardo de bienes y control de acceso a las instalaciones.
+          El/la trabajador/a declara haber sido informado/a de la existencia de cámaras de seguridad instaladas en las instalaciones de la empresa Vematel (en adelante "la Empresa"), cuya finalidad exclusiva es la prevención de riesgos, seguridad de las personas, resguardo de bienes y control de acceso a las instalaciones.
         </p>
 
         <p style={{

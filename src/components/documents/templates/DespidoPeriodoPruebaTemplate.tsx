@@ -31,7 +31,7 @@ export const DespidoPeriodoPruebaTemplate = React.forwardRef<
       {/* Encabezado */}
       <div style={{ textAlign: 'center', marginBottom: '30px' }}>
         <h1 style={{ fontSize: '16px', fontWeight: 'bold', margin: '0 0 10px 0' }}>
-          Avícola La Paloma
+          Vematel
         </h1>
         <p style={{ margin: '0 0 7px 0', fontSize: '10px' }}>20-24088189-7</p>
         <p style={{ margin: '0 0 20px 0', fontSize: '10px' }}>

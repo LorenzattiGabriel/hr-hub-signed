@@ -38,7 +38,7 @@ const Header = () => {
               className="h-12 w-12 object-contain"
             />
             <div>
-              <h1 className="text-xl font-bold text-foreground tracking-tight">RRHH Avícola La Paloma & TalentHub</h1>
+              <h1 className="text-xl font-bold text-foreground tracking-tight">RRHH Fabricius & TalentHub</h1>
               <p className="text-sm text-muted-foreground">Sistema de gestión de personal • Desarrollo propio Talenthub</p>
             </div>
           </div>

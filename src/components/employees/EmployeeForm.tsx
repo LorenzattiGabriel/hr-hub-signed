@@ -406,7 +406,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="empleado@avicolapaloma.com"
+                placeholder="empleado@vematel.com"
               />
             </div>
 

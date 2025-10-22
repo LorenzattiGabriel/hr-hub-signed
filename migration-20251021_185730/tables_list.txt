@@ -1,0 +1,18 @@
+                  List of relations
+ Schema |          Name           | Type  |  Owner   
+--------+-------------------------+-------+----------
+ public | absences                | table | postgres
+ public | attendance              | table | postgres
+ public | declaraciones_domicilio | table | postgres
+ public | documents               | table | postgres
+ public | employees               | table | postgres
+ public | payroll                 | table | postgres
+ public | performance_evaluations | table | postgres
+ public | sanctions               | table | postgres
+ public | trainings               | table | postgres
+ public | uniforms                | table | postgres
+ public | vacation_balances       | table | postgres
+ public | vacation_requests       | table | postgres
+ public | visitas_consultores     | table | postgres
+(13 rows)
+

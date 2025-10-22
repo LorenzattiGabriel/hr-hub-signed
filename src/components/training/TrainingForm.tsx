@@ -130,7 +130,7 @@ const TrainingForm = ({ onBack, training, employees }: TrainingFormProps) => {
           </div>
 
           <div style="text-align:center; font-size: 11px; color:#6b7280; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 12px;">
-            Generado el ${new Date().toLocaleDateString()} - Sistema RRHH Avícola La Paloma
+            Generado el ${new Date().toLocaleDateString()} - Sistema RRHH Vematel
           </div>
         </div>
       `;

@@ -360,7 +360,7 @@ const downloadPDF = async () => {
               Este documento constituye el legajo digital del empleado según normativas laborales vigentes.
             </p>
             <p className="mt-1">
-              Generado el {formatDateLocal(getCurrentDateString())} - Sistema RRHH Avícola La Paloma
+              Generado el {formatDateLocal(getCurrentDateString())} - Sistema RRHH Vematel
             </p>
           </div>
         </div>

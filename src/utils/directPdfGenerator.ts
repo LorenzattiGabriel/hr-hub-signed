@@ -348,7 +348,7 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
       
       // ENCABEZADO
       doc.setFontSize(14);
-      doc.text('AVICOLA LA PALOMA', 105, yPos, { align: 'center' });
+      doc.text('VEMATEL', 105, yPos, { align: 'center' });
       yPos += 15;
       
       doc.setFontSize(12);
@@ -382,7 +382,7 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
       doc.text(`Córdoba, ${formattedDate}.`, 20, yPos);
       yPos += 18;
       
-      doc.text('AVICOLA LA PALOMA', 105, yPos, { align: 'center' });
+      doc.text('VEMATEL', 105, yPos, { align: 'center' });
       yPos += 25;
       
       // FIRMA
@@ -477,7 +477,7 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
       
       // ENCABEZADO
       doc.setFontSize(14);
-      doc.text('AVICOLA LA PALOMA', 105, yPos, { align: 'center' });
+      doc.text('VEMATEL', 105, yPos, { align: 'center' });
       yPos += 15;
       
       doc.setFontSize(12);
@@ -516,7 +516,7 @@ export const generatePDFDirectly = async (params: GeneratePDFParams): Promise<PD
       doc.text(`Córdoba, ${formattedDate}.`, 20, yPos);
       yPos += 18;
       
-      doc.text('AVICOLA LA PALOMA', 105, yPos, { align: 'center' });
+      doc.text('VEMATEL', 105, yPos, { align: 'center' });
       yPos += 25;
       
       // FIRMA

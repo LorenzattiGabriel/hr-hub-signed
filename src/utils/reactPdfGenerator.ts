@@ -185,7 +185,7 @@ export const generatePDFFromReactComponents = async (params: GeneratePDFParams):
         fallbackDoc.text(`${employeeName}, DNI N° ${employeeData.dni}, quien manifiesta`, 20, 155);
         fallbackDoc.text('prestar su consentimiento expreso para el uso de camaras de', 20, 170);
         fallbackDoc.text('vigilancia y datos biometricos en las instalaciones de', 20, 185);
-        fallbackDoc.text('Avicola La Paloma.', 20, 200);
+        fallbackDoc.text('Vematel.', 20, 200);
         
         fallbackDoc.text('Firma del empleado:', 20, 240);
         fallbackDoc.text('_________________________', 20, 260);
@@ -198,7 +198,7 @@ export const generatePDFFromReactComponents = async (params: GeneratePDFParams):
         fallbackDoc.setFontSize(18);
         fallbackDoc.text('REGLAMENTO INTERNO', 20, 30);
         fallbackDoc.setFontSize(16);
-        fallbackDoc.text('AVICOLA LA PALOMA', 20, 50);
+        fallbackDoc.text('VEMATEL', 20, 50);
         
         fallbackDoc.setFontSize(12);
         fallbackDoc.text(`Fecha: ${formattedDate}`, 20, 75);

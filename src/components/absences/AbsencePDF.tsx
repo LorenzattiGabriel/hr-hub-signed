@@ -266,7 +266,7 @@ const AbsencePDF = ({ absenceData, trigger }: AbsencePDFProps) => {
               Este documento constituye el certificado oficial de ausencia según normativas laborales vigentes.
             </p>
             <p className="mt-1">
-              Generado el {new Date().toLocaleDateString()} - Sistema RRHH Avícola La Paloma
+              Generado el {new Date().toLocaleDateString()} - Sistema RRHH Vematel
             </p>
           </div>
         </div>

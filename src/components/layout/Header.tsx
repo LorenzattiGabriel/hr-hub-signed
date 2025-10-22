@@ -32,11 +32,6 @@ const Header = () => {
       <div className="container flex h-16 items-center justify-between px-6">
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-3">
-            <img 
-              src="/lovable-uploads/bc1834d3-5cc1-4aa1-9acd-e40b9c20d1bf.png" 
-              alt="Avícola La Paloma" 
-              className="h-12 w-12 object-contain"
-            />
             <div>
               <h1 className="text-xl font-bold text-foreground tracking-tight">RRHH Fabricius & TalentHub</h1>
               <p className="text-sm text-muted-foreground">Sistema de gestión de personal • Desarrollo propio Talenthub</p>

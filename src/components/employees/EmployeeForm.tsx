@@ -80,6 +80,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     empresa: employee?.empresa || "",
     tipoContrato: employee?.tipoContrato || "",
     fechaIngreso: employee?.fechaIngreso || "",
+    fechaRegistro: employee?.fechaRegistro || "",
     salario: employee?.salario || "",
     estadoCivil: employee?.estadoCivil || "",
     estado: employee?.estado || "activo",
@@ -541,6 +542,16 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                 value={formData.fechaIngreso}
                 onChange={(e) => handleInputChange("fechaIngreso", e.target.value)}
                 required
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="fechaRegistro" className="text-foreground">Fecha de Registro</Label>
+              <Input
+                id="fechaRegistro"
+                type="date"
+                value={formData.fechaRegistro}
+                onChange={(e) => handleInputChange("fechaRegistro", e.target.value)}
               />
             </div>
 

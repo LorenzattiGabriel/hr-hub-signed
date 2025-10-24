@@ -77,6 +77,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     // Datos Laborales
     cargo: employee?.cargo || "",
     sector: employee?.sector || "",
+    empresa: employee?.empresa || "",
     tipoContrato: employee?.tipoContrato || "",
     fechaIngreso: employee?.fechaIngreso || "",
     salario: employee?.salario || "",
@@ -499,6 +500,19 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   <SelectItem value="recursos-humanos">Recursos Humanos</SelectItem>
                   <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
                   <SelectItem value="sistema">Sistema</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="empresa" className="text-foreground">Empresa</Label>
+              <Select value={formData.empresa} onValueChange={(value) => handleInputChange("empresa", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar empresa" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="vematel">Vematel</SelectItem>
+                  <SelectItem value="servicap">Servicap</SelectItem>
                 </SelectContent>
               </Select>
             </div>

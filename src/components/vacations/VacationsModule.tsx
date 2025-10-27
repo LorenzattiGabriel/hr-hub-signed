@@ -48,9 +48,9 @@ const VacationsModule = () => {
     
     // Antigüedad por años completos según Ley de Contrato de Trabajo N° 20.744
     if (antiguedadAnios < 0) return 0;
-    if (antiguedadAnios <= 5) return 14;    // Hasta 5 años: 14 días corridos
-    if (antiguedadAnios <= 10) return 21;   // Más de 5 hasta 10 años: 21 días corridos
-    if (antiguedadAnios <= 20) return 28;   // Más de 10 hasta 20 años: 28 días corridos
+    if (antiguedadAnios < 5) return 14;     // Más de 6 meses y hasta 5 años: 14 días corridos
+    if (antiguedadAnios < 10) return 21;    // Más de 5 años y hasta 10 años: 21 días corridos
+    if (antiguedadAnios < 20) return 28;    // Más de 10 años y hasta 20 años: 28 días corridos
     return 35;                              // Más de 20 años: 35 días corridos
   };
 

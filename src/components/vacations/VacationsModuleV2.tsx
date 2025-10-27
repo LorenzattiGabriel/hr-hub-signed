@@ -86,10 +86,10 @@ export const VacationsModule = () => {
 
     // Full years per law - Antigüedad calculada al 31/12 del año actual
     const antiguedadAnios = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
-    if (antiguedadAnios <= 5) return 14;
-    if (antiguedadAnios <= 10) return 21;
-    if (antiguedadAnios <= 20) return 28;
-    return 35;
+    if (antiguedadAnios < 5) return 14;     // Más de 6 meses y hasta 5 años: 14 días
+    if (antiguedadAnios < 10) return 21;    // Más de 5 años y hasta 10 años: 21 días
+    if (antiguedadAnios < 20) return 28;    // Más de 10 años y hasta 20 años: 28 días
+    return 35;                              // Más de 20 años: 35 días
   };
 
   // Create employees with vacation information from database

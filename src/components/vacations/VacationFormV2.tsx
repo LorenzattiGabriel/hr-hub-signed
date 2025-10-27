@@ -221,7 +221,7 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
       return 14;
     }
 
-    // Full years per law
+    // Full years per law - Antigüedad calculada al 31/12 del año actual
     const antiguedadAnios = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
     if (antiguedadAnios <= 5) return 14;
     if (antiguedadAnios <= 10) return 21;

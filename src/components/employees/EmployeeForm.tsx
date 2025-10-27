@@ -482,6 +482,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   <SelectItem value="gerente-administrativa">Gerente Administrativa</SelectItem>
                   <SelectItem value="electricistas">Electricistas</SelectItem>
                   <SelectItem value="asistente-electricista">Asistente de electricista</SelectItem>
+                  <SelectItem value="empleado-limpieza">Empleado/a de limpieza</SelectItem>
                 </SelectContent>
               </Select>
             </div>

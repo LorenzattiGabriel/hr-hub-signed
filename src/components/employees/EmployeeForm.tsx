@@ -469,11 +469,16 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   <SelectValue placeholder="Seleccionar puesto" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="operario-mantenimiento">Operario Mantenimiento</SelectItem>
-                  <SelectItem value="operario-produccion">Operario Producción</SelectItem>
-                  <SelectItem value="recursos-humanos">Recursos Humanos</SelectItem>
-                  <SelectItem value="administracion">Administración</SelectItem>
-                  <SelectItem value="chofer">Chofer</SelectItem>
+                  <SelectItem value="encargado-sucursal">Encargado de sucursal</SelectItem>
+                  <SelectItem value="atencion-publico-carnicero">Atención al público y carnicero</SelectItem>
+                  <SelectItem value="cajero">Cajero/a</SelectItem>
+                  <SelectItem value="cajera-encargada-pedidos">Cajera y Encargada de pedidos mayoristas</SelectItem>
+                  <SelectItem value="operario-produccion">Operario de producción</SelectItem>
+                  <SelectItem value="administrativo">Administrativo/a</SelectItem>
+                  <SelectItem value="encargado-administracion">Encargada/o de administración</SelectItem>
+                  <SelectItem value="logistica">Logística</SelectItem>
+                  <SelectItem value="encargado-stock">Encargado de Stock</SelectItem>
+                  <SelectItem value="responsable-marketing">Responsable de marketing</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -485,9 +490,12 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
                   <SelectValue placeholder="Seleccionar sector" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="administracion">Administración</SelectItem>
-                  <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                  <SelectItem value="ventas">Ventas</SelectItem>
                   <SelectItem value="produccion">Producción</SelectItem>
+                  <SelectItem value="administrativa">Administrativa</SelectItem>
+                  <SelectItem value="mantenimiento">Mantenimiento</SelectItem>
+                  <SelectItem value="logistica-distribucion">Logística y distribución</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
                 </SelectContent>
               </Select>
             </div>

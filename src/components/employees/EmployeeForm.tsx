@@ -164,16 +164,62 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     return 35;                              // Más de 20 años: 35 días corridos
   };
 
-  const handleSave = () => {
-    // Validaciones básicas
-    if (!formData.nombres || !formData.apellidos || !formData.dni || !formData.fechaIngreso) {
+const handleSave = () => {
+  // Validaciones básicas
+  if (!formData.nombres || !formData.apellidos || !formData.dni || !formData.fechaIngreso) {
+    toast({
+      title: "Error",
+      description: "Por favor complete los campos obligatorios (Nombres, Apellidos, DNI, Fecha de Ingreso)",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  // Validación de Fecha de Nacimiento
+  if (formData.fechaNacimiento) {
+    const fechaNac = new Date(formData.fechaNacimiento);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    // Validar que la fecha no sea futura
+    if (fechaNac >= hoy) {
       toast({
-        title: "Error",
-        description: "Por favor complete los campos obligatorios (Nombres, Apellidos, DNI, Fecha de Ingreso)",
+        title: "Error en Fecha de Nacimiento",
+        description: "La fecha de nacimiento no puede ser igual o posterior a la fecha actual",
         variant: "destructive"
       });
       return;
     }
+    
+    // Calcular edad
+    let edad = hoy.getFullYear() - fechaNac.getFullYear();
+    const mesActual = hoy.getMonth();
+    const mesNacimiento = fechaNac.getMonth();
+    
+    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && hoy.getDate() < fechaNac.getDate())) {
+      edad--;
+    }
+    
+    // Validar edad mínima legal (18 años)
+    if (edad < 18) {
+      toast({
+        title: "Error: Edad insuficiente",
+        description: `El empleado debe tener al menos 18 años. Edad actual: ${edad} años`,
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validar edad máxima razonable (110 años como límite superior)
+    if (edad > 110) {
+      toast({
+        title: "Error en Fecha de Nacimiento",
+        description: "La fecha de nacimiento ingresada no es válida. Por favor verifique los datos",
+        variant: "destructive"
+      });
+      return;
+    }
+  }
 
     // Guardar en lista (padre)
     const payload = { ...formData, id: employee?.id };
@@ -304,30 +350,31 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="fechaNacimiento" className="text-foreground">Fecha de Nacimiento</Label>
-                <Input
-                  id="fechaNacimiento"
-                  type="date"
-                  value={formData.fechaNacimiento}
-                  onChange={(e) => handleInputChange("fechaNacimiento", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="estadoCivil" className="text-foreground">Estado Civil</Label>
-                <Select value={formData.estadoCivil} onValueChange={(value) => handleInputChange("estadoCivil", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar estado civil" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="soltero">Soltero/a</SelectItem>
-                    <SelectItem value="casado">Casado/a</SelectItem>
-                    <SelectItem value="divorciado">Divorciado/a</SelectItem>
-                    <SelectItem value="viudo">Viudo/a</SelectItem>
-                    <SelectItem value="union-convivencial">Unión Convivencial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="fechaNacimiento" className="text-foreground">Fecha de Nacimiento</Label>
+              <Input
+                id="fechaNacimiento"
+                type="date"
+                value={formData.fechaNacimiento}
+                onChange={(e) => handleInputChange("fechaNacimiento", e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            <div>
+              <Label htmlFor="estadoCivil" className="text-foreground">Estado Civil</Label>
+              <Select value={formData.estadoCivil} onValueChange={(value) => handleInputChange("estadoCivil", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar estado civil" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="soltero">Soltero/a</SelectItem>
+                  <SelectItem value="casado">Casado/a</SelectItem>
+                  <SelectItem value="divorciado">Divorciado/a</SelectItem>
+                  <SelectItem value="viudo">Viudo/a</SelectItem>
+                  <SelectItem value="union-convivencial">Unión Convivencial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             </div>
 
             <div>

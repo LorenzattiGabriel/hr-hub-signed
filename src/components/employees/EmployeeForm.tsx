@@ -12,6 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 import LegajoPDF from "./LegajoPDF";
 import { calculateDetailedAntiquity } from "@/utils/dateUtils";
 
+// Constantes para mantener los valores configurables
+const EDAD_MINIMA_LEGAL = 18;
+const EDAD_MAXIMA_RAZONABLE = 110;
+
 interface EmployeeFormProps {
   onBack: () => void;
   onSave?: (employee: any) => void;
@@ -164,16 +168,81 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     return 35;                              // Más de 20 años: 35 días corridos
   };
 
-  const handleSave = () => {
-    // Validaciones básicas
-    if (!formData.nombres || !formData.apellidos || !formData.dni || !formData.fechaIngreso) {
-      toast({
-        title: "Error",
-        description: "Por favor complete los campos obligatorios (Nombres, Apellidos, DNI, Fecha de Ingreso)",
-        variant: "destructive"
-      });
-      return;
-    }
+const handleSave = () => {
+  // Validaciones básicas
+  if (!formData.nombres || !formData.apellidos || !formData.dni || !formData.fechaIngreso) {
+    toast({
+      title: "Error",
+      description: "Por favor complete los campos obligatorios (Nombres, Apellidos, DNI, Fecha de Ingreso)",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  // Validación de Fecha de Nacimiento
+  if (formData.fechaNacimiento) {
+    const fechaNac = new Date(formData.fechaNacimiento);
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+/**
+ * Calcula la edad exacta a partir de una fecha de nacimiento
+ * @param {Date} fechaNacimiento - Fecha de nacimiento
+ * @param {Date} fechaReferencia - Fecha de referencia (por defecto hoy)
+ * @returns {number} Edad en años
+ */
+const calcularEdad = (fechaNacimiento, fechaReferencia = new Date()) => {
+  let edad = fechaReferencia.getFullYear() - fechaNacimiento.getFullYear();
+  const diferenciaMeses = fechaReferencia.getMonth() - fechaNacimiento.getMonth();
+  
+  // Restar un año si aún no ha cumplido años este año
+  if (diferenciaMeses < 0 || 
+      (diferenciaMeses === 0 && fechaReferencia.getDate() < fechaNacimiento.getDate())) {
+    edad--;
+  }
+  
+  return edad;
+};
+
+/**
+ * Valida la edad de un empleado
+ * @param {Date} fechaNac - Fecha de nacimiento
+ * @returns {{ valida: boolean, edad?: number, error?: string }}
+ */
+const validarEdadEmpleado = (fechaNac) => {
+  const edad = calcularEdad(fechaNac);
+  
+  if (edad < EDAD_MINIMA_LEGAL) {
+    return {
+      valida: false,
+      edad,
+      error: `El empleado debe tener al menos ${EDAD_MINIMA_LEGAL} años. Edad actual: ${edad} años`
+    };
+  }
+  
+  if (edad > EDAD_MAXIMA_RAZONABLE) {
+    return {
+      valida: false,
+      edad,
+      error: "La fecha de nacimiento ingresada no es válida. Por favor verifique los datos"
+    };
+  }
+  
+  return { valida: true, edad };
+};
+// Uso en tu código
+const resultado = validarEdadEmpleado(fechaNac);
+if (!resultado.valida) {
+  toast({
+    title: resultado.edad < EDAD_MINIMA_LEGAL ? "Error: Edad insuficiente" : "Error en Fecha de Nacimiento",
+    description: resultado.error,
+    variant: "destructive"
+  });
+  return;
+}
+// Continuar con la lógica si la edad es válida
+const edadEmpleado = resultado.edad;
+}
 
     // Guardar en lista (padre)
     const payload = { ...formData, id: employee?.id };
@@ -304,30 +373,31 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="fechaNacimiento" className="text-foreground">Fecha de Nacimiento</Label>
-                <Input
-                  id="fechaNacimiento"
-                  type="date"
-                  value={formData.fechaNacimiento}
-                  onChange={(e) => handleInputChange("fechaNacimiento", e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="estadoCivil" className="text-foreground">Estado Civil</Label>
-                <Select value={formData.estadoCivil} onValueChange={(value) => handleInputChange("estadoCivil", value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar estado civil" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="soltero">Soltero/a</SelectItem>
-                    <SelectItem value="casado">Casado/a</SelectItem>
-                    <SelectItem value="divorciado">Divorciado/a</SelectItem>
-                    <SelectItem value="viudo">Viudo/a</SelectItem>
-                    <SelectItem value="union-convivencial">Unión Convivencial</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="fechaNacimiento" className="text-foreground">Fecha de Nacimiento</Label>
+              <Input
+                id="fechaNacimiento"
+                type="date"
+                value={formData.fechaNacimiento}
+                onChange={(e) => handleInputChange("fechaNacimiento", e.target.value)}
+                max={new Date().toISOString().split('T')[0]}
+              />
+            </div>
+            <div>
+              <Label htmlFor="estadoCivil" className="text-foreground">Estado Civil</Label>
+              <Select value={formData.estadoCivil} onValueChange={(value) => handleInputChange("estadoCivil", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar estado civil" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="soltero">Soltero/a</SelectItem>
+                  <SelectItem value="casado">Casado/a</SelectItem>
+                  <SelectItem value="divorciado">Divorciado/a</SelectItem>
+                  <SelectItem value="viudo">Viudo/a</SelectItem>
+                  <SelectItem value="union-convivencial">Unión Convivencial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             </div>
 
             <div>

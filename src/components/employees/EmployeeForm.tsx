@@ -12,6 +12,10 @@ import { useToast } from "@/hooks/use-toast";
 import LegajoPDF from "./LegajoPDF";
 import { calculateDetailedAntiquity } from "@/utils/dateUtils";
 
+// Constantes para mantener los valores configurables
+const EDAD_MINIMA_LEGAL = 18;
+const EDAD_MAXIMA_RAZONABLE = 110;
+
 interface EmployeeFormProps {
   onBack: () => void;
   onSave?: (employee: any) => void;
@@ -181,45 +185,64 @@ const handleSave = () => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
     
-    // Validar que la fecha no sea futura
-    if (fechaNac >= hoy) {
-      toast({
-        title: "Error en Fecha de Nacimiento",
-        description: "La fecha de nacimiento no puede ser igual o posterior a la fecha actual",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Calcular edad
-    let edad = hoy.getFullYear() - fechaNac.getFullYear();
-    const mesActual = hoy.getMonth();
-    const mesNacimiento = fechaNac.getMonth();
-    
-    if (mesActual < mesNacimiento || (mesActual === mesNacimiento && hoy.getDate() < fechaNac.getDate())) {
-      edad--;
-    }
-    
-    // Validar edad mínima legal (18 años)
-    if (edad < 18) {
-      toast({
-        title: "Error: Edad insuficiente",
-        description: `El empleado debe tener al menos 18 años. Edad actual: ${edad} años`,
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Validar edad máxima razonable (110 años como límite superior)
-    if (edad > 110) {
-      toast({
-        title: "Error en Fecha de Nacimiento",
-        description: "La fecha de nacimiento ingresada no es válida. Por favor verifique los datos",
-        variant: "destructive"
-      });
-      return;
-    }
+/**
+ * Calcula la edad exacta a partir de una fecha de nacimiento
+ * @param {Date} fechaNacimiento - Fecha de nacimiento
+ * @param {Date} fechaReferencia - Fecha de referencia (por defecto hoy)
+ * @returns {number} Edad en años
+ */
+const calcularEdad = (fechaNacimiento, fechaReferencia = new Date()) => {
+  let edad = fechaReferencia.getFullYear() - fechaNacimiento.getFullYear();
+  const diferenciaMeses = fechaReferencia.getMonth() - fechaNacimiento.getMonth();
+  
+  // Restar un año si aún no ha cumplido años este año
+  if (diferenciaMeses < 0 || 
+      (diferenciaMeses === 0 && fechaReferencia.getDate() < fechaNacimiento.getDate())) {
+    edad--;
   }
+  
+  return edad;
+};
+
+/**
+ * Valida la edad de un empleado
+ * @param {Date} fechaNac - Fecha de nacimiento
+ * @returns {{ valida: boolean, edad?: number, error?: string }}
+ */
+const validarEdadEmpleado = (fechaNac) => {
+  const edad = calcularEdad(fechaNac);
+  
+  if (edad < EDAD_MINIMA_LEGAL) {
+    return {
+      valida: false,
+      edad,
+      error: `El empleado debe tener al menos ${EDAD_MINIMA_LEGAL} años. Edad actual: ${edad} años`
+    };
+  }
+  
+  if (edad > EDAD_MAXIMA_RAZONABLE) {
+    return {
+      valida: false,
+      edad,
+      error: "La fecha de nacimiento ingresada no es válida. Por favor verifique los datos"
+    };
+  }
+  
+  return { valida: true, edad };
+};
+// Uso en tu código
+const resultado = validarEdadEmpleado(fechaNac);
+if (!resultado.valida) {
+  toast({
+    title: resultado.edad < EDAD_MINIMA_LEGAL ? "Error: Edad insuficiente" : "Error en Fecha de Nacimiento",
+    description: resultado.error,
+    variant: "destructive"
+  });
+  return;
+}
+// Continuar con la lógica si la edad es válida
+const edadEmpleado = resultado.edad;
+}
 
     // Guardar en lista (padre)
     const payload = { ...formData, id: employee?.id };

@@ -141,6 +141,18 @@ export const VacationsModule = () => {
       const emitido = new Date().toLocaleDateString("es-AR");
       const dias = vacation.dias_solicitados || 0;
       const periodo = vacation.periodo || new Date().getFullYear().toString();
+      
+      // Calcular antigüedad del empleado
+      const fechaIngreso = vacation.employee?.fecha_ingreso;
+      let antiguedadTexto = "";
+      if (fechaIngreso) {
+        const ingreso = new Date(fechaIngreso);
+        const fechaCorte = new Date(new Date().getFullYear(), 11, 31);
+        const antiguedadAnios = Math.floor((fechaCorte.getTime() - ingreso.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+        antiguedadTexto = antiguedadAnios === 1 ? "1 año" : `${antiguedadAnios} años`;
+      } else {
+        antiguedadTexto = "[X años]";
+      }
 
       const safeName = empleadoNombre.replace(/\s+/g, "_");
       const fileName = `Notificacion_Vacaciones_${safeName}_${periodo}.pdf`;
@@ -156,53 +168,44 @@ export const VacationsModule = () => {
       container.style.fontSize = "11px";
       
       container.innerHTML = `
-        <div style="text-align:center; margin-bottom:12px;">
-          <h2 style="margin:0 0 4px 0; font-size:16px; font-weight:bold;">VEMATEL</h2>
-        </div>
+        <h1 style="text-align:center; font-size:16px; font-weight:bold; margin:0 0 20px 0; text-decoration:underline;">
+          Comunicado de Vacaciones – Modelo Legal
+        </h1>
         
-        <h1 style="text-align:center; font-size:18px; font-weight:bold; margin:12px 0;">NOTIFICACIÓN DE VACACIONES</h1>
-        
-        <div style="margin-bottom:10px;">
-          <p style="margin:4px 0;"><strong>Nombre y Apellido:</strong> ${empleadoNombre.toUpperCase()}</p>
-          <p style="margin:4px 0;"><strong>DNI:</strong> ${dni}</p>
-        </div>
-        
-        <p style="line-height:1.5; text-align:justify; margin:12px 0;">
-          En cumplimiento de la Legislación vigente Art. 154 de la Ley de Contrato de trabajo, se le notifica que el período de descanso anual ${periodo} es de <strong>${dias} días</strong>, comenzando desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong> inclusive.
+        <p style="margin:4px 0; text-align:right; font-size:11px;">
+          Río Primero, ${emitido}
         </p>
         
-        <p style="margin:16px 0 20px 0;">Sin otro particular saludo muy atte.</p>
-        
-        <div style="margin-bottom:12px;">
-          <p style="margin:2px 0;"><strong>Empleador:</strong> FOLCO MARCOS DENIS.</p>
-          <p style="margin:2px 0;"><strong>Domicilio:</strong> Avda. José Hernández N°90, Rio Primero (5127) Córdoba.</p>
-          <p style="margin:2px 0;"><strong>Cuit:</strong> 20-24088189-7</p>
+        <div style="margin:16px 0;">
+          <p style="margin:4px 0; font-size:11px;"><strong>A ${empleadoNombre}</strong></p>
+          <p style="margin:4px 0; font-size:11px;"><strong>DNI:</strong> ${dni}</p>
         </div>
         
-        <p style="margin:12px 0;"><strong>Fecha:</strong> ${emitido}</p>
+        <p style="line-height:1.6; text-align:justify; margin:16px 0; font-size:11px;">
+          Por la presente, y en cumplimiento de lo dispuesto por los artículos 150 a 157 de la Ley de Contrato de Trabajo (L.C.T.), le notificamos que deberá gozar de su período de descanso anual obligatorio (vacaciones) correspondiente al ciclo laboral <strong>${periodo}</strong>, por haber alcanzado una antigüedad de <strong>${antiguedadTexto}</strong> en la empresa.
+        </p>
         
-        <div style="text-align:center; margin:20px 0 12px 0;">
-          <p style="font-style:italic; margin-bottom:4px;">Vematel</p>
+        <p style="line-height:1.6; text-align:justify; margin:16px 0; font-size:11px;">
+          El período de vacaciones se extenderá desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong>, ambos inclusive, totalizando <strong>${dias}</strong> días corridos.
+        </p>
+        
+        <p style="line-height:1.6; text-align:justify; margin:16px 0; font-size:11px;">
+          Durante dicho período percibirá la retribución correspondiente conforme lo establece el Art. 155 de la L.C.T., debiendo abonarse con la anticipación legal prevista.
+        </p>
+        
+        <p style="margin:20px 0; font-size:11px;">
+          Sin otro particular, saludamos atentamente.
+        </p>
+        
+        <div style="margin:40px 0 20px 0;">
+          <p style="margin:8px 0; font-size:11px;"><strong>Firma empleador/a:</strong> ______________________</p>
+          <p style="margin:8px 0; font-size:11px;"><strong>Nombre:</strong> FOLCO MARCOS DENIS</p>
+          <p style="margin:8px 0; font-size:11px;"><strong>CUIT:</strong> 20-24088189-7</p>
         </div>
         
-        <p style="margin:16px 0 8px 0;">Me notifico de la comunicación que antecede, tomando debida nota.</p>
-        
-        <p style="margin:8px 0;"><strong>Fecha:</strong> ________________</p>
-        
-        <div style="margin:24px 0; text-align:center;">
-          <div style="border-top:1px solid #000; width:220px; margin:0 auto 6px;"></div>
-          <p style="margin:0; font-size:10px;">FIRMA DEL EMPLEADO</p>
-        </div>
-        
-        <div style="border-top:2px solid #000; margin:24px 0 16px 0;"></div>
-        
-        <p style="margin:12px 0 8px 0;">Certifico haber gozado del período de vacaciones arriba mencionado, reintegrandome en la fecha de conformidad a mis ocupaciones</p>
-        
-        <p style="margin:8px 0;"><strong>Fecha:</strong> ________________</p>
-        
-        <div style="margin:24px 0; text-align:center;">
-          <div style="border-top:1px solid #000; width:220px; margin:0 auto 6px;"></div>
-          <p style="margin:0; font-size:10px;">FIRMA DEL EMPLEADO</p>
+        <div style="margin:40px 0 0 0; padding-top:20px; border-top:1px dashed #000;">
+          <p style="margin:8px 0; font-size:11px;"><strong>Firma trabajador/a:</strong> ______________________</p>
+          <p style="margin:8px 0; font-size:11px; font-style:italic;">Conforme notificación</p>
         </div>
       `;
 

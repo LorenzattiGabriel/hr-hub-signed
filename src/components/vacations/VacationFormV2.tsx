@@ -9,6 +9,7 @@ import { Calendar, Save, ArrowLeft, Download } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useVacations } from "@/hooks/useVacations";
 import html2pdf from "html2pdf.js";
+import { formatDateLocal } from "@/utils/dateUtils";
 
 interface VacationFormProps {
   onBack: () => void;
@@ -126,13 +127,9 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
         otros: "Otros",
       };
       const motivoLabel = motivoMap[formData.motivo] ?? "Vacaciones";
-      const inicio = formData.fecha_inicio
-        ? new Date(formData.fecha_inicio).toLocaleDateString("es-AR")
-        : "";
-      const fin = formData.fecha_fin
-        ? new Date(formData.fecha_fin).toLocaleDateString("es-AR")
-        : "";
-      const emitido = new Date().toLocaleDateString("es-AR");
+      const inicio = formatDateLocal(formData.fecha_inicio);
+      const fin = formatDateLocal(formData.fecha_fin);
+      const emitido = formatDateLocal(new Date().toISOString());
 
       const safeName = employeeName.replace(/\s+/g, "_");
       const fileName = `Constancia_Vacaciones_${safeName}_${formData.periodo}_${formData.fecha_inicio}_${formData.fecha_fin}.pdf`;

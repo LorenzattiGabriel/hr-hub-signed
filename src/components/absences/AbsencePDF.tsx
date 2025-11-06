@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Download, FileText, User, Calendar, Clock, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatDateLocal } from "@/utils/dateUtils";
 
 interface AbsencePDFProps {
   absenceData: any;
@@ -48,7 +49,7 @@ const AbsencePDF = ({ absenceData, trigger }: AbsencePDFProps) => {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "No especificado";
-    return new Date(dateString).toLocaleDateString();
+    return formatDateLocal(dateString);
   };
 
   const calculateDuration = () => {
@@ -100,7 +101,7 @@ const AbsencePDF = ({ absenceData, trigger }: AbsencePDFProps) => {
             <h1 className="text-2xl font-bold mb-2" style={{ color: '#1f2937' }}>CERTIFICADO DE AUSENCIA</h1>
             <h2 className="text-lg font-semibold" style={{ color: '#4b5563' }}>VEMATEL</h2>
             <p className="text-sm mt-2" style={{ color: '#6b7280' }}>
-              Fecha de Generación: {new Date().toLocaleDateString()}
+              Fecha de Generación: {formatDateLocal(new Date().toISOString())}
             </p>
           </div>
 
@@ -266,7 +267,7 @@ const AbsencePDF = ({ absenceData, trigger }: AbsencePDFProps) => {
               Este documento constituye el certificado oficial de ausencia según normativas laborales vigentes.
             </p>
             <p className="mt-1">
-              Generado el {new Date().toLocaleDateString()} - Sistema RRHH Vematel
+              Generado el {formatDateLocal(new Date().toISOString())} - Sistema RRHH Vematel
             </p>
           </div>
         </div>

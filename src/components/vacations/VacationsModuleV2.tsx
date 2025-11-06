@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useVacations } from "@/hooks/useVacations";
 import html2pdf from "html2pdf.js";
+import { formatDateLocal } from "@/utils/dateUtils";
 
 export const VacationsModule = () => {
   const { toast } = useToast();
@@ -136,9 +137,9 @@ export const VacationsModule = () => {
         ? `${vacation.employee.nombres} ${vacation.employee.apellidos}` 
         : "Empleado";
       const dni = vacation.employee?.dni || "";
-      const inicio = vacation.fecha_inicio ? new Date(vacation.fecha_inicio).toLocaleDateString("es-AR") : "";
-      const fin = vacation.fecha_fin ? new Date(vacation.fecha_fin).toLocaleDateString("es-AR") : "";
-      const emitido = new Date().toLocaleDateString("es-AR");
+      const inicio = formatDateLocal(vacation.fecha_inicio);
+      const fin = formatDateLocal(vacation.fecha_fin);
+      const emitido = formatDateLocal(new Date().toISOString());
       const dias = vacation.dias_solicitados || 0;
       const periodo = vacation.periodo || new Date().getFullYear().toString();
       
@@ -272,7 +273,7 @@ export const VacationsModule = () => {
 
   const generateReport = async () => {
     try {
-      const fecha = new Date().toLocaleDateString("es-AR");
+      const fecha = formatDateLocal(new Date().toISOString());
       const container = document.createElement("div");
       container.style.padding = "24px";
       container.style.fontFamily = "Inter, Arial, sans-serif";
@@ -288,7 +289,7 @@ export const VacationsModule = () => {
         <tr>
           <td style="padding:6px 8px; border:1px solid #ddd;">${v.employee ? `${v.employee.nombres} ${v.employee.apellidos}` : ''}</td>
           <td style="padding:6px 8px; border:1px solid #ddd;">${v.periodo}</td>
-          <td style="padding:6px 8px; border:1px solid #ddd;">${new Date(v.fecha_inicio).toLocaleDateString("es-AR")} - ${new Date(v.fecha_fin).toLocaleDateString("es-AR")}</td>
+          <td style="padding:6px 8px; border:1px solid #ddd;">${formatDateLocal(v.fecha_inicio)} - ${formatDateLocal(v.fecha_fin)}</td>
           <td style="padding:6px 8px; border:1px solid #ddd; text-align:center;">${v.dias_solicitados}</td>
           <td style="padding:6px 8px; border:1px solid #ddd; text-transform:capitalize;">${v.estado}</td>
         </tr>
@@ -571,7 +572,7 @@ export const VacationsModule = () => {
                           </div>
                           <div className="text-sm text-muted-foreground mt-1">
                             <span className="mr-4">
-                              📅 {new Date(vacation.fecha_inicio).toLocaleDateString("es-AR")} - {new Date(vacation.fecha_fin).toLocaleDateString("es-AR")}
+                              📅 {formatDateLocal(vacation.fecha_inicio)} - {formatDateLocal(vacation.fecha_fin)}
                             </span>
                             <span className="mr-4">📊 {vacation.dias_solicitados} días</span>
                             {vacation.motivo && <span>💼 {vacation.motivo}</span>}

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Download, Edit, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import html2pdf from "html2pdf.js";
+import { formatDateLocal } from "@/utils/dateUtils";
 
 interface TrainingDetailProps {
   training: any;
@@ -17,7 +18,7 @@ const TrainingDetail = ({ training, onBack }: TrainingDetailProps) => {
     try {
       const empleado = training.empleadoNombre || "Empleado";
       const titulo = training.titulo || "Capacitación";
-      const fecha = training.fecha ? new Date(training.fecha).toLocaleDateString() : new Date().toLocaleDateString();
+      const fecha = training.fecha ? formatDateLocal(training.fecha) : formatDateLocal(new Date().toISOString());
       const horas = training.duracion || 0;
       const instructor = training.instructor || "Instructor";
       const filename = `Certificado_${empleado.replace(/\s+/g, '_')}_${titulo.replace(/\s+/g, '_')}.pdf`;
@@ -100,7 +101,7 @@ const TrainingDetail = ({ training, onBack }: TrainingDetailProps) => {
     try {
       const empleado = training.empleadoNombre || "Empleado";
       const titulo = training.titulo || "Capacitación";
-      const fecha = training.fecha ? new Date(training.fecha).toLocaleDateString() : new Date().toLocaleDateString();
+      const fecha = training.fecha ? formatDateLocal(training.fecha) : formatDateLocal(new Date().toISOString());
       const horas = training.duracion || 0;
       const filename = `Constancia_Asistencia_${empleado.replace(/\s+/g, '_')}_${titulo.replace(/\s+/g, '_')}.pdf`;
 
@@ -223,7 +224,7 @@ const TrainingDetail = ({ training, onBack }: TrainingDetailProps) => {
             
             <div>
               <p className="text-sm font-medium text-foreground/70">Fecha</p>
-              <p className="text-foreground">{new Date(training.fecha).toLocaleDateString()}</p>
+              <p className="text-foreground">{formatDateLocal(training.fecha)}</p>
             </div>
             
             <div>
@@ -364,7 +365,7 @@ const TrainingDetail = ({ training, onBack }: TrainingDetailProps) => {
                   Esta capacitación otorga certificación oficial válida por 2 años.
                 </p>
                 <p className="text-xs text-foreground/60 mt-1">
-                  Vencimiento: {new Date(new Date(training.fecha).getTime() + 2 * 365 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                  Vencimiento: {formatDateLocal(new Date(new Date(training.fecha).getTime() + 2 * 365 * 24 * 60 * 60 * 1000).toISOString())}
                 </p>
               </div>
             )}

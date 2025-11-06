@@ -362,7 +362,7 @@ const UniformsModule = () => {
       <div style="font-family: Arial, sans-serif; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
           <h1 style="color: #1f2937;">REPORTE GENERAL DE UNIFORMES</h1>
-          <p style="color: #6b7280;">Generado el ${new Date().toLocaleDateString('es-AR')}</p>
+          <p style="color: #6b7280;">Generado el ${formatDateLocal(new Date().toISOString())}</p>
         </div>
         
         <div style="margin-bottom: 20px;">

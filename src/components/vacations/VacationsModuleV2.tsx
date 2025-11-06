@@ -160,58 +160,91 @@ export const VacationsModule = () => {
       const empresaNombre = empresa.toLowerCase() === "vematel" ? "Vematel" : "Servicap";
       const empresaCuitFormateado = empresa.toLowerCase() === "vematel" ? "30-71638948-7" : "30-71854237-1";
 
+      // Calcular día posterior a la fecha de fin
+      const fechaFinDate = new Date(vacation.fecha_fin);
+      fechaFinDate.setDate(fechaFinDate.getDate() + 1);
+      const diaPosterior = formatDateLocal(fechaFinDate.toISOString().split('T')[0]);
+
+      // Obtener días totales según antigüedad
+      const diasTotales = vacation.dias_solicitados || dias;
+
       const safeName = empleadoNombre.replace(/\s+/g, "_");
       const fileName = `Notificacion_Vacaciones_${safeName}_${periodo}.pdf`;
 
       const container = document.createElement("div");
       container.style.width = "210mm";
       container.style.minHeight = "297mm";
-      container.style.padding = "15mm 20mm";
+      container.style.padding = "20mm 25mm";
       container.style.fontFamily = "Arial, sans-serif";
       container.style.color = "#000";
       container.style.backgroundColor = "#fff";
       container.style.boxSizing = "border-box";
-      container.style.fontSize = "11px";
+      container.style.fontSize = "12px";
+      container.style.lineHeight = "1.6";
       
       container.innerHTML = `
-        <h1 style="text-align:center; font-size:16px; font-weight:bold; margin:0 0 20px 0; text-decoration:underline;">
-          Comunicado de Vacaciones – Modelo Legal
+        <h1 style="text-align:center; font-size:18px; font-weight:bold; margin:0 0 10px 0; letter-spacing:1px;">
+          NOTIFICACIÓN DE VACACIONES
         </h1>
         
-        <p style="margin:4px 0; text-align:right; font-size:11px;">
-          Río Primero, ${emitido}
+        <hr style="border:none; border-top:2px solid #000; margin:0 0 30px 0;">
+        
+        <p style="margin:0 0 30px 0; text-align:right; font-size:12px;">
+          Córdoba, ${emitido}
         </p>
         
-        <div style="margin:16px 0;">
-          <p style="margin:4px 0; font-size:11px;"><strong>A ${empleadoNombre}</strong></p>
-          <p style="margin:4px 0; font-size:11px;"><strong>DNI:</strong> ${dni}</p>
+        <div style="margin:0 0 30px 0;">
+          <p style="margin:4px 0; font-size:12px;"><strong>Razón Social:</strong> ${empresaNombre}</p>
+          <p style="margin:4px 0; font-size:12px;"><strong>CUIT de la Empresa:</strong> ${empresaCuitFormateado}</p>
         </div>
         
-        <p style="line-height:1.6; text-align:justify; margin:16px 0; font-size:11px;">
-          Por la presente, y en cumplimiento de lo dispuesto por los artículos 150 a 157 de la Ley de Contrato de Trabajo (L.C.T.), le notificamos que deberá gozar de su período de descanso anual obligatorio (vacaciones) correspondiente al ciclo laboral <strong>${periodo}</strong>, por haber alcanzado una antigüedad de <strong>${antiguedadTexto}</strong> en la empresa.
-        </p>
-        
-        <p style="line-height:1.6; text-align:justify; margin:16px 0; font-size:11px;">
-          El período de vacaciones se extenderá desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong>, ambos inclusive, totalizando <strong>${dias}</strong> días corridos.
-        </p>
-        
-        <p style="line-height:1.6; text-align:justify; margin:16px 0; font-size:11px;">
-          Durante dicho período percibirá la retribución correspondiente conforme lo establece el Art. 155 de la L.C.T., debiendo abonarse con la anticipación legal prevista.
-        </p>
-        
-        <p style="margin:20px 0; font-size:11px;">
-          Sin otro particular, saludamos atentamente.
-        </p>
-        
-        <div style="margin:40px 0 20px 0;">
-          <p style="margin:8px 0; font-size:11px;"><strong>Firma empleador/a:</strong> ______________________</p>
-          <p style="margin:8px 0; font-size:11px;"><strong>Nombre:</strong> ${empresaNombre}</p>
-          <p style="margin:8px 0; font-size:11px;"><strong>CUIT:</strong> ${empresaCuitFormateado}</p>
+        <div style="margin:30px 0;">
+          <p style="margin:4px 0; font-size:12px;"><strong>Al Sr./Sra.</strong> ${empleadoNombre}</p>
+          <p style="margin:4px 0; font-size:12px;"><strong>Número de DNI:</strong> ${dni}</p>
         </div>
         
-        <div style="margin:40px 0 0 0; padding-top:20px; border-top:1px dashed #000;">
-          <p style="margin:8px 0; font-size:11px;"><strong>Firma trabajador/a:</strong> ______________________</p>
-          <p style="margin:8px 0; font-size:11px; font-style:italic;">Conforme notificación</p>
+        <p style="margin:20px 0 10px 0; font-size:12px;">
+          De nuestra mayor consideración:
+        </p>
+        
+        <p style="line-height:1.6; text-align:justify; margin:10px 0; font-size:12px;">
+          Por medio de la presente, y en cumplimiento de lo dispuesto por el Artículo 154 de la Ley de Contrato de Trabajo (LCT N° 20.744), le notificamos fehacientemente que se le otorga el goce de su licencia anual ordinaria (vacaciones) correspondiente al período ${periodo}.
+        </p>
+        
+        <p style="line-height:1.6; text-align:justify; margin:10px 0; font-size:12px;">
+          Dicha licencia constará de <strong>${diasTotales}</strong> días, calculados en base a su antigüedad.
+        </p>
+        
+        <p style="line-height:1.6; text-align:justify; margin:10px 0; font-size:12px;">
+          Las vacaciones se extenderán desde el día <strong>${inicio}</strong> hasta <strong>${fin}</strong> inclusive.
+        </p>
+        
+        <p style="line-height:1.6; text-align:justify; margin:10px 0 30px 0; font-size:12px;">
+          Por lo tanto, deberá reintegrarse a sus tareas habituales el día <strong>${diaPosterior}</strong>, en su horario habitual.
+        </p>
+        
+        <p style="margin:30px 0; font-size:12px;">
+          Sin otro particular, saludamos a Ud. atentamente.
+        </p>
+        
+        <div style="margin:50px 0 30px 0;">
+          <p style="margin:30px 0 4px 0;">___________________________________</p>
+          <p style="margin:4px 0; font-size:12px;">Firma del Empleador o Representante de RRHH</p>
+          <p style="margin:4px 0; font-size:12px;"><strong>Aclaración de Firma:</strong></p>
+        </div>
+        
+        <div style="margin:50px 0 30px 0; page-break-before:avoid;">
+          <p style="margin:10px 0; font-size:12px;">Constancia de Notificación (Duplicado para el empleador)</p>
+          
+          <p style="line-height:1.6; text-align:justify; margin:20px 0; font-size:12px;">
+            <strong>Recibí en Córdoba, el día ${emitido}, copia fiel de la presente notificación, quedando debidamente notificado/a de mi período vacacional.</strong>
+          </p>
+          
+          <div style="margin:30px 0 10px 0;">
+            <p style="margin:10px 0; font-size:12px;"><strong>Firma del Empleado:</strong> _______________________________</p>
+            <p style="margin:10px 0; font-size:12px;"><strong>Aclaración:</strong> _______________________________</p>
+            <p style="margin:10px 0; font-size:12px;"><strong>DNI:</strong> _______________________________</p>
+          </div>
         </div>
       `;
 

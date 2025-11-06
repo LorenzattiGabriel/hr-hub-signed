@@ -119,50 +119,94 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
       const employeeName = emp ? `${emp.nombres} ${emp.apellidos}` : "Empleado";
       const dni = emp?.dni ?? "";
       const days = calculateDays();
-      const motivoMap: Record<string, string> = {
-        "vacaciones-anuales": "Vacaciones Anuales",
-        "asuntos-personales": "Asuntos Personales",
-        "motivos-familiares": "Motivos Familiares",
-        "licencia-medica": "Licencia Médica",
-        otros: "Otros",
-      };
-      const motivoLabel = motivoMap[formData.motivo] ?? "Vacaciones";
       const inicio = formatDateLocal(formData.fecha_inicio);
       const fin = formatDateLocal(formData.fecha_fin);
       const emitido = formatDateLocal(new Date().toISOString());
+      
+      // Calcular día posterior a la fecha de fin
+      const fechaFinDate = new Date(formData.fecha_fin);
+      fechaFinDate.setDate(fechaFinDate.getDate() + 1);
+      const diaPosterior = formatDateLocal(fechaFinDate.toISOString().split('T')[0]);
+
+      // Obtener la empresa del empleado
+      const empresa = emp?.empresa || "";
+      const empresaNombre = empresa.toLowerCase() === "vematel" ? "Vematel" : "Servicap";
+      const empresaCuit = empresa.toLowerCase() === "vematel" ? "30716389487" : "30718542371";
+      const empresaCuitFormateado = empresa.toLowerCase() === "vematel" ? "30-71638948-7" : "30-71854237-1";
+
+      // Calcular antigüedad
+      const fechaIngreso = emp?.fecha_ingreso || emp?.fechaIngreso;
+      let antiguedadTexto = "X años";
+      if (fechaIngreso) {
+        const ingreso = new Date(fechaIngreso);
+        const ahora = new Date();
+        const antiguedadAnios = Math.floor((ahora.getTime() - ingreso.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
+        antiguedadTexto = `${antiguedadAnios} año${antiguedadAnios !== 1 ? 's' : ''}`;
+      }
 
       const safeName = employeeName.replace(/\s+/g, "_");
-      const fileName = `Constancia_Vacaciones_${safeName}_${formData.periodo}_${formData.fecha_inicio}_${formData.fecha_fin}.pdf`;
+      const fileName = `Comunicado_Vacaciones_${safeName}_${formData.periodo}_${formData.fecha_inicio}_${formData.fecha_fin}.pdf`;
 
       const container = document.createElement("div");
-      container.style.padding = "24px";
-      container.style.fontFamily = "Inter, Arial, sans-serif";
-      container.style.color = "#0f1115";
+      container.style.padding = "40px 50px";
+      container.style.fontFamily = "Arial, sans-serif";
+      container.style.color = "#000000";
+      container.style.lineHeight = "1.5";
       container.innerHTML = `
-        <div style="text-align:center; margin-bottom:16px;">
-          <h1 style="margin:0; font-size:22px;">Constancia de Vacaciones</h1>
-          <p style="margin:4px 0; font-size:12px;">Período ${formData.periodo || "-"}</p>
+        <div style="text-align:center; margin-bottom:30px;">
+          <h1 style="margin:0; font-size:16px; font-weight:bold; text-decoration:underline;">Comunicado de Vacaciones – Modelo Legal</h1>
         </div>
-        <p style="line-height:1.6; font-size:14px;">
-          Se deja constancia de que <strong>${employeeName}</strong> ${dni ? "(DNI " + dni + ")" : ""} gozará de su período de vacaciones desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong>, totalizando <strong>${days}</strong> días corridos.
+        
+        <div style="text-align:right; margin-bottom:30px; font-size:12px;">
+          Río Primero, ${emitido}
+        </div>
+        
+        <div style="margin-bottom:25px; font-size:12px;">
+          <strong>A ${employeeName}</strong><br/>
+          <strong>DNI:</strong> ${dni}
+        </div>
+        
+        <p style="font-size:12px; text-align:justify; margin-bottom:15px;">
+          Por la presente, y en cumplimiento de lo dispuesto por los artículos 150 a 157 de la Ley de Contrato de Trabajo (L.C.T.), le notificamos que deberá gozar de su período de descanso anual obligatorio (vacaciones) correspondiente al ciclo laboral <strong>${formData.periodo}</strong>, por haber alcanzado una antigüedad de <strong>${antiguedadTexto}</strong> en la empresa.
         </p>
-        ${formData.motivo ? `<p style="font-size:13px;"><strong>Motivo:</strong> ${motivoLabel}</p>` : ""}
-        ${formData.observaciones ? `<p style=\"font-size:13px;\"><strong>Observaciones:</strong> ${formData.observaciones}</p>` : ""}
-        <p style="margin-top:24px; font-size:13px;">Emitido el ${emitido}.</p>
-        <div style="display:flex; justify-content:space-between; margin-top:48px;">
-          <div style="text-align:center;">
-            <div style="border-top:1px solid #777; width:220px; margin:0 auto 6px;"></div>
-            <span style="font-size:12px;">Firma del Empleado</span>
+        
+        <p style="font-size:12px; text-align:justify; margin-bottom:15px;">
+          El período de vacaciones se extenderá desde el <strong>${inicio}</strong> hasta el <strong>${fin}</strong>, ambos inclusive, totalizando <strong>${days}</strong> días corridos.
+        </p>
+        
+        <p style="font-size:12px; text-align:justify; margin-bottom:15px;">
+          Durante dicho período percibirá la retribución correspondiente conforme lo establece el Art. 155 de la L.C.T., debiendo abonarse con la anticipación legal prevista.
+        </p>
+        
+        <p style="font-size:12px; text-align:justify; margin-bottom:50px;">
+          Sin otro particular, saludamos atentamente.
+        </p>
+        
+        <div style="margin-bottom:15px; font-size:12px;">
+          <strong>Firma empleadora:</strong> ______________________________
+        </div>
+        
+        <div style="margin-bottom:15px; font-size:12px;">
+          <strong>Nombre:</strong> ${empresaNombre}
+        </div>
+        
+        <div style="margin-bottom:50px; font-size:12px;">
+          <strong>CUIT:</strong> ${empresaCuitFormateado}
+        </div>
+        
+        <div style="border-top:1px dashed #000; padding-top:30px; margin-top:30px;">
+          <div style="margin-bottom:15px; font-size:12px;">
+            <strong>Firma trabajadora/o:</strong> ______________________________
           </div>
-          <div style="text-align:center;">
-            <div style="border-top:1px solid #777; width:220px; margin:0 auto 6px;"></div>
-            <span style="font-size:12px;">Firma de la Empresa</span>
+          
+          <div style="margin-bottom:15px; font-size:12px; font-style:italic;">
+            Conforme notificación
           </div>
         </div>
       `;
 
       const opt = {
-        margin: 10,
+        margin: [15, 15, 15, 15],
         filename: fileName,
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
@@ -184,7 +228,7 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
 
       toast({
         title: "Descarga iniciada",
-        description: "La constancia se está descargando.",
+        description: "El comunicado de vacaciones se está descargando.",
       });
     } catch (error) {
       console.error(error);

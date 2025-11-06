@@ -54,7 +54,7 @@ const TrainingDetail = ({ training, onBack }: TrainingDetailProps) => {
           </div>
 
           <div style="text-align:center; font-size: 11px; color:#6b7280; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 12px;">
-            Generado el ${new Date().toLocaleDateString()} - Sistema RRHH Vematel
+            Generado el ${formatDateLocal(new Date().toISOString())} - Sistema RRHH Vematel
           </div>
         </div>
       `;
@@ -132,7 +132,7 @@ const TrainingDetail = ({ training, onBack }: TrainingDetailProps) => {
           </div>
 
           <div style="text-align:center; font-size: 11px; color:#6b7280; margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 12px;">
-            Generado el ${new Date().toLocaleDateString()} - Sistema RRHH Vematel
+            Generado el ${formatDateLocal(new Date().toISOString())} - Sistema RRHH Vematel
           </div>
         </div>
       `;

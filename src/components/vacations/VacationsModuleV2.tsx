@@ -155,6 +155,11 @@ export const VacationsModule = () => {
         antiguedadTexto = "[X años]";
       }
 
+      // Obtener la empresa del empleado
+      const empresa = vacation.employee?.empresa || "";
+      const empresaNombre = empresa.toLowerCase() === "vematel" ? "Vematel" : "Servicap";
+      const empresaCuitFormateado = empresa.toLowerCase() === "vematel" ? "30-71638948-7" : "30-71854237-1";
+
       const safeName = empleadoNombre.replace(/\s+/g, "_");
       const fileName = `Notificacion_Vacaciones_${safeName}_${periodo}.pdf`;
 
@@ -200,8 +205,8 @@ export const VacationsModule = () => {
         
         <div style="margin:40px 0 20px 0;">
           <p style="margin:8px 0; font-size:11px;"><strong>Firma empleador/a:</strong> ______________________</p>
-          <p style="margin:8px 0; font-size:11px;"><strong>Nombre:</strong> FOLCO MARCOS DENIS</p>
-          <p style="margin:8px 0; font-size:11px;"><strong>CUIT:</strong> 20-24088189-7</p>
+          <p style="margin:8px 0; font-size:11px;"><strong>Nombre:</strong> ${empresaNombre}</p>
+          <p style="margin:8px 0; font-size:11px;"><strong>CUIT:</strong> ${empresaCuitFormateado}</p>
         </div>
         
         <div style="margin:40px 0 0 0; padding-top:20px; border-top:1px dashed #000;">

@@ -77,7 +77,7 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
     // Datos Laborales
     cargo: employee?.cargo || "",
     sector: employee?.sector || "",
-    empresa: employee?.empresa || "",
+    empresa: employee?.empresa ? employee.empresa.toLowerCase() : "",
     tipoContrato: employee?.tipoContrato || "",
     fechaIngreso: employee?.fechaIngreso || "",
     fechaRegistro: employee?.fechaRegistro || "",

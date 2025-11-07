@@ -18,6 +18,8 @@ export interface VacationRequest {
     nombres: string;
     apellidos: string;
     dni: string;
+    empresa?: string;
+    fecha_ingreso?: string;
   };
 }
 
@@ -46,7 +48,9 @@ export const useVacations = () => {
           employee:employees (
             nombres,
             apellidos,
-            dni
+            dni,
+            empresa,
+            fecha_ingreso
           )
         `)
         .order('created_at', { ascending: false });
@@ -94,7 +98,9 @@ export const useVacations = () => {
           employee:employees (
             nombres,
             apellidos,
-            dni
+            dni,
+            empresa,
+            fecha_ingreso
           )
         `)
         .single();
@@ -301,7 +307,9 @@ export const useVacations = () => {
           employee:employees (
             nombres,
             apellidos,
-            dni
+            dni,
+            empresa,
+            fecha_ingreso
           )
         `)
         .single();

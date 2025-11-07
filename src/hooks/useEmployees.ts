@@ -17,6 +17,7 @@ export interface Employee {
   salario?: number;
   tipo_contrato?: string;
   estado: string;
+  empresa?: string;
   // Legacy fields for compatibility
   fechaIngreso?: string;
   cuil?: string;
@@ -74,6 +75,7 @@ export const useEmployees = () => {
       salario: toNumber(input.salario),
       tipo_contrato: input.tipo_contrato || input.tipoContrato || null,
       estado: input.estado || 'activo',
+      empresa: input.empresa || null,
       // Extended fields
       cuil: input.cuil || null,
       id_huella: input.idHuella || null,

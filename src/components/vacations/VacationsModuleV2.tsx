@@ -186,7 +186,7 @@ export const VacationsModule = () => {
       
       container.innerHTML = `
         <!-- PÁGINA 1: Original para el empleado -->
-        <div style="width:210mm; min-height:297mm; padding:20mm 25mm; box-sizing:border-box; page-break-after:always;">
+        <div style="width:210mm; min-height:297mm; padding:20mm 25mm; box-sizing:border-box;">
           <h1 style="text-align:center; font-size:18px; font-weight:bold; margin:0 0 10px 0; letter-spacing:1px;">
             NOTIFICACIÓN DE VACACIONES
           </h1>
@@ -239,7 +239,7 @@ export const VacationsModule = () => {
         </div>
         
         <!-- PÁGINA 2: Duplicado con constancia para el empleador -->
-        <div style="width:210mm; min-height:297mm; padding:20mm 25mm; box-sizing:border-box;">
+        <div style="width:210mm; min-height:297mm; padding:20mm 25mm; box-sizing:border-box; page-break-before:always;">
           <h1 style="text-align:center; font-size:18px; font-weight:bold; margin:0 0 10px 0; letter-spacing:1px;">
             NOTIFICACIÓN DE VACACIONES
           </h1>
@@ -312,7 +312,7 @@ export const VacationsModule = () => {
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        pagebreak: { mode: ['css', 'legacy'], before: '.page-break-before', avoid: '.no-break' }
       } as const;
 
       // Force download via Blob + anchor to work inside iframes

@@ -157,8 +157,16 @@ export const VacationsModule = () => {
 
       // Obtener la empresa del empleado
       const empresa = vacation.employee?.empresa || "";
-      const empresaNombre = empresa.toLowerCase() === "vematel" ? "Vematel" : "Servicap";
-      const empresaCuitFormateado = empresa.toLowerCase() === "vematel" ? "30-71638948-7" : "30-71854237-1";
+      let empresaNombre = "SIN ASIGNAR";
+      let empresaCuitFormateado = "XX-XXXXXXXX-X";
+      
+      if (empresa.toLowerCase() === "vematel") {
+        empresaNombre = "Vematel";
+        empresaCuitFormateado = "30-71638948-7";
+      } else if (empresa.toLowerCase() === "servicap") {
+        empresaNombre = "Servicap";
+        empresaCuitFormateado = "30-71854237-1";
+      }
 
       // Calcular día posterior a la fecha de fin
       const fechaFinDate = new Date(vacation.fecha_fin);

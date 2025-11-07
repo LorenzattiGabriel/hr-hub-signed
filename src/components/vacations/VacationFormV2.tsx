@@ -130,9 +130,16 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
 
       // Obtener la empresa del empleado
       const empresa = emp?.empresa || "";
-      const empresaNombre = empresa.toLowerCase() === "vematel" ? "Vematel" : "Servicap";
-      const empresaCuit = empresa.toLowerCase() === "vematel" ? "30716389487" : "30718542371";
-      const empresaCuitFormateado = empresa.toLowerCase() === "vematel" ? "30-71638948-7" : "30-71854237-1";
+      let empresaNombre = "SIN ASIGNAR";
+      let empresaCuitFormateado = "XX-XXXXXXXX-X";
+      
+      if (empresa.toLowerCase() === "vematel") {
+        empresaNombre = "Vematel";
+        empresaCuitFormateado = "30-71638948-7";
+      } else if (empresa.toLowerCase() === "servicap") {
+        empresaNombre = "Servicap";
+        empresaCuitFormateado = "30-71854237-1";
+      }
 
       // Calcular antigüedad
       const fechaIngreso = emp?.fecha_ingreso || emp?.fechaIngreso;

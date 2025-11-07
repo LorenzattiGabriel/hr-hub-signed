@@ -169,15 +169,68 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
   };
 
 const handleSave = () => {
-  // Validaciones básicas
-  if (!formData.nombres || !formData.apellidos || !formData.dni || !formData.fechaIngreso) {
+  // Validación: Nombres
+  if (!formData.nombres?.trim()) {
     toast({
-      title: "Error",
-      description: "Por favor complete los campos obligatorios (Nombres, Apellidos, DNI, Fecha de Ingreso)",
+      title: "Falta completar el nombre",
+      description: "Por favor ingrese el nombre del empleado antes de guardar.",
       variant: "destructive"
     });
     return;
   }
+
+  // Validación: Apellidos
+  if (!formData.apellidos?.trim()) {
+    toast({
+      title: "Falta completar el apellido",
+      description: "Por favor ingrese el apellido del empleado antes de guardar.",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  // Validación: DNI
+  if (!formData.dni?.trim()) {
+    toast({
+      title: "Falta completar el DNI",
+      description: "Por favor ingrese el número de documento del empleado.",
+      variant: "destructive"
+    });
+    return;
+  } else if (!/^\d+$/.test(formData.dni)) {
+    toast({
+      title: "DNI inválido",
+      description: "El DNI solo debe contener números (sin puntos ni letras).",
+      variant: "destructive"
+    });
+    return;
+  }
+
+// Validación: Fecha de ingreso
+if (!formData.fechaIngreso) {
+  toast({
+    title: "Falta seleccionar la fecha de ingreso",
+    description: "Por favor elija la fecha en la que el empleado ingresó a la empresa.",
+    variant: "destructive"
+  });
+  return;
+}
+
+// Validación: Fecha de ingreso no puede ser futura
+if (formData.fechaIngreso) {
+  const fechaIngreso = new Date(formData.fechaIngreso);
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  if (fechaIngreso > hoy) {
+    toast({
+      title: "Fecha inválida",
+      description: "La fecha de ingreso no puede ser una fecha futura.",
+      variant: "destructive"
+    });
+    return;
+  }
+}
 
   // Validación de Fecha de Nacimiento
   if (formData.fechaNacimiento) {
@@ -593,6 +646,7 @@ const edadEmpleado = resultado.edad;
                 type="date"
                 value={formData.fechaIngreso}
                 onChange={(e) => handleInputChange("fechaIngreso", e.target.value)}
+                max={new Date().toISOString().split("T")[0]} // No permite fechas futuras
                 required
               />
             </div>

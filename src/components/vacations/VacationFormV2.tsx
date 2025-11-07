@@ -38,8 +38,9 @@ const VacationForm = ({ onBack, vacation, employees, onSave }: VacationFormProps
     if (formData.fecha_inicio && formData.fecha_fin) {
       const start = new Date(formData.fecha_inicio);
       const end = new Date(formData.fecha_fin);
-      const diffTime = Math.abs(end.getTime() - start.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+      const diffTime = end.getTime() - start.getTime();
+      if (diffTime < 0) return 0; // fin antes que inicio: inválido
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
       return diffDays;
     }
     return 0;

@@ -29,11 +29,14 @@ export const EmployeeImport = ({ onComplete, refetch }: EmployeeImportProps) => 
           const fechaIngreso = parts[1]?.trim() || '';
           const nombreCompleto = parts[2]?.trim() || '';
           const fechaNacimiento = parts[3]?.trim() || '';
-          const dni = parts[4]?.trim() || '';
+          // Limpiar DNI: solo permitir números
+          const dni = (parts[4]?.trim() || '').replace(/\D/g, '');
           const cargo = parts[5]?.trim() || '';
           const tipoContrato = parts[6]?.trim() || '';
           const telefono = parts[7]?.trim() || '';
-          const email = parts[8]?.trim() || '';
+          // Validar email: si no tiene @, dejarlo vacío
+          const emailRaw = parts[8]?.trim() || '';
+          const email = emailRaw && emailRaw.includes('@') ? emailRaw : '';
           const telefonoEmergencia = parts[9]?.trim() || '';
           const contactoEmergencia = parts[10]?.trim() || '';
           const parentescoEmergencia = parts[11]?.trim() || '';
@@ -175,10 +178,18 @@ export const EmployeeImport = ({ onComplete, refetch }: EmployeeImportProps) => 
 
           const tipoLic = norm(r['Detallar el tipo de Licencia:']);
 
+          // Limpiar y validar campos
+          const dni = norm(r['Seleccione DNI:']).replace(/\D/g, '');
+          const emailRaw = norm(r['Correo Electrónico:']);
+          // Validar email: si no tiene @, dejarlo vacío
+          const email = emailRaw && emailRaw.includes('@') ? emailRaw : '';
+
           return {
             nombres,
             apellidos,
-            dni: norm(r['Seleccione DNI:']),
+            // Limpiar DNI: solo permitir números
+            dni,
+            // CUIL: limpiar si existe (solo números)
             cuil: '',
             cargo: norm(r['Puesto:']),
             sector: 'Producción',
@@ -186,7 +197,7 @@ export const EmployeeImport = ({ onComplete, refetch }: EmployeeImportProps) => 
             fechaIngreso: convertDate(norm(r['Fecha de ingreso:'])),
             fechaNacimiento: convertDate(norm(r['Fecha de Nacimiento:'])),
             telefono: norm(r['Número de contacto:']),
-            email: norm(r['Correo Electrónico:']),
+            email,
             direccion: '',
             salario: 0,
             estadoCivil: '',

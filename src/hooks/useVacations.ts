@@ -84,8 +84,59 @@ export const useVacations = () => {
     }
   };
 
+  // Función helper para verificar si dos rangos de fechas se superponen
+  const datesOverlap = (start1: string, end1: string, start2: string, end2: string): boolean => {
+    const date1Start = new Date(start1);
+    const date1End = new Date(end1);
+    const date2Start = new Date(start2);
+    const date2End = new Date(end2);
+    
+    // Dos rangos se superponen si: start1 <= end2 && end1 >= start2
+    return date1Start <= date2End && date1End >= date2Start;
+  };
+
   const addVacationRequest = async (requestData: Omit<VacationRequest, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      // Verificar traslapes consultando directamente la base de datos para asegurar datos actualizados
+      const { data: existingRequests, error: checkError } = await supabase
+        .from('vacation_requests')
+        .select(`
+          id,
+          fecha_inicio,
+          fecha_fin,
+          estado,
+          employee:employees (
+            nombres,
+            apellidos,
+            dni
+          )
+        `)
+        .eq('employee_id', requestData.employee_id);
+
+      if (checkError) throw checkError;
+
+      // Verificar traslapes con todas las solicitudes existentes del mismo empleado
+      if (existingRequests) {
+        for (const existingReq of existingRequests) {
+          if (datesOverlap(
+            requestData.fecha_inicio,
+            requestData.fecha_fin,
+            existingReq.fecha_inicio,
+            existingReq.fecha_fin
+          )) {
+            const employeeName = existingReq.employee 
+              ? `${existingReq.employee.nombres} ${existingReq.employee.apellidos}`
+              : 'el empleado';
+            const fechaInicioFormatted = new Date(existingReq.fecha_inicio).toLocaleDateString('es-AR');
+            const fechaFinFormatted = new Date(existingReq.fecha_fin).toLocaleDateString('es-AR');
+            
+            throw new Error(
+              `Existe un traslape con una solicitud existente (${fechaInicioFormatted} al ${fechaFinFormatted}, Estado: ${existingReq.estado}). Por favor, seleccione fechas que no se superpongan.`
+            );
+          }
+        }
+      }
+
       const { data, error } = await supabase
         .from('vacation_requests')
         .insert([requestData])
@@ -109,11 +160,11 @@ export const useVacations = () => {
       });
       
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding vacation request:', error);
       toast({
-        title: "Error",
-        description: "No se pudo crear la solicitud de vacaciones",
+        title: "Error - Traslape de fechas",
+        description: error.message || "No se pudo crear la solicitud de vacaciones",
         variant: "destructive",
       });
       throw error;
@@ -292,6 +343,63 @@ export const useVacations = () => {
 
   const updateVacationRequest = async (requestId: string, requestData: Partial<VacationRequest>) => {
     try {
+      // Si se están actualizando las fechas, verificar traslapes
+      if (requestData.fecha_inicio && requestData.fecha_fin) {
+        // Obtener el employee_id de la solicitud actual si no viene en requestData
+        let employeeId = requestData.employee_id;
+        if (!employeeId) {
+          const { data: currentRequest } = await supabase
+            .from('vacation_requests')
+            .select('employee_id')
+            .eq('id', requestId)
+            .single();
+          if (currentRequest) employeeId = currentRequest.employee_id;
+        }
+
+        if (employeeId) {
+          // Verificar traslapes consultando directamente la base de datos
+          const { data: existingRequests, error: checkError } = await supabase
+            .from('vacation_requests')
+            .select(`
+              id,
+              fecha_inicio,
+              fecha_fin,
+              estado,
+              employee:employees (
+                nombres,
+                apellidos,
+                dni
+              )
+            `)
+            .eq('employee_id', employeeId)
+            .neq('id', requestId);
+
+          if (checkError) throw checkError;
+
+          // Verificar traslapes con todas las solicitudes existentes del mismo empleado (excepto la actual)
+          if (existingRequests) {
+            for (const existingReq of existingRequests) {
+              if (datesOverlap(
+                requestData.fecha_inicio,
+                requestData.fecha_fin,
+                existingReq.fecha_inicio,
+                existingReq.fecha_fin
+              )) {
+                const employeeName = existingReq.employee 
+                  ? `${existingReq.employee.nombres} ${existingReq.employee.apellidos}`
+                  : 'el empleado';
+                const fechaInicioFormatted = new Date(existingReq.fecha_inicio).toLocaleDateString('es-AR');
+                const fechaFinFormatted = new Date(existingReq.fecha_fin).toLocaleDateString('es-AR');
+                
+                throw new Error(
+                  `Existe un traslape con una solicitud existente (${fechaInicioFormatted} al ${fechaFinFormatted}, Estado: ${existingReq.estado}). Por favor, seleccione fechas que no se superpongan.`
+                );
+              }
+            }
+          }
+        }
+      }
+
       const { data, error } = await supabase
         .from('vacation_requests')
         .update(requestData)
@@ -316,11 +424,11 @@ export const useVacations = () => {
       });
       
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating vacation request:', error);
       toast({
-        title: "Error",
-        description: "No se pudo actualizar la solicitud",
+        title: "Error - Traslape de fechas",
+        description: error.message || "No se pudo actualizar la solicitud",
         variant: "destructive",
       });
       throw error;

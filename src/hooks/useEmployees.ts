@@ -154,6 +154,28 @@ export const useEmployees = () => {
         throw new Error('Los campos DNI, nombres, apellidos y fecha de ingreso son obligatorios');
       }
 
+      // Validar que el DNI solo contenga números
+      const dniString = String(employeeData.dni).trim();
+      if (!/^\d+$/.test(dniString)) {
+        throw new Error('El campo DNI solo acepta números. Por favor ingrese un DNI válido.');
+      }
+
+      // Validar que el CUIL solo contenga números (si se proporciona)
+      if (employeeData.cuil !== undefined && employeeData.cuil !== null && String(employeeData.cuil).trim() !== "") {
+        const cuilString = String(employeeData.cuil).trim();
+        if (!/^\d+$/.test(cuilString)) {
+          throw new Error('El campo CUIL solo acepta números. Por favor ingrese un CUIL válido.');
+        }
+      }
+
+      // Validar que el correo electrónico contenga @ (si se proporciona)
+      if (employeeData.email !== undefined && employeeData.email !== null && String(employeeData.email).trim() !== "") {
+        const emailString = String(employeeData.email).trim();
+        if (!emailString.includes("@")) {
+          throw new Error('El campo Correo Electrónico debe contener un símbolo @. Por favor ingrese un correo válido.');
+        }
+      }
+
       const dbEmployee = toDbEmployee(employeeData);
       const { data, error } = await supabase
         .from('employees')
@@ -218,6 +240,30 @@ export const useEmployees = () => {
 
   const updateEmployee = async (id: string, employeeData: Partial<Employee>) => {
     try {
+      // Validar que el DNI solo contenga números si se está actualizando
+      if (employeeData.dni !== undefined && employeeData.dni !== null) {
+        const dniString = String(employeeData.dni).trim();
+        if (!/^\d+$/.test(dniString)) {
+          throw new Error('El campo DNI solo acepta números. Por favor ingrese un DNI válido.');
+        }
+      }
+
+      // Validar que el CUIL solo contenga números si se está actualizando
+      if (employeeData.cuil !== undefined && employeeData.cuil !== null && String(employeeData.cuil).trim() !== "") {
+        const cuilString = String(employeeData.cuil).trim();
+        if (!/^\d+$/.test(cuilString)) {
+          throw new Error('El campo CUIL solo acepta números. Por favor ingrese un CUIL válido.');
+        }
+      }
+
+      // Validar que el correo electrónico contenga @ si se está actualizando
+      if (employeeData.email !== undefined && employeeData.email !== null && String(employeeData.email).trim() !== "") {
+        const emailString = String(employeeData.email).trim();
+        if (!emailString.includes("@")) {
+          throw new Error('El campo Correo Electrónico debe contener un símbolo @. Por favor ingrese un correo válido.');
+        }
+      }
+
       const dbUpdate = toDbEmployee(employeeData);
       // Avoid violating NOT NULL by not sending nulls on update
       Object.keys(dbUpdate).forEach((k) => {

@@ -109,6 +109,20 @@ const EmployeeForm = ({ onBack, onSave, employee, isEditing = false }: EmployeeF
   });
 
   const handleInputChange = (field: string, value: string | File | null) => {
+    // Validación especial para el campo DNI: solo permite números
+    if (field === "dni" && typeof value === "string") {
+      // Remover cualquier carácter que no sea número
+      const numericValue = value.replace(/\D/g, "");
+      setFormData(prev => ({ ...prev, [field]: numericValue }));
+      return;
+    }
+    // Validación especial para el campo CUIL: solo permite números
+    if (field === "cuil" && typeof value === "string") {
+      // Remover cualquier carácter que no sea número
+      const numericValue = value.replace(/\D/g, "");
+      setFormData(prev => ({ ...prev, [field]: numericValue }));
+      return;
+    }
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -174,6 +188,36 @@ const handleSave = () => {
     toast({
       title: "Error",
       description: "Por favor complete los campos obligatorios (Nombres, Apellidos, DNI, Fecha de Ingreso)",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  // Validación del DNI: solo debe contener números
+  if (formData.dni && !/^\d+$/.test(formData.dni)) {
+    toast({
+      title: "Error de validación",
+      description: "El campo DNI solo acepta números. Por favor ingrese un DNI válido.",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  // Validación del CUIL: solo debe contener números
+  if (formData.cuil && formData.cuil.trim() !== "" && !/^\d+$/.test(formData.cuil)) {
+    toast({
+      title: "Error de validación",
+      description: "El campo CUIL solo acepta números. Por favor ingrese un CUIL válido.",
+      variant: "destructive"
+    });
+    return;
+  }
+
+  // Validación del correo electrónico: debe contener @
+  if (formData.email && formData.email.trim() !== "" && !formData.email.includes("@")) {
+    toast({
+      title: "Error de validación",
+      description: "El campo Correo Electrónico debe contener un símbolo @. Por favor ingrese un correo válido.",
       variant: "destructive"
     });
     return;

@@ -14,7 +14,7 @@ const Login = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (password === 'Talent-Lapaloma') {
+    if (password === 'AYETALENT123') {
       localStorage.setItem('authenticated', 'true');
       toast({
         title: "Acceso concedido",

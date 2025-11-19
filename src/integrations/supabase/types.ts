@@ -681,6 +681,33 @@ export type Database = {
         }
         Relationships: []
       }
+      system_config: {
+        Row: {
+          id: string
+          key: string
+          value: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          key: string
+          value: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          key?: string
+          value?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trainings: {
         Row: {
           calificacion: number | null

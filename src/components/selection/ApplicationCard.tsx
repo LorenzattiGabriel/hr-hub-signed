@@ -71,94 +71,97 @@ export const ApplicationCard = ({ application, onView, onDelete, onDownloadCV }:
 
   return (
     <Card 
-      className="bg-gradient-card shadow-soft hover:shadow-medium transition-all duration-300 border border-border/50 cursor-pointer hover:scale-[1.02]"
+      className="bg-gradient-card shadow-soft hover:shadow-medium transition-all duration-300 border border-border/50 overflow-hidden"
     >
       <CardContent className="p-4">
-        <div className="flex items-start space-x-3">
-          <Avatar className="h-12 w-12 bg-primary/10">
-            <AvatarFallback className="text-primary font-semibold">
-              {getInitials(application.full_name)}
-            </AvatarFallback>
-          </Avatar>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between">
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-foreground truncate">
-                  {application.full_name}
-                </h3>
-                <div className="flex items-center text-sm text-muted-foreground mt-1">
-                  <span className="mr-2">{getPositionIcon()}</span>
-                  <span className="truncate">{application.position}</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-end space-y-1">
-                <Badge variant="outline" className="text-xs shrink-0">
-                  {application.education}
-                </Badge>
-                {application.cv_file_name && (
-                  <Badge 
-                    variant="outline" 
-                    className="text-xs flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDownloadCV();
-                    }}
-                  >
-                    <FileText className="h-3 w-3" />
-                    CV
-                  </Badge>
-                )}
-              </div>
-            </div>
+        <div className="flex flex-col space-y-3">
+          {/* Header con avatar y nombre */}
+          <div className="flex items-start gap-3">
+            <Avatar className="h-12 w-12 shrink-0 bg-primary/10">
+              <AvatarFallback className="text-primary font-semibold">
+                {getInitials(application.full_name)}
+              </AvatarFallback>
+            </Avatar>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3 text-xs text-muted-foreground">
-              <div className="flex items-center space-x-1">
-                <Phone className="h-3 w-3" />
-                <span className="truncate">{application.phone}</span>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground truncate">
+                {application.full_name}
+              </h3>
+              <div className="flex items-center text-sm text-muted-foreground mt-1">
+                <span className="mr-2">{getPositionIcon()}</span>
+                <span className="truncate">{application.position}</span>
               </div>
-              {age && (
-                <div className="flex items-center space-x-1">
-                  <Briefcase className="h-3 w-3" />
-                  <span>{age} años</span>
-                </div>
-              )}
-              <div className="flex items-center space-x-1">
-                <Calendar className="h-3 w-3" />
-                <span>{new Date(application.created_at).toLocaleDateString()}</span>
-              </div>
-              {application.has_transport && (
-                <div className="flex items-center space-x-1">
-                  <span>🚗 {application.has_transport}</span>
-                </div>
-              )}
             </div>
+          </div>
 
-            <div className="flex gap-2 mt-3">
-              <Button
-                variant="outline"
-                size="sm"
+          {/* Badges de educación y CV */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="text-xs truncate max-w-full">
+              {application.education}
+            </Badge>
+            {application.cv_file_name && (
+              <Badge 
+                variant="outline" 
+                className="text-xs flex items-center gap-1 cursor-pointer hover:bg-primary/10"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onView();
+                  onDownloadCV();
                 }}
-                className="flex-1"
               >
-                <Eye className="h-4 w-4 mr-1" />
-                Ver más
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                }}
-                className="text-destructive hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+                <FileText className="h-3 w-3" />
+                CV
+              </Badge>
+            )}
+          </div>
+          
+          {/* Información adicional */}
+          <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 min-w-0">
+              <Phone className="h-3 w-3 shrink-0" />
+              <span className="truncate">{application.phone}</span>
             </div>
+            {age && (
+              <div className="flex items-center gap-1">
+                <Briefcase className="h-3 w-3 shrink-0" />
+                <span className="whitespace-nowrap">{age} años</span>
+              </div>
+            )}
+            <div className="flex items-center gap-1 min-w-0">
+              <Calendar className="h-3 w-3 shrink-0" />
+              <span className="truncate">{new Date(application.created_at).toLocaleDateString()}</span>
+            </div>
+            {application.has_transport && (
+              <div className="flex items-center gap-1 min-w-0">
+                <span className="truncate">🚗 {application.has_transport}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Botones de acción */}
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onView();
+              }}
+              className="flex-1"
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              Ver más
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-destructive hover:text-destructive shrink-0"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </CardContent>

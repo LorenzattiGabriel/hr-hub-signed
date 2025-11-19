@@ -5,29 +5,66 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { Lock } from 'lucide-react';
+import { Lock, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Login = () => {
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (password === 'Fabricius1234') {
-      localStorage.setItem('authenticated', 'true');
+    setIsLoading(true);
+
+    try {
+      // Obtener contraseña desde Supabase
+      const { data, error } = await (supabase
+        .from('system_config' as any)
+        .select('value')
+        .eq('key', 'app_password')
+        .single() as unknown as Promise<{
+          data: { value: string } | null;
+          error: any;
+        }>);
+
+      if (error) {
+        console.error('Error al verificar contraseña:', error);
+        toast({
+          title: "Error de conexión",
+          description: "No se pudo verificar la contraseña. Intente nuevamente.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      if (data && password === data.value) {
+        localStorage.setItem('authenticated', 'true');
+        toast({
+          title: "Acceso concedido",
+          description: "Bienvenido al sistema",
+        });
+        navigate('/');
+      } else {
+        toast({
+          title: "Acceso denegado",
+          description: "Contraseña incorrecta",
+          variant: "destructive",
+        });
+        setPassword('');
+      }
+
+    } catch (error) {
+      console.error('Error inesperado:', error);
       toast({
-        title: "Acceso concedido",
-        description: "Bienvenido al sistema",
-      });
-      navigate('/');
-    } else {
-      toast({
-        title: "Acceso denegado",
-        description: "Contraseña incorrecta",
+        title: "Error",
+        description: "Ocurrió un error inesperado",
         variant: "destructive",
       });
-      setPassword('');
+
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,8 +96,15 @@ const Login = () => {
                 autoFocus
               />
             </div>
-            <Button type="submit" className="w-full">
-              Ingresar
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Verificando...
+                </>
+              ) : (
+                'Ingresar'
+              )}
             </Button>
           </form>
         </CardContent>
@@ -70,3 +114,4 @@ const Login = () => {
 };
 
 export default Login;
+
